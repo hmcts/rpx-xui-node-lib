@@ -2,8 +2,8 @@
   "name": "@hmcts/rpx-xui-node-lib",
   "version": "1.0.0",
   "description": "Common Nodejs library components for XUI",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest --config jestconfig.json",
     "build": "tsc",
@@ -13,7 +13,8 @@
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "release": "standard-version"
   },
   "repository": {
     "type": "git",
@@ -41,6 +42,7 @@
     "husky": "^3.1.0",
     "jest": "^24.9.0",
     "prettier": "^1.19.1",
+    "standard-version": "^7.0.1",
     "ts-jest": "^24.2.0",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
