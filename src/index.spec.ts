@@ -1,5 +1,5 @@
-import { Greeter } from './index';
+import { auth } from './index';
 
-test('My Greeter', () => {
-    expect(Greeter('Carl')).toBe('Hello Carl');
+test('Auth', () => {
+    expect(auth('Carl')).toBe('Hello Carl');
 });
