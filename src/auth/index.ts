@@ -6,7 +6,7 @@ export interface IAuthOptions {
 
 export function auth(options: IAuthOptions) {
     return function authMiddleware(req: Request, res: Response, next: NextFunction) {
-      return next();
+        return next();
     };
 }
 
