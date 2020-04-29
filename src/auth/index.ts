@@ -1,15 +1,13 @@
-import {Request, Response, NextFunction} from 'express';
+import { NextFunction, Request, Response } from 'express';
 
-export interface AuthOptions {
-  strategyName: string;
+export interface IAuthOptions {
+    strategyName: string;
 }
 
-export function auth( options: AuthOptions ) {
-
-  return function auth(req: Request, res: Response, next: NextFunction) {
-
-  }
-
+export function auth(options: IAuthOptions) {
+    return function authMiddleware(req: Request, res: Response, next: NextFunction) {
+      return next();
+    };
 }
 
 /*
