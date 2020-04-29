@@ -1,5 +1,5 @@
-import { xuiNodeLib } from './index';
 import { Request, Response } from 'express';
+import { xuiNodeLib } from './index';
 
 test('Auth', () => {
   const req = ({} as unknown) as Request;
