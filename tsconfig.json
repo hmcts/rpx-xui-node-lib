@@ -1,8 +1,9 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "module": "commonjs",
+    "lib": ["es2017", "es7", "es6", "dom"],
     "esModuleInterop": true,
     "moduleResolution": "node",
     "declaration": true,
