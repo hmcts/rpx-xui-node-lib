@@ -7,9 +7,9 @@
   "scripts": {
     "test": "jest --config jestconfig.json",
     "build": "tsc",
-    "format": "npx prettier --write \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "ci": "yarn format && yarn lint && yarn build"
+    "ci": "yarn && yarn format && yarn lint && yarn build"
   },
   "repository": {
     "type": "git",
