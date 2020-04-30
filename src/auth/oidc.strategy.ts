@@ -2,7 +2,7 @@ import { Issuer, Strategy } from 'openid-client';
 
 const clientMetadata = {
     client_id: 'xuiwebapp',
-    client_secret: 'yB71mnPeypP3HlcN',
+    client_secret: process.env.IDAM_SECRET,
     // token_endpoint_auth_method: 'client_secret_post', // The default is 'client_secret_basic'.
     post_logout_redirect_uri: 'http://localhost:3000',
     redirect_uri: 'http://localhost:3000/oauth2/callback',
