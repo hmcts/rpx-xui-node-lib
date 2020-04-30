@@ -1,4 +1,4 @@
 export enum StrategyTypes {
-  oauth2 = 1,
-  oidc
+    oauth2 = 1,
+    oidc,
 }
