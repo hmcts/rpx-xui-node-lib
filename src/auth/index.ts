@@ -1,10 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-
-export interface IAuthOptions {
-    strategyName: string;
-}
+import { IAuthOptions } from './interfaces';
 
 export function auth(options: IAuthOptions) {
+
     return function authMiddleware(req: Request, res: Response, next: NextFunction) {
         return next();
     };
