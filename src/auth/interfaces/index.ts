@@ -1,2 +1,2 @@
-export { IAuthOptions } from './authOptions.interface'
-export { StrategyTypes } from './strategyTypes.enum'
+export { IAuthOptions } from './authOptions.interface';
+export { StrategyTypes } from './strategyTypes.enum';
