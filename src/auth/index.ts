@@ -1,7 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
-import { IAuthOptions } from './interfaces';
+import { handleOpenIdConnect } from '../openIDConnect';
+import { IAuthOptions, StrategyTypes } from './interfaces';
+import { handleOAuth2 } from './oAuth2';
 
 export function auth(options: IAuthOptions) {
+    switch (options.strategyType) {
+        case StrategyTypes.oauth2:
+            handleOAuth2(options);
+            break;
+        case StrategyTypes.oidc:
+            handleOpenIdConnect(options);
+            break;
+    }
     return function authMiddleware(req: Request, res: Response, next: NextFunction) {
         return next();
     };
