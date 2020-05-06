@@ -896,6 +896,11 @@ anymatch@^2.0.0:
     micromatch "^3.1.4"
     normalize-path "^2.1.1"
 
+app-root-path@~3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/app-root-path/-/app-root-path-3.0.0.tgz#210b6f43873227e18a4b810a032283311555d5ad"
+  integrity sha512-qMcx+Gy2UZynHjOHOIXPNvpf+9cjvk3cWrBBK7zg4gH9+clobJRb9NGzcT7mQTcV/6Gm/1WelUtqxVXnNlrwcw==
+
 argparse@^1.0.7:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-1.0.10.tgz#bcd6791ea5ae09725e17e5ad988134cd40b3d911"
@@ -1466,6 +1471,14 @@ commitizen@^4.0.3:
     minimist "1.2.5"
     strip-bom "4.0.0"
     strip-json-comments "3.0.1"
+
+commitlint-config-cz@^0.13.1:
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/commitlint-config-cz/-/commitlint-config-cz-0.13.1.tgz#26ec3096e3e53dca1e3c389127678a0bc41b814b"
+  integrity sha512-CBW8Ohk7wzSknKWaLRooTpmO3s1VLjuT51x+dAyCjuzAoWz8I45oH7SC+G1BWc2xhafQoZ6rrus2DjVFNW9TZw==
+  dependencies:
+    app-root-path "~3.0.0"
+    lodash.clonedeep "~4.5.0"
 
 compare-func@^1.3.1:
   version "1.3.2"
@@ -4071,6 +4084,11 @@ lodash._reinterpolate@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/lodash._reinterpolate/-/lodash._reinterpolate-3.0.0.tgz#0ccf2d89166af03b3663c796538b75ac6e114d9d"
   integrity sha1-DM8tiRZq8Ds2Y8eWU4t1rG4RTZ0=
+
+lodash.clonedeep@~4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
+  integrity sha1-4j8/nE+Pvd6HJSnBBxhXoIblzO8=
 
 lodash.ismatch@^4.4.0:
   version "4.4.0"
