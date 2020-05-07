@@ -1,15 +1,12 @@
-import { IClientMetadataBase } from './clientMetadataBase.interface';
-import { OpenIdClientAuthMethod } from './openIdClientAuthMethod.enum';
-import { OpenIdResponseType } from './openIdResponseType.enum';
+export interface ClientMetadata {
+    clientID: string;
+    clientSecret: string;
+    redirectUrl: string;
 
-export interface IOpenIdMetadata extends IClientMetadataBase {
-    idTokenSignedResponseAlg?: string;
-    tokenEndpointAuthMethod?: OpenIdClientAuthMethod;
-    responseTypes?: OpenIdResponseType[];
-    postLogoutRedirectUris?: string[];
-    defaultMaxAge?: number;
-    requireAuthTime?: boolean;
-    tlsClientCertificateBoundAccessTokens?: boolean;
-    requestObjectSigningAlg?: string;
-    [key: string]: unknown;
+    // token_endpoint_auth_method: 'client_secret_post', // The default is 'client_secret_basic'.
+    post_logout_redirect_uri: 'http://localhost:3000';
+
+    // oauth2
+    authorizationURL: 'https://www.example.com/oauth2/authorize';
+    tokenURL: 'https://www.example.com/oauth2/token';
 }

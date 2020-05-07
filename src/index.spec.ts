@@ -1,10 +1,7 @@
 import { Request, Response } from 'express';
-import { xuiNodeLib } from './index';
+import { XuiNodeLib } from './index';
 
 test('Auth', () => {
-    const req = ({} as unknown) as Request;
-    const res = ({} as unknown) as Response;
-    const nextMock = jest.fn();
-    xuiNodeLib({})(req, res, nextMock);
-    expect(nextMock.mock.calls.length).toBe(1);
+    const instance = new XuiNodeLib();
+    expect(instance).toBeDefined();
 });

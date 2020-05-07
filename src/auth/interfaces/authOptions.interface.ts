@@ -1,8 +1,7 @@
-import { IOpenIdMetadata } from './clientMetadata.interface';
-import { IOAuth2Metadata } from './oAuth2Metadata.interface';
+import { ClientMetadata } from 'openid-client';
 import { StrategyTypes } from './strategyTypes.enum';
 
-export interface IAuthOptions {
+export interface AuthOptions {
     strategyType: StrategyTypes;
-    clientMetaData: IOpenIdMetadata | IOAuth2Metadata;
+    clientMetaData: ClientMetadata;
 }
