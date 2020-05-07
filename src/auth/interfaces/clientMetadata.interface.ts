@@ -1,4 +1,4 @@
-export interface IClientMetadata {
+export interface ClientMetadata {
     clientID: string;
     clientSecret: string;
     redirectUrl: string;
