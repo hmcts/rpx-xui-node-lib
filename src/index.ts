@@ -1,9 +1,14 @@
-import { NextFunction, Request, Response } from 'express';
+import * as events from 'events';
+
+export class XuiNodeLib extends events.EventEmitter {}
+
+/*
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { auth } from './auth';
 
 const DEFAULT_MIDDLEWARE = ['auth'];
 
-export function xuiNodeLib(options: any) {
+export function xuiNodeLib(options: any): RequestHandler {
     options = options || {};
 
     if (options.constructor.name === 'IncomingMessage') {
@@ -32,13 +37,12 @@ export function xuiNodeLib(options: any) {
         return result;
     }, []);
 
-    return function xuiNodeLibMiddleware(req: Request, res: Response, next: NextFunction) {
+    return function xuiNodeLibMiddleware(req: Request, res: Response, next: NextFunction): void {
         let index = 0;
 
-        function internalNext() {
-            if (arguments.length > 0) {
-                // @ts-ignore
-                return next.apply(null, arguments);
+        function internalNext(...params: any[]): void {
+            if (params.length > 0) {
+                return next(params);
             }
 
             const middleware = stack[index];
@@ -58,3 +62,4 @@ export function xuiNodeLib(options: any) {
 xuiNodeLib.auth = auth;
 
 const middlewares: any[] = Object.keys(xuiNodeLib);
+*/
