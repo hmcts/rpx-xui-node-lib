@@ -11,7 +11,7 @@ const heartbeatRoute = 'keepalive';*/
 
 export interface OpenIDMetadata extends ClientMetadata {
     discovery_endpoint: string;
-    issuer: string;
+    issuer_url: string;
     prompt?: 'login';
     redirect_uri: string;
     scope: string;
@@ -28,7 +28,7 @@ export class OpenID extends events.EventEmitter {
     protected options: OpenIDMetadata = {
         client_id: '',
         discovery_endpoint: '',
-        issuer: '',
+        issuer_url: '',
         redirect_uri: '',
         scope: '',
     };
@@ -94,7 +94,7 @@ export class OpenID extends events.EventEmitter {
         const issuer = await Issuer.discover(`${this.options.discovery_endpoint}/o`);
 
         const metadata = issuer.metadata;
-        metadata.issuer = this.options.issuer;
+        metadata.issuer = this.options.issuer_url;
 
         console.log('metadata', metadata);
 
