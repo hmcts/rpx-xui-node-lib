@@ -3,6 +3,8 @@ import { Client, ClientMetadata, Issuer, Strategy, TokenSet, UserinfoResponse } 
 import * as express from 'express';
 import * as events from 'events';
 import passport from 'passport';
+import { AUTH_EVENT, OIDC } from './oidc.constants';
+import { URL } from 'url';
 
 const loginRoute = '/login';
 const callbackRoute = '/oauth2';
@@ -49,48 +51,63 @@ export class OpenID extends events.EventEmitter {
         return done(null, { tokenset, userinfo });
     };
 
+    public initialiseStrategy = async (initialised: boolean, options: OpenIDMetadata): Promise<void> => {
+        if (!initialised) {
+            const redirectUri = new URL('/oauth2/callback', options.redirect_uri);
+            this.issuer = await this.discover();
+            this.client = new this.issuer.Client(options);
+            passport.use(
+                OIDC.STRATEGY_NAME,
+                new Strategy(
+                    {
+                        client: this.client,
+                        params: {
+                            prompt: OIDC.PROMPT,
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            redirect_uri: redirectUri.toString(),
+                            scope: options.scope,
+                        },
+                        sessionKey: options.sessionKey, // being explicit here so we can set manually on logout
+                    },
+                    this.verify,
+                ),
+            );
+        }
+    };
+
     public configure = (options: OpenIDMetadata): RequestHandler => {
         this.options = options;
-
-        this.router.use(async (req, res, next) => {
-            try {
-                if (!this.initialised) {
-                    this.issuer = await this.discover();
-                    this.client = new this.issuer.Client(this.options);
-                    this.initialised = true;
-                    passport.use(
-                        'oidc',
-                        new Strategy(
-                            {
-                                client: this.client,
-                                params: {
-                                    prompt: 'login',
-                                    // eslint-disable-next-line @typescript-eslint/camelcase
-                                    redirect_uri: 'http://localhost:3000/oauth2/callback',
-                                    scope: 'profile openid roles manage-user create-user',
-                                },
-                                sessionKey: 'xui_webapp', // being explicit here so we can set manually on logout
-                            },
-                            this.verify,
-                        ),
-                    );
-                }
-            } catch (err) {
-                next(err);
-            }
-            next();
-        });
-        this.initialiseRoutes();
         return (req: Request, res: Response, next: NextFunction): void => {
             req.app.use(passport.initialize());
             req.app.use(passport.session());
             passport.serializeUser((user, done) => {
-                done(null, user);
+                if (!this.listenerCount(AUTH_EVENT.SERIALIZE_USER)) {
+                    done(null, user);
+                } else {
+                    this.emit(AUTH_EVENT.SERIALIZE_USER, user, done);
+                }
             });
 
             passport.deserializeUser((id, done) => {
-                done(null, id);
+                if (!this.listenerCount(AUTH_EVENT.DESERIALIZE_USER)) {
+                    done(null, id);
+                } else {
+                    this.emit(AUTH_EVENT.DESERIALIZE_USER, id, done);
+                }
             });
+
+            this.router.use(async (req, res, next) => {
+                try {
+                    await this.initialiseStrategy(this.initialised, this.options);
+                    this.initialised = true;
+                } catch (err) {
+                    next(err);
+                }
+                next();
+            });
+
+            this.initialiseRoutes();
+
             req.app.use('/auth', this.router);
             req.app.get('/oauth2/callback', this.callbackHandler);
             next();
@@ -103,7 +120,7 @@ export class OpenID extends events.EventEmitter {
     };
 
     public callbackHandler = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
-        passport.authenticate('oidc', (error, user, info) => {
+        passport.authenticate(OIDC.STRATEGY_NAME, (error, user, info) => {
             // TODO: give a more meaningful error to user rather than redirect back to idam
             // return next(error) would pass off to error.handler.ts to show users a proper error page etc
             if (error) {
@@ -122,11 +139,11 @@ export class OpenID extends events.EventEmitter {
                 if (err) {
                     return next(err);
                 }
-                this.emit('oidc.authenticate.success', req, res, next);
-                if (!this.listenerCount('oidc.authenticate.success')) {
-                    console.log('redirecting, no listener count: oidc.authenticate.success', req.session);
+                if (!this.listenerCount(OIDC.EVENT.AUTHENTICATE_SUCCESS)) {
+                    console.log(`redirecting, no listener count: ${OIDC.EVENT.AUTHENTICATE_SUCCESS}`, req.session);
                     res.redirect('/');
-                    // return next();
+                } else {
+                    this.emit(OIDC.EVENT.AUTHENTICATE_SUCCESS, req, res, next);
                 }
             });
         })(req, res, next);
@@ -146,7 +163,7 @@ export class OpenID extends events.EventEmitter {
 
     public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
         console.log('loginHandler Hit');
-        return passport.authenticate('oidc')(req, res, next);
+        return passport.authenticate(OIDC.STRATEGY_NAME)(req, res, next);
     };
 
     public authenticate = (req: Request, res: Response, next: NextFunction): void => {
