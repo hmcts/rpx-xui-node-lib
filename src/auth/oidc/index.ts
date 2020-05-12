@@ -1,10 +1,10 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { Client, ClientMetadata, Issuer } from 'openid-client';
+import { Client, ClientMetadata, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client';
 import * as express from 'express';
 import * as events from 'events';
 import passport from 'passport';
 
-const loginRoute = 'login';
+const loginRoute = '/login';
 const callbackRoute = '/oauth2';
 /*const logoutRoute = 'logout';
 const heartbeatRoute = 'keepalive';*/
@@ -24,6 +24,8 @@ export class OpenID extends events.EventEmitter {
     protected issuer: Issuer<Client> | undefined;
     protected client: Client | undefined;
 
+    protected initialised = false;
+
     /* eslint-disable @typescript-eslint/camelcase */
     protected options: OpenIDMetadata = {
         client_id: '',
@@ -36,40 +38,81 @@ export class OpenID extends events.EventEmitter {
 
     constructor() {
         super();
-        this.initialiseRoutes();
     }
 
-    setOptions(options: OpenIDMetadata): void {
+    public verify = (tokenset: TokenSet, userinfo: UserinfoResponse, done: (err: any, user?: any) => void) => {
+        /*if (!propsExist(userinfo, ['roles'])) {
+            logger.warn('User does not have any access roles.')
+            return done(null, false, {message: 'User does not have any access roles.'})
+        }*/
+        console.info('verify okay, user:', userinfo);
+        return done(null, { tokenset, userinfo });
+    };
+
+    public configure = (options: OpenIDMetadata): RequestHandler => {
         this.options = options;
-    }
 
-    async configure(): Promise<void> {
-        if (!this.issuer) {
-            this.issuer = await this.discover();
-        }
+        this.router.use(async (req, res, next) => {
+            try {
+                if (!this.initialised) {
+                    this.issuer = await this.discover();
+                    this.client = new this.issuer.Client(this.options);
+                    this.initialised = true;
+                    passport.use(
+                        'oidc',
+                        new Strategy(
+                            {
+                                client: this.client,
+                                params: {
+                                    prompt: 'login',
+                                    // eslint-disable-next-line @typescript-eslint/camelcase
+                                    redirect_uri: 'http://localhost:3000/oauth2/callback',
+                                    scope: 'profile openid roles manage-user create-user',
+                                },
+                                sessionKey: 'xui_webapp', // being explicit here so we can set manually on logout
+                            },
+                            this.verify,
+                        ),
+                    );
+                }
+            } catch (err) {
+                next(err);
+            }
+            next();
+        });
+        this.initialiseRoutes();
+        return (req: Request, res: Response, next: NextFunction): void => {
+            req.app.use(passport.initialize());
+            req.app.use(passport.session());
+            passport.serializeUser((user, done) => {
+                done(null, user);
+            });
 
-        if (!this.client) {
-            this.client = new this.issuer.Client(this.options);
-        }
-    }
+            passport.deserializeUser((id, done) => {
+                done(null, id);
+            });
+            req.app.use('/auth', this.router);
+            req.app.get('/oauth2/callback', this.callbackHandler);
+            next();
+        };
+    };
 
-    initialiseRoutes(): void {
+    public initialiseRoutes = (): void => {
         this.router.get(loginRoute, this.loginHandler);
-        this.router.post('callback', this.callbackHandler);
-        console.log('initialiseRoutes', loginRoute, 'callback');
-    }
+        // this.router.get('callback', this.callbackHandler);
+    };
 
-    callbackHandler(req: express.Request, res: express.Response, next: express.NextFunction): void {
+    public callbackHandler = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
         passport.authenticate('oidc', (error, user, info) => {
             // TODO: give a more meaningful error to user rather than redirect back to idam
             // return next(error) would pass off to error.handler.ts to show users a proper error page etc
             if (error) {
                 console.error(error);
-                return next(error);
+                // return next(error);
             }
             if (info) {
                 console.info(info);
-                return next(info);
+                // return next(info);
             }
             if (!user) {
                 console.info('No user found, redirecting');
@@ -81,17 +124,17 @@ export class OpenID extends events.EventEmitter {
                 }
                 this.emit('oidc.authenticate.success', req, res, next);
                 if (!this.listenerCount('oidc.authenticate.success')) {
-                    console.log('redirecting, no listener count: oidc.authenticate.success');
+                    console.log('redirecting, no listener count: oidc.authenticate.success', req.session);
                     res.redirect('/');
-                    return next();
+                    // return next();
                 }
             });
         })(req, res, next);
-    }
+    };
 
-    async discover(): Promise<Issuer<Client>> {
+    public discover = async (): Promise<Issuer<Client>> => {
         console.log(`discovering endpoint: ${this.options.discovery_endpoint}`);
-        const issuer = await Issuer.discover(`${this.options.discovery_endpoint}/o`);
+        const issuer = await Issuer.discover(`${this.options.discovery_endpoint}`);
 
         const metadata = issuer.metadata;
         metadata.issuer = this.options.issuer_url;
@@ -99,21 +142,14 @@ export class OpenID extends events.EventEmitter {
         console.log('metadata', metadata);
 
         return new Issuer(metadata);
-    }
+    };
 
-    loginHandler(req: Request, res: Response, next: NextFunction): RequestHandler {
+    public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
         console.log('loginHandler Hit');
         return passport.authenticate('oidc')(req, res, next);
-    }
+    };
 
-    async authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
-        await this.configure();
-        console.log('authenticate');
-        req.app.use(passport.initialize());
-        req.app.use(passport.session());
-
-        req.app.use('auth', this.router);
-        req.app.use(callbackRoute, this.router);
+    public authenticate = (req: Request, res: Response, next: NextFunction): void => {
         if (req.isAuthenticated()) {
             console.log('req is authenticated');
             this.emit('oidc.bootstrap.success');
@@ -121,18 +157,7 @@ export class OpenID extends events.EventEmitter {
         }
         console.log('unauthed, redirecting');
         res.redirect(loginRoute);
-    }
+    };
 }
 
-/*export function oidc(options: OpenIDMetadata): OpenID {
-    return new OpenID(options);
-}*/
-
 export default new OpenID();
-
-/*app.use(oidc.configure({
-    redirect_uri: 'https://idam-web.hmcts.net/authorize?callback_url=http://localhost:3000/auth/login'
-    discovery: 'https://idam-web.hmcts.net/o',
-}));
-
-oidc.on('')*/
