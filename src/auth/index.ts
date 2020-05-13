@@ -1,11 +1,11 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { ClientMetadata } from 'openid-client';
+import { NextFunction, Request, RequestHandler, Response } from 'express'
+import { ClientMetadata } from 'openid-client'
 
 export function auth(options: ClientMetadata): RequestHandler {
-    console.log(options);
+    console.log(options)
     return function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-        return next();
-    };
+        return next()
+    }
 }
 
 /*

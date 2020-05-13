@@ -64,6 +64,7 @@
     }
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "deepmerge": "^4.2.2",
     "express": "^4.17.1",
     "express-session": "^1.17.0",

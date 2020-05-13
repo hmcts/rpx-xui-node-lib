@@ -5,7 +5,7 @@ export const OIDC = {
     },
     PROMPT: 'login',
     STRATEGY_NAME: 'oidc',
-};
+}
 
 // AUTH
 
@@ -13,4 +13,4 @@ export const AUTH_EVENT = {
     AUTHENTICATE_SUCCESS: 'auth.authenticate.success',
     SERIALIZE_USER: 'auth.serializeUser',
     DESERIALIZE_USER: 'auth.deserializeUser',
-};
+}
