@@ -11,6 +11,7 @@ const loginRoute = '/auth/login'
 const callbackRoute = '/oauth2'
 /*const logoutRoute = 'logout';
 const heartbeatRoute = 'keepalive';*/
+const defaultAuthRoute = '/api/isAuthenticated'
 
 export interface OpenIDMetadata extends ClientMetadata {
     discovery_endpoint: string
@@ -19,6 +20,7 @@ export interface OpenIDMetadata extends ClientMetadata {
     redirect_uri: string
     scope: string
     sessionKey?: string
+    isAuthRouteName?: string
 }
 
 export class OpenID extends events.EventEmitter {
@@ -36,6 +38,7 @@ export class OpenID extends events.EventEmitter {
         issuer_url: '',
         redirect_uri: '',
         scope: '',
+        isAuthRouteName: '',
     }
     /* eslint-enable @typescript-eslint/camelcase */
 
@@ -110,6 +113,10 @@ export class OpenID extends events.EventEmitter {
         return (req: Request, res: Response, next: NextFunction): void => {
             passport.initialize()(req, res, () => console.log('passport initialised '))
             passport.session()(req, res, () => console.log('passport session intialised'))
+            const authRoute = this.options.isAuthRouteName ? this.options.isAuthRouteName : defaultAuthRoute
+            req.app.get(authRoute, (req, res) => {
+                res.send(req.isAuthenticated())
+            })
 
             req.app.use('/auth/login', this.loginHandler)
             req.app.get('/oauth2/callback', this.callbackHandler)
