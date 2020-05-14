@@ -15,4 +15,11 @@ export const AUTH = {
         SERIALIZE_USER: 'auth.serializeUser',
         DESERIALIZE_USER: 'auth.deserializeUser',
     },
+    ROUTE: {
+        DEFAULT_REDIRECT: '/',
+        LOGIN: '/auth/login',
+        DEFAULT_AUTH_ROUTE: '/api/isAuthenticated',
+        OAUTH_CALLBACK: '/oauth2/callback',
+        LOGOUT: '/api/logout',
+    },
 }
