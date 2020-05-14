@@ -105,27 +105,22 @@ export class OpenID extends events.EventEmitter {
             }
         })()
 
-        this.initialiseRoutes()
+        this.router.use(passport.initialize())
+        this.router.use(passport.session())
+
+        const authRoute = this.options.isAuthRouteName ? this.options.isAuthRouteName : AUTH.ROUTE.DEFAULT_AUTH_ROUTE
+        this.router.get(authRoute, (req, res) => {
+            res.send(req.isAuthenticated())
+        })
+        this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
+        this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
+        this.router.get(AUTH.ROUTE.LOGOUT, async (req, res) => {
+            await this.logout(req, res)
+        })
 
         this.emit('oidc.bootstrap.success')
 
-        return (req: Request, res: Response, next: NextFunction): void => {
-            passport.initialize()(req, res, () => console.log('passport initialised '))
-            passport.session()(req, res, () => console.log('passport session intialised'))
-            const authRoute = this.options.isAuthRouteName
-                ? this.options.isAuthRouteName
-                : AUTH.ROUTE.DEFAULT_AUTH_ROUTE
-            req.app.get(authRoute, (req, res) => {
-                res.send(req.isAuthenticated())
-            })
-
-            req.app.use(AUTH.ROUTE.LOGIN, this.loginHandler)
-            req.app.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
-            req.app.get(AUTH.ROUTE.LOGOUT, async (req, res) => {
-                await this.logout(req, res)
-            })
-            next()
-        }
+        return this.router
     }
 
     public logout = async (req: express.Request, res: express.Response): Promise<void> => {
@@ -162,10 +157,6 @@ export class OpenID extends events.EventEmitter {
             res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
         }
         console.log('logout end')
-    }
-
-    public initialiseRoutes = (): void => {
-        this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
     }
 
     public callbackHandler = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
