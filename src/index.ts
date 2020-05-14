@@ -1,6 +1,25 @@
-import * as events from 'events';
+import * as events from 'events'
+export * from 'openid-client'
+import { ClientMetadata } from 'openid-client'
 
-export class XuiNodeLib extends events.EventEmitter {}
+interface LibOptions {
+    oidc?: ClientMetadata
+}
+
+export class XuiNodeLib extends events.EventEmitter {
+    constructor(options: LibOptions) {
+        super()
+    }
+}
+
+const xuiNodeLib = new XuiNodeLib({})
+
+const verifyCallback = (done: any, session: any, user: any) => {
+    console.log(session, user)
+    done()
+}
+
+xuiNodeLib.on('oidc.verify', verifyCallback)
 
 /*
 import { NextFunction, Request, RequestHandler, Response } from 'express';
