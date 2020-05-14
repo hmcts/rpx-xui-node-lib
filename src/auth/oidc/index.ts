@@ -7,11 +7,8 @@ import { AUTH, OIDC } from './oidc.constants'
 import { URL } from 'url'
 import { http } from '../../http/http'
 
-const loginRoute = '/auth/login'
-const callbackRoute = '/oauth2'
 /*const logoutRoute = 'logout';
 const heartbeatRoute = 'keepalive';*/
-const defaultAuthRoute = '/api/isAuthenticated'
 
 export interface OpenIDMetadata extends ClientMetadata {
     discovery_endpoint: string
@@ -57,7 +54,7 @@ export class OpenID extends events.EventEmitter {
 
     public initialiseStrategy = async (initialised: boolean, options: OpenIDMetadata): Promise<void> => {
         if (!initialised) {
-            const redirectUri = new URL('/oauth2/callback', options.redirect_uri)
+            const redirectUri = new URL(AUTH.ROUTE.OAUTH_CALLBACK, options.redirect_uri)
             this.issuer = await this.discover()
             this.client = new this.issuer.Client(options)
             passport.use(
@@ -113,14 +110,16 @@ export class OpenID extends events.EventEmitter {
         return (req: Request, res: Response, next: NextFunction): void => {
             passport.initialize()(req, res, () => console.log('passport initialised '))
             passport.session()(req, res, () => console.log('passport session intialised'))
-            const authRoute = this.options.isAuthRouteName ? this.options.isAuthRouteName : defaultAuthRoute
+            const authRoute = this.options.isAuthRouteName
+                ? this.options.isAuthRouteName
+                : AUTH.ROUTE.DEFAULT_AUTH_ROUTE
             req.app.get(authRoute, (req, res) => {
                 res.send(req.isAuthenticated())
             })
 
-            req.app.use('/auth/login', this.loginHandler)
-            req.app.get('/oauth2/callback', this.callbackHandler)
-            req.app.get('/api/logout', async (req, res) => {
+            req.app.use(AUTH.ROUTE.LOGIN, this.loginHandler)
+            req.app.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
+            req.app.get(AUTH.ROUTE.LOGOUT, async (req, res) => {
                 await this.logout(req, res)
             })
             next()
@@ -154,19 +153,18 @@ export class OpenID extends events.EventEmitter {
 
             if (!req.query.noredirect && req.query.redirect) {
                 // 401 is when no accessToken
-                res.redirect(401, '/')
+                res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
             } else {
-                res.redirect('/')
+                res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
             }
         } catch (e) {
-            res.redirect(401, '/')
+            res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
         }
         console.log('logout end')
     }
 
     public initialiseRoutes = (): void => {
-        this.router.get(loginRoute, this.loginHandler)
-        // this.router.get('callback', this.callbackHandler);
+        this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
     }
 
     public callbackHandler = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
@@ -183,7 +181,7 @@ export class OpenID extends events.EventEmitter {
             }
             if (!user) {
                 console.info('No user found, redirecting')
-                return res.redirect('/auth/login')
+                return res.redirect(AUTH.ROUTE.LOGIN)
             }
             req.logIn(user, (err) => {
                 if (err) {
@@ -191,7 +189,7 @@ export class OpenID extends events.EventEmitter {
                 }
                 if (!this.listenerCount(OIDC.EVENT.AUTHENTICATE_SUCCESS)) {
                     console.log(`redirecting, no listener count: ${OIDC.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
-                    res.redirect('/')
+                    res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
                 } else {
                     this.emit(OIDC.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
                 }
@@ -222,7 +220,7 @@ export class OpenID extends events.EventEmitter {
             return next()
         }
         console.log('unauthed,redirecting')
-        res.redirect(loginRoute)
+        res.redirect(AUTH.ROUTE.LOGIN)
     }
 }
 
