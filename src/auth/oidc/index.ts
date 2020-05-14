@@ -18,6 +18,7 @@ export interface OpenIDMetadata extends ClientMetadata {
     scope: string
     sessionKey?: string
     isAuthRouteName?: string
+    logout_url: string
 }
 
 export class OpenID extends events.EventEmitter {
@@ -36,6 +37,7 @@ export class OpenID extends events.EventEmitter {
         redirect_uri: '',
         scope: '',
         isAuthRouteName: '',
+        logout_url: '',
     }
     /* eslint-enable @typescript-eslint/camelcase */
 
@@ -135,14 +137,13 @@ export class OpenID extends events.EventEmitter {
             const auth = `Basic ${Buffer.from(`${this.options.client_id}:${this.options.client_secret}`).toString(
                 'base64',
             )}`
-            const idamApiUrl = 'https://idam-api.aat.platform.hmcts.net'
 
-            await http.delete(`${idamApiUrl}/session/${accessToken}`, {
+            await http.delete(`${this.options.logout_url}/session/${accessToken}`, {
                 headers: {
                     Authorization: auth,
                 },
             })
-            await http.delete(`${idamApiUrl}/session/${refreshToken}`, {
+            await http.delete(`${this.options.logout_url}/session/${refreshToken}`, {
                 headers: {
                     Authorization: auth,
                 },
