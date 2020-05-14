@@ -5,8 +5,9 @@ import * as events from 'events'
 import passport from 'passport'
 import { AUTH, OIDC } from './oidc.constants'
 import { URL } from 'url'
+import { http } from '../../http/http'
 
-const loginRoute = '/login'
+const loginRoute = '/auth/login'
 const callbackRoute = '/oauth2'
 /*const logoutRoute = 'logout';
 const heartbeatRoute = 'keepalive';*/
@@ -110,10 +111,50 @@ export class OpenID extends events.EventEmitter {
             passport.initialize()(req, res, () => console.log('passport initialised '))
             passport.session()(req, res, () => console.log('passport session intialised'))
 
-            req.app.use('/auth', this.router)
+            req.app.use('/auth/login', this.loginHandler)
             req.app.get('/oauth2/callback', this.callbackHandler)
+            req.app.get('/api/logout', async (req, res) => {
+                await this.logout(req, res)
+            })
             next()
         }
+    }
+
+    public logout = async (req: express.Request, res: express.Response): Promise<void> => {
+        try {
+            console.log('logout start')
+            const accessToken = req.session?.passport.user.tokenset.access_token
+            const refreshToken = req.session?.passport.user.tokenset.refresh_token
+
+            const auth = `Basic ${Buffer.from(`${this.options.client_id}:${this.options.client_secret}`).toString(
+                'base64',
+            )}`
+            const idamApiUrl = 'https://idam-api.aat.platform.hmcts.net'
+
+            await http.delete(`${idamApiUrl}/session/${accessToken}`, {
+                headers: {
+                    Authorization: auth,
+                },
+            })
+            await http.delete(`${idamApiUrl}/session/${refreshToken}`, {
+                headers: {
+                    Authorization: auth,
+                },
+            })
+
+            //passport provides this method on request object
+            req.logout()
+
+            if (!req.query.noredirect && req.query.redirect) {
+                // 401 is when no accessToken
+                res.redirect(401, '/')
+            } else {
+                res.redirect('/')
+            }
+        } catch (e) {
+            res.redirect(401, '/')
+        }
+        console.log('logout end')
     }
 
     public initialiseRoutes = (): void => {
@@ -142,7 +183,7 @@ export class OpenID extends events.EventEmitter {
                     return next(err)
                 }
                 if (!this.listenerCount(OIDC.EVENT.AUTHENTICATE_SUCCESS)) {
-                    // console.log(`redirecting, no listener count: ${OIDC.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
+                    console.log(`redirecting, no listener count: ${OIDC.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
                     res.redirect('/')
                 } else {
                     this.emit(OIDC.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
@@ -158,7 +199,7 @@ export class OpenID extends events.EventEmitter {
         const metadata = issuer.metadata
         metadata.issuer = this.options.issuer_url
 
-        // console.log('metadata', metadata)
+        console.log('metadata', metadata)
 
         return new Issuer(metadata)
     }
@@ -173,7 +214,7 @@ export class OpenID extends events.EventEmitter {
             console.log('req is authenticated')
             return next()
         }
-        console.log('unauthed, redirecting')
+        console.log('unauthed,redirecting')
         res.redirect(loginRoute)
     }
 }
