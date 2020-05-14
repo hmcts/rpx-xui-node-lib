@@ -18,8 +18,8 @@ export const AUTH = {
     ROUTE: {
         DEFAULT_REDIRECT: '/',
         LOGIN: '/auth/login',
-        DEFAULT_AUTH_ROUTE: '/api/isAuthenticated',
+        DEFAULT_AUTH_ROUTE: '/auth/isAuthenticated',
         OAUTH_CALLBACK: '/oauth2/callback',
-        LOGOUT: '/api/logout',
+        LOGOUT: '/auth/logout',
     },
 }
