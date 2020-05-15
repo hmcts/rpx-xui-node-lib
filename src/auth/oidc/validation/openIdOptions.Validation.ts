@@ -1,7 +1,7 @@
 import { OpenIDMetadata } from '../OpenIDMetadata'
 import Joi, { ValidationResult } from '@hapi/joi'
 
-export function ValidateOpenIdOptions(options: OpenIDMetadata): ValidationResult {
+export function ValidateOpenIdOptions(options: OpenIDMetadata) {
     /* eslint-disable @typescript-eslint/camelcase */
     const schema = Joi.object({
         discovery_endpoint: Joi.required(),
