@@ -1,25 +1,13 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { Client, ClientMetadata, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
+import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import * as express from 'express'
 import * as events from 'events'
 import passport from 'passport'
 import { AUTH, OIDC } from './oidc.constants'
 import { URL } from 'url'
 import { http } from '../../http/http'
-
-/*const logoutRoute = 'logout';
-const heartbeatRoute = 'keepalive';*/
-
-export interface OpenIDMetadata extends ClientMetadata {
-    discovery_endpoint: string
-    issuer_url: string
-    prompt?: 'login'
-    redirect_uri: string
-    scope: string
-    sessionKey?: string
-    isAuthRouteName?: string
-    logout_url: string
-}
+import { OpenIDMetadata } from './OpenIDMetadata'
+import { ValidateOpenIdOptions } from './validation/openIdOptions.Validation'
 
 export class OpenID extends events.EventEmitter {
     router = express.Router({ mergeParams: true })
@@ -80,6 +68,7 @@ export class OpenID extends events.EventEmitter {
 
     public configure = (options: OpenIDMetadata): RequestHandler => {
         this.options = options
+        ValidateOpenIdOptions(options)
         passport.serializeUser((user, done) => {
             if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
                 done(null, user)
