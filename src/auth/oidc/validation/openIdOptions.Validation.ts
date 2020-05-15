@@ -1,6 +1,5 @@
 import { OpenIDMetadata } from '../OpenIDMetadata'
-import Joi, { ValidationResult } from '@hapi/joi'
-import { ResponseType } from 'openid-client'
+import Joi from '@hapi/joi'
 
 export function ValidateOpenIdOptions(options: OpenIDMetadata) {
     /* eslint-disable @typescript-eslint/camelcase */
