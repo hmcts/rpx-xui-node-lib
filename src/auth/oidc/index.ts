@@ -24,8 +24,8 @@ export class OpenID extends events.EventEmitter {
         issuer_url: '',
         redirect_uri: '',
         scope: '',
-        isAuthRouteName: '',
         logout_url: '',
+        useRoutes: true,
     }
     /* eslint-enable @typescript-eslint/camelcase */
 
@@ -68,7 +68,7 @@ export class OpenID extends events.EventEmitter {
 
     public configure = (options: OpenIDMetadata): RequestHandler => {
         this.options = options
-        ValidateOpenIdOptions(options)
+        // ValidateOpenIdOptions(options)
         passport.serializeUser((user, done) => {
             if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
                 done(null, user)
@@ -97,16 +97,16 @@ export class OpenID extends events.EventEmitter {
         this.router.use(passport.initialize())
         this.router.use(passport.session())
 
-        const authRoute = this.options.isAuthRouteName ? this.options.isAuthRouteName : AUTH.ROUTE.DEFAULT_AUTH_ROUTE
-        this.router.get(authRoute, (req, res) => {
-            res.send(req.isAuthenticated())
-        })
-        this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
-        this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
-        this.router.get(AUTH.ROUTE.LOGOUT, async (req, res) => {
-            await this.logout(req, res)
-        })
-
+        if (options.useRoutes) {
+            this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, (req, res) => {
+                res.send(req.isAuthenticated())
+            })
+            this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
+            this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
+            this.router.get(AUTH.ROUTE.LOGOUT, async (req, res) => {
+                await this.logout(req, res)
+            })
+        }
         this.emit('oidc.bootstrap.success')
 
         return this.router
