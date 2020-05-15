@@ -68,7 +68,7 @@ export class OpenID extends events.EventEmitter {
 
     public configure = (options: OpenIDMetadata): RequestHandler => {
         this.options = options
-        // ValidateOpenIdOptions(options)
+        ValidateOpenIdOptions(options)
         passport.serializeUser((user, done) => {
             if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
                 done(null, user)
