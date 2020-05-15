@@ -7,6 +7,6 @@ export interface OpenIDMetadata extends ClientMetadata {
     redirect_uri: string
     scope: string
     sessionKey?: string
-    isAuthRouteName?: string
     logout_url: string
+    useRoutes?: boolean
 }
