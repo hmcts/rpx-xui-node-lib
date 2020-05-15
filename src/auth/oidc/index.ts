@@ -7,7 +7,7 @@ import { AUTH, OIDC } from './oidc.constants'
 import { URL } from 'url'
 import { http } from '../../http/http'
 import { OpenIDMetadata } from './OpenIDMetadata'
-import { ValidateOpenIdOptions } from './validation/openIdOptions.Validation'
+import { ValidateOpenIdOptions } from './validation/openIdOptions.validation'
 
 export class OpenID extends events.EventEmitter {
     router = express.Router({ mergeParams: true })
