@@ -11,8 +11,6 @@ import { AUTH } from '../auth.constants'
 import { Authentication } from '..'
 
 export class OpenID extends Authentication {
-    router = express.Router({ mergeParams: true })
-
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
 
@@ -30,8 +28,8 @@ export class OpenID extends Authentication {
     }
     /* eslint-enable @typescript-eslint/camelcase */
 
-    constructor() {
-        super()
+    constructor(strategyName: string) {
+        super(strategyName)
     }
 
     public verify = (tokenset: TokenSet, userinfo: UserinfoResponse, done: (err: any, user?: any) => void) => {
@@ -49,7 +47,7 @@ export class OpenID extends Authentication {
             this.issuer = await this.discover()
             this.client = new this.issuer.Client(options)
             passport.use(
-                OIDC.STRATEGY_NAME,
+                this.strategyName,
                 new Strategy(
                     {
                         client: this.client,
@@ -150,7 +148,7 @@ export class OpenID extends Authentication {
     }
 
     public callbackHandler = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
-        passport.authenticate(OIDC.STRATEGY_NAME, (error, user, info) => {
+        passport.authenticate(this.strategyName, (error, user, info) => {
             // TODO: give a more meaningful error to user rather than redirect back to idam
             // return next(error) would pass off to error.handler.ts to show users a proper error page etc
             if (error) {
@@ -191,11 +189,6 @@ export class OpenID extends Authentication {
         return new Issuer(metadata)
     }
 
-    public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
-        console.log('loginHandler Hit')
-        return passport.authenticate(OIDC.STRATEGY_NAME)(req, res, next)
-    }
-
     public authenticate = (req: Request, res: Response, next: NextFunction): void => {
         if (req.isAuthenticated()) {
             console.log('req is authenticated')
@@ -206,4 +199,4 @@ export class OpenID extends Authentication {
     }
 }
 
-export default new OpenID()
+export default new OpenID(OIDC.STRATEGY_NAME)

@@ -1,4 +1,3 @@
-import * as events from 'events'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 import * as express from 'express'
 import { OAuth2Metadata } from './OAuth2Metadata'
@@ -20,19 +19,13 @@ export class OAuth2 extends Authentication {
         useRoutes: true,
     }
 
-    router = express.Router({ mergeParams: true })
-    constructor() {
-        super()
-    }
-
-    public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
-        console.log('loginHandler Hit')
-        return passport.authenticate(OAUTH2.STRATEGY_NAME)(req, res, next)
+    constructor(strategyName: string) {
+        super(strategyName)
     }
 
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
         console.info('outside passport authenticate', req.query.code)
-        passport.authenticate(OAUTH2.STRATEGY_NAME, (error, user, info) => {
+        passport.authenticate(this.strategyName, (error, user, info) => {
             console.info('inside passport authenticate')
             console.error(error)
             if (error) {
@@ -106,7 +99,7 @@ export class OAuth2 extends Authentication {
     }
 
     public initialiseStrategy = (options: OAuth2Metadata): void => {
-        passport.use(OAUTH2.STRATEGY_NAME, new OAuth2Strategy(options, this.verify))
+        passport.use(this.strategyName, new OAuth2Strategy(options, this.verify))
         console.log('initialiseStrategy end')
     }
 
@@ -116,4 +109,4 @@ export class OAuth2 extends Authentication {
     }
 }
 
-export default new OAuth2()
+export default new OAuth2(OAUTH2.STRATEGY_NAME)
