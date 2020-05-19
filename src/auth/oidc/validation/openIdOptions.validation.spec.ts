@@ -1,4 +1,4 @@
-import { ValidateOpenIdOptions } from './openIdOptions.Validation'
+import { ValidateOpenIdOptions } from './openIdOptions.validation'
 import { ClientAuthMethod, ResponseType } from 'openid-client'
 /* eslint-disable @typescript-eslint/camelcase */
 test('Auth', () => {
