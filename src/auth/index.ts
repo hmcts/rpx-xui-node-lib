@@ -1,8 +1,19 @@
 import * as events from 'events'
+import * as express from 'express'
+import { NextFunction, Request, RequestHandler, Response } from 'express'
+import passport from 'passport'
 
 export class Authentication extends events.EventEmitter {
-    constructor() {
+    protected readonly strategyName: string
+    protected readonly router = express.Router({ mergeParams: true })
+    constructor(strategyName: string) {
         super()
+        this.strategyName = strategyName
+    }
+
+    public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
+        console.log('loginHandler Hit')
+        return passport.authenticate(this.strategyName)(req, res, next)
     }
 }
 
