@@ -1,15 +1,16 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import * as express from 'express'
-import * as events from 'events'
 import passport from 'passport'
-import { AUTH, OIDC } from './oidc.constants'
+import { OIDC } from './oidc.constants'
 import { URL } from 'url'
 import { http } from '../../http/http'
 import { OpenIDMetadata } from './OpenIDMetadata'
 import { ValidateOpenIdOptions } from './validation/openIdOptions.validation'
+import { AUTH } from '../auth.constants'
+import { Authentication } from '..'
 
-export class OpenID extends events.EventEmitter {
+export class OpenID extends Authentication {
     router = express.Router({ mergeParams: true })
 
     protected issuer: Issuer<Client> | undefined

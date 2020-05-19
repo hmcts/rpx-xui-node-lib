@@ -1,12 +1,20 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { ClientMetadata } from 'openid-client'
+import * as events from 'events'
 
-export function auth(options: ClientMetadata): RequestHandler {
-    console.log(options)
-    return function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-        return next()
+export class Authentication extends events.EventEmitter {
+    constructor() {
+        super()
     }
 }
+
+// import { NextFunction, Request, RequestHandler, Response } from 'express'
+// import { ClientMetadata } from 'openid-client'
+
+// export function auth(options: ClientMetadata): RequestHandler {
+//     console.log(options)
+//     return function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+//         return next()
+//     }
+// }
 
 /*
 import * as express from "express";
