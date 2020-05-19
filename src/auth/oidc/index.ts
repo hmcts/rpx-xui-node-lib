@@ -147,36 +147,6 @@ export class OpenID extends Authentication {
         console.log('logout end')
     }
 
-    public callbackHandler = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
-        passport.authenticate(this.strategyName, (error, user, info) => {
-            // TODO: give a more meaningful error to user rather than redirect back to idam
-            // return next(error) would pass off to error.handler.ts to show users a proper error page etc
-            if (error) {
-                console.error(error)
-                // return next(error);
-            }
-            if (info) {
-                console.info(info)
-                // return next(info);
-            }
-            if (!user) {
-                console.info('No user found, redirecting')
-                return res.redirect(AUTH.ROUTE.LOGIN)
-            }
-            req.logIn(user, (err) => {
-                if (err) {
-                    return next(err)
-                }
-                if (!this.listenerCount(OIDC.EVENT.AUTHENTICATE_SUCCESS)) {
-                    console.log(`redirecting, no listener count: ${OIDC.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
-                    res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
-                } else {
-                    this.emit(OIDC.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
-                }
-            })
-        })(req, res, next)
-    }
-
     public discover = async (): Promise<Issuer<Client>> => {
         console.log(`discovering endpoint: ${this.options.discovery_endpoint}`)
         const issuer = await Issuer.discover(`${this.options.discovery_endpoint}`)

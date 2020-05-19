@@ -23,37 +23,6 @@ export class OAuth2 extends Authentication {
         super(strategyName)
     }
 
-    public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
-        console.info('outside passport authenticate', req.query.code)
-        passport.authenticate(this.strategyName, (error, user, info) => {
-            console.info('inside passport authenticate')
-            console.error(error)
-            if (error) {
-                console.error(error)
-                // return next(error);
-            }
-            if (info) {
-                console.info(info)
-                // return next(info);
-            }
-            if (!user) {
-                console.info('No user found, redirecting')
-                return res.redirect(AUTH.ROUTE.LOGIN)
-            }
-            req.logIn(user, (err) => {
-                if (err) {
-                    return next(err)
-                }
-                if (!this.listenerCount(OAUTH2.EVENT.AUTHENTICATE_SUCCESS)) {
-                    console.log(`redirecting, no listener count: ${OAUTH2.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
-                    res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
-                } else {
-                    this.emit(OAUTH2.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
-                }
-            })
-        })(req, res, next)
-    }
-
     public configure = (options: OAuth2Metadata): RequestHandler => {
         console.log('configure start')
         this.options = options
