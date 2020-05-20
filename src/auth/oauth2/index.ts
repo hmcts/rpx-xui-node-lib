@@ -4,9 +4,10 @@ import { OAuth2Metadata } from './OAuth2Metadata'
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import { OAUTH2 } from './oauth2.constants'
-import OAuth2Strategy, { VerifyCallback } from 'passport-oauth2'
+import { VerifyCallback } from 'passport-oauth2'
 import { Authentication } from '..'
 import { http } from '../../http/http'
+import { MyOAuth2Strategy } from './MyOAuth2Strategy'
 
 export class OAuth2 extends Authentication {
     protected options: OAuth2Metadata = {
@@ -20,8 +21,8 @@ export class OAuth2 extends Authentication {
         useRoutes: true,
     }
 
-    constructor(strategyName: string) {
-        super(strategyName)
+    constructor() {
+        super(OAUTH2.STRATEGY_NAME)
     }
 
     public configure = (options: OAuth2Metadata): RequestHandler => {
@@ -105,17 +106,23 @@ export class OAuth2 extends Authentication {
     }
 
     public initialiseStrategy = (options: OAuth2Metadata): void => {
-        passport.use(this.strategyName, new OAuth2Strategy(options, this.verify))
+        passport.use(this.strategyName, new MyOAuth2Strategy(options, this.verify))
         console.log('initialiseStrategy end')
     }
 
-    public verify = (accessToken: string, refreshToken: string, results: any, profile: any, done: VerifyCallback) => {
+    public verify = async (
+        accessToken: string,
+        refreshToken: string,
+        results: any,
+        profile: any,
+        done: VerifyCallback,
+    ): Promise<void> => {
         console.log('accessToken', accessToken)
         console.log('refreshToken', refreshToken)
         console.log('results', results)
-        console.log('verify', profile)
+        console.log('profile', profile)
         done(null, profile)
     }
 }
 
-export default new OAuth2(OAUTH2.STRATEGY_NAME)
+export default new OAuth2()

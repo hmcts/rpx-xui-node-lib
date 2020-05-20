@@ -28,8 +28,8 @@ export class OpenID extends Authentication {
     }
     /* eslint-enable @typescript-eslint/camelcase */
 
-    constructor(strategyName: string) {
-        super(strategyName)
+    constructor() {
+        super(OIDC.STRATEGY_NAME)
     }
 
     public verify = (tokenset: TokenSet, userinfo: UserinfoResponse, done: (err: any, user?: any) => void) => {
@@ -169,4 +169,4 @@ export class OpenID extends Authentication {
     }
 }
 
-export default new OpenID(OIDC.STRATEGY_NAME)
+export default new OpenID()
