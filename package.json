@@ -10,7 +10,7 @@
     "lint": "eslint '*/**/*.{js,ts}' --quiet --fix",
     "commit": "git cz",
     "ci:lint": "eslint '*/**/*.{js,ts}' --quiet",
-    "ci": "yarn && yarn format && yarn ci:lint && yarn build",
+    "ci": "yarn && yarn ci:lint && yarn build",
     "watch": "tsc --watch"
   },
   "repository": {
@@ -37,6 +37,7 @@
     "@types/express-session": "^1.15.16",
     "@types/hapi__joi": "^17.1.0",
     "@types/jest": "^24.0.24",
+    "@types/jwt-decode": "^2.2.1",
     "@types/node": "^12.12.21",
     "@types/passport": "^1.0.2",
     "@types/session-file-store": "^1.2.1",
@@ -71,6 +72,7 @@
     "deepmerge": "^4.2.2",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
+    "jwt-decode": "^2.2.0",
     "openid-client": "^3.10.0",
     "passport": "^0.4.1",
     "passport-oauth2": "^1.5.0",
