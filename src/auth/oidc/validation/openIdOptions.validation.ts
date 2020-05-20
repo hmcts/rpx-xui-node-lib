@@ -1,7 +1,7 @@
 import { OpenIDMetadata } from '../OpenIDMetadata'
 import Joi from '@hapi/joi'
 
-export function ValidateOpenIdOptions(options: OpenIDMetadata) {
+export function ValidateOpenIdOptions(options: OpenIDMetadata): void {
     /* eslint-disable @typescript-eslint/camelcase */
     const schema = Joi.object({
         client_id: Joi.string().required(),
@@ -17,7 +17,7 @@ export function ValidateOpenIdOptions(options: OpenIDMetadata) {
         useRoutes: Joi.any(),
     })
     /* eslint-enable @typescript-eslint/camelcase */
-    const { error, value } = schema.validate(options)
+    const { error } = schema.validate(options)
     if (error) {
         throw error
     }
