@@ -8,14 +8,16 @@ import { URL } from 'url'
 import { http } from '../../http/http'
 import { OpenIDMetadata } from './OpenIDMetadata'
 import { ValidateOpenIdOptions } from './validation/openIdOptions.validation'
+import jwtDecode from 'jwt-decode'
+
+//TODO: move this as an option and proper logger
+const logger = console
 
 export class OpenID extends events.EventEmitter {
     router = express.Router({ mergeParams: true })
 
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
-
-    protected initialised = false
 
     /* eslint-disable @typescript-eslint/camelcase */
     protected options: OpenIDMetadata = {
@@ -38,32 +40,30 @@ export class OpenID extends events.EventEmitter {
             logger.warn('User does not have any access roles.')
             return done(null, false, {message: 'User does not have any access roles.'})
         }*/
-        console.info('verify okay, user:', userinfo)
+        logger.info('verify okay, user:', userinfo)
         return done(null, { tokenset, userinfo })
     }
 
-    public initialiseStrategy = async (initialised: boolean, options: OpenIDMetadata): Promise<void> => {
-        if (!initialised) {
-            const redirectUri = new URL(AUTH.ROUTE.OAUTH_CALLBACK, options.redirect_uri)
-            this.issuer = await this.discover()
-            this.client = new this.issuer.Client(options)
-            passport.use(
-                OIDC.STRATEGY_NAME,
-                new Strategy(
-                    {
-                        client: this.client,
-                        params: {
-                            prompt: OIDC.PROMPT,
-                            // eslint-disable-next-line @typescript-eslint/camelcase
-                            redirect_uri: redirectUri.toString(),
-                            scope: options.scope,
-                        },
-                        sessionKey: options.sessionKey, // being explicit here so we can set manually on logout
+    public initialiseStrategy = async (options: OpenIDMetadata): Promise<void> => {
+        const redirectUri = new URL(AUTH.ROUTE.OAUTH_CALLBACK, options.redirect_uri)
+        this.issuer = await this.discover()
+        this.client = new this.issuer.Client(options)
+        passport.use(
+            OIDC.STRATEGY_NAME,
+            new Strategy(
+                {
+                    client: this.client,
+                    params: {
+                        prompt: OIDC.PROMPT,
+                        // eslint-disable-next-line @typescript-eslint/camelcase
+                        redirect_uri: redirectUri.toString(),
+                        scope: options.scope,
                     },
-                    this.verify,
-                ),
-            )
-        }
+                    sessionKey: options.sessionKey, // being explicit here so we can set manually on logout
+                },
+                this.verify,
+            ),
+        )
     }
 
     public configure = (options: OpenIDMetadata): RequestHandler => {
@@ -86,10 +86,10 @@ export class OpenID extends events.EventEmitter {
         })
         ;(async () => {
             try {
-                await this.initialiseStrategy(this.initialised, this.options)
-                this.initialised = true
+                await this.initialiseStrategy(this.options)
             } catch (err) {
                 // next(err)
+                logger.error(err)
                 this.emit('oidc.configure.error', err)
             }
         })()
@@ -114,7 +114,7 @@ export class OpenID extends events.EventEmitter {
 
     public logout = async (req: express.Request, res: express.Response): Promise<void> => {
         try {
-            console.log('logout start')
+            logger.log('logout start')
             const accessToken = req.session?.passport.user.tokenset.access_token
             const refreshToken = req.session?.passport.user.tokenset.refresh_token
 
@@ -145,7 +145,7 @@ export class OpenID extends events.EventEmitter {
         } catch (e) {
             res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
         }
-        console.log('logout end')
+        logger.log('logout end')
     }
 
     public callbackHandler = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
@@ -153,15 +153,15 @@ export class OpenID extends events.EventEmitter {
             // TODO: give a more meaningful error to user rather than redirect back to idam
             // return next(error) would pass off to error.handler.ts to show users a proper error page etc
             if (error) {
-                console.error(error)
-                // return next(error);
+                logger.error(error)
+                return next(error)
             }
             if (info) {
-                console.info(info)
-                // return next(info);
+                logger.info(info)
+                // return next(info)
             }
             if (!user) {
-                console.info('No user found, redirecting')
+                logger.info('No user found, redirecting')
                 return res.redirect(AUTH.ROUTE.LOGIN)
             }
             req.logIn(user, (err) => {
@@ -169,39 +169,78 @@ export class OpenID extends events.EventEmitter {
                     return next(err)
                 }
                 if (!this.listenerCount(OIDC.EVENT.AUTHENTICATE_SUCCESS)) {
-                    console.log(`redirecting, no listener count: ${OIDC.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
+                    logger.log(`redirecting, no listener count: ${OIDC.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
                     res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
                 } else {
-                    this.emit(OIDC.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
+                    this.emit(OIDC.EVENT.AUTHENTICATE_SUCCESS, false, req, res, next)
                 }
             })
         })(req, res, next)
     }
 
     public discover = async (): Promise<Issuer<Client>> => {
-        console.log(`discovering endpoint: ${this.options.discovery_endpoint}`)
+        logger.log(`discovering endpoint: ${this.options.discovery_endpoint}`)
         const issuer = await Issuer.discover(`${this.options.discovery_endpoint}`)
 
         const metadata = issuer.metadata
         metadata.issuer = this.options.issuer_url
 
-        console.log('metadata', metadata)
+        logger.log('metadata', metadata)
 
         return new Issuer(metadata)
     }
 
     public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
-        console.log('loginHandler Hit')
         return passport.authenticate(OIDC.STRATEGY_NAME)(req, res, next)
     }
 
-    public authenticate = (req: Request, res: Response, next: NextFunction): void => {
-        if (req.isAuthenticated()) {
-            console.log('req is authenticated')
-            return next()
+    public isTokenExpired = (token: string): boolean => {
+        const jwtData = jwtDecode<any>(token)
+        const expires = new Date(jwtData.exp * 1000).getTime()
+        const now = new Date().getTime()
+        return expires < now
+    }
+
+    public authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        if (req.isUnauthenticated()) {
+            logger.log('unauthenticated, redirecting')
+            return res.redirect(AUTH.ROUTE.LOGIN)
         }
-        console.log('unauthed,redirecting')
-        res.redirect(AUTH.ROUTE.LOGIN)
+
+        if (req.session && this.client) {
+            const userDetails = req.session.passport.user
+            const currentAccessToken = userDetails.tokenset.access_token
+
+            req.headers['user-roles'] = userDetails.userinfo.roles.join()
+
+            if (currentAccessToken) {
+                try {
+                    // TODO: ideally we need to introspect the tokens but currently unsupported in IDAM
+                    if (this.isTokenExpired(currentAccessToken)) {
+                        logger.log('token expired')
+                        req.session.passport.user.tokenset = await this.client.refresh(
+                            req.session.passport.user.tokenset.refresh_token,
+                            req.session.passport.user.tokenset,
+                        )
+                        req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.access_token}`
+                        if (!this.listenerCount(OIDC.EVENT.AUTHENTICATE_SUCCESS)) {
+                            logger.log(`refresh: no listener count: ${OIDC.EVENT.AUTHENTICATE_SUCCESS}`)
+                            return next()
+                        } else {
+                            this.emit(OIDC.EVENT.AUTHENTICATE_SUCCESS, true, req, res, next)
+                            return
+                        }
+                    } else {
+                        req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.access_token}`
+                        return next()
+                    }
+                } catch (e) {
+                    logger.log('refresh error =>', e)
+                    next(e)
+                }
+            }
+        }
+        return res.redirect(AUTH.ROUTE.LOGIN)
     }
 }
 
