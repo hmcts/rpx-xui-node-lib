@@ -1,15 +1,9 @@
 name: Semantic-Release
 
 on:
-  pull_request:
-    branches:
-      - master
   push:
     branches:
       - master
-      - refs/tags/*
-    tags:
-      - '*'
 
 jobs:
   release:
