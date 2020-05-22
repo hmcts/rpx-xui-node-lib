@@ -36,6 +36,7 @@ exports.XuiNodeLib = XuiNodeLib;
 var xuiNodeLib = new XuiNodeLib({});
 var verifyCallback = function (done, session, user) {
     console.log(session, user);
+    console.log('VerifyCallback');
     done();
 };
 xuiNodeLib.on('oidc.verify', verifyCallback);
