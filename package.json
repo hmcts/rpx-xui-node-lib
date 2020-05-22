@@ -18,9 +18,11 @@
     "url": "git+https://github.com/hmcts/rpx-xui-node-lib.git"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "tag": "latest"
   },
-  "keywords": [],
+  "keywords": ["XUI", "node", "authentication"],
   "author": "",
   "license": "MIT",
   "bugs": {
