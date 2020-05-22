@@ -16,7 +16,7 @@ const xuiNodeLib = new XuiNodeLib({})
 
 const verifyCallback = (done: any, session: any, user: any) => {
     console.log(session, user)
-    console.log('VerifyCallback')
+    console.log('VerifyCallback1')
     done()
 }
 
