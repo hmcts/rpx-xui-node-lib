@@ -10,7 +10,7 @@
     "lint": "eslint '*/**/*.{js,ts}' --quiet --fix",
     "commit": "git cz",
     "ci:lint": "eslint '*/**/*.{js,ts}' --quiet",
-    "ci": "yarn ci:lint && yarn build",
+    "ci": "yarn && yarn ci:lint && yarn build",
     "watch": "tsc --watch"
   },
   "repository": {
