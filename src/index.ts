@@ -1,6 +1,7 @@
 import * as events from 'events'
-export * from 'openid-client'
 import { ClientMetadata } from 'openid-client'
+
+export * from 'openid-client'
 
 interface LibOptions {
     oidc?: ClientMetadata

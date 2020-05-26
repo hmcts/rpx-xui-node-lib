@@ -1,4 +1,4 @@
-import { OpenIDMetadata } from '../OpenIDMetadata'
+import { OpenIDMetadata } from '../models'
 import Joi from '@hapi/joi'
 
 export function ValidateOpenIdOptions(options: OpenIDMetadata): void {
