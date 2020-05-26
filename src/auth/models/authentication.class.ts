@@ -41,7 +41,7 @@ export class Authentication extends events.EventEmitter {
                     console.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
                     res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
                 } else {
-                    this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
+                    this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, false, req, res, next)
                 }
             })
         })(req, res, next)
