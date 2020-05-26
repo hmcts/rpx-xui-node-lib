@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "1.0.3",
+  "version": "2.2.0",
   "description": "Common Nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -22,7 +22,11 @@
     "registry": "https://registry.npmjs.org/",
     "tag": "latest"
   },
-  "keywords": ["XUI", "node", "authentication"],
+  "keywords": [
+    "XUI",
+    "node",
+    "authentication"
+  ],
   "author": "",
   "license": "MIT",
   "bugs": {
