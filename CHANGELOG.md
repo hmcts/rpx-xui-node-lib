@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.2.0...v2.3.0) (2020-05-26)
+
+
+### Features
+
+* **oauth2:** implement oAuth2 ([bcedfb9](https://github.com/hmcts/rpx-xui-node-lib/commit/bcedfb9a49df232e6022b3c46950018ac74de519))
+
 # [2.2.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.1.1...v2.2.0) (2020-05-26)
 
 
