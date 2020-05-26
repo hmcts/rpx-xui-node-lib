@@ -9,6 +9,9 @@ import { Authentication } from '../../models/authentication.class'
 import { http } from '../../../http/http'
 import { XUIOAuth2Strategy } from './XUIOAuth2Strategy.class'
 
+//TODO: move this as an option and proper logger
+const logger = console
+
 export class OAuth2 extends Authentication {
     protected options: OAuth2Metadata = {
         authorizationURL: '',
@@ -26,10 +29,10 @@ export class OAuth2 extends Authentication {
     }
 
     public configure = (options: OAuth2Metadata): RequestHandler => {
-        console.log('oAuth2 configure start')
+        logger.info('oAuth2 configure start')
         this.options = options
         passport.serializeUser((user, done) => {
-            console.log('serialize user', user)
+            logger.info('serialize user', user)
             if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
                 done(null, user)
             } else {
@@ -38,21 +41,21 @@ export class OAuth2 extends Authentication {
         })
 
         passport.deserializeUser((id, done) => {
-            console.log('de-serialize user', id)
+            logger.info('de-serialize user', id)
             if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
                 done(null, id)
             } else {
                 this.emit(AUTH.EVENT.DESERIALIZE_USER, id, done)
             }
         })
-        console.log('oAuth2 before initialiseStrategy')
+        logger.info('oAuth2 before initialiseStrategy')
         this.initialiseStrategy(this.options)
-        console.log('oAuth2 after initialiseStrategy')
+        logger.info('oAuth2 after initialiseStrategy')
 
         this.router.use(passport.initialize())
         this.router.use(passport.session())
 
-        console.log('oAuth2 options.useRoutes', options.useRoutes)
+        logger.info('oAuth2 options.useRoutes', options.useRoutes)
         if (options.useRoutes) {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, (req, res) => {
                 res.send(req.isAuthenticated())
@@ -60,18 +63,18 @@ export class OAuth2 extends Authentication {
             this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
             this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
             this.router.get(AUTH.ROUTE.LOGOUT, async (req, res) => {
-                console.log('before logout')
+                logger.info('before logout')
                 await this.logout(req, res)
             })
         }
         this.emit('oAuth2 outh2.bootstrap.success')
-        console.log('oAuth2 configure end')
+        logger.info('oAuth2 configure end')
         return this.router
     }
 
     public logout = async (req: express.Request, res: express.Response): Promise<void> => {
         try {
-            console.log('logout start')
+            logger.info('logout start')
             const accessToken = req.session?.passport.user.tokenset.access_token
             const refreshToken = req.session?.passport.user.tokenset.refresh_token
 
@@ -102,12 +105,12 @@ export class OAuth2 extends Authentication {
         } catch (e) {
             res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
         }
-        console.log('logout end')
+        logger.info('logout end')
     }
 
     public initialiseStrategy = (options: OAuth2Metadata): void => {
         passport.use(this.strategyName, new XUIOAuth2Strategy(options, this.verify))
-        console.log('initialiseStrategy end')
+        logger.info('initialiseStrategy end')
     }
 
     public verify = async (
@@ -117,10 +120,10 @@ export class OAuth2 extends Authentication {
         profile: any,
         done: VerifyCallback,
     ): Promise<void> => {
-        console.log('accessToken', accessToken)
-        console.log('refreshToken', refreshToken)
-        console.log('results', results)
-        console.log('profile', profile)
+        logger.info('accessToken', accessToken)
+        logger.info('refreshToken', refreshToken)
+        logger.info('results', results)
+        logger.info('profile', profile)
         done(null, { tokenset: { accessToken, refreshToken }, userinfo: profile })
     }
 }

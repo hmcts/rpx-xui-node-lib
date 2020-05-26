@@ -69,7 +69,7 @@ export class OpenID extends Authentication {
         this.options = options
         ValidateOpenIdOptions(options)
         passport.serializeUser((user, done) => {
-            console.log('oidc serializeUser', user)
+            logger.info('oidc serializeUser', user)
             if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
                 done(null, user)
             } else {
@@ -78,7 +78,7 @@ export class OpenID extends Authentication {
         })
 
         passport.deserializeUser((id, done) => {
-            console.log('oidc de-serializeUser', id)
+            logger.info('oidc de-serializeUser', id)
             if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
                 done(null, id)
             } else {
@@ -175,7 +175,7 @@ export class OpenID extends Authentication {
         }
 
         if (req.session && this.client) {
-            console.log('req.session and this.client')
+            logger.info('req.session and this.client')
             const userDetails = req.session.passport.user
             const currentAccessToken = userDetails.tokenset.access_token
 
@@ -183,7 +183,7 @@ export class OpenID extends Authentication {
 
             if (currentAccessToken) {
                 try {
-                    console.log('found currentAccessToken')
+                    logger.info('found currentAccessToken')
                     // TODO: ideally we need to introspect the tokens but currently unsupported in IDAM
                     if (this.isTokenExpired(currentAccessToken)) {
                         logger.log('token expired')
@@ -200,7 +200,7 @@ export class OpenID extends Authentication {
                             return
                         }
                     } else {
-                        console.log('Adding req.headers.Authorization')
+                        logger.info('Adding req.headers.Authorization')
                         req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.access_token}`
                         return next()
                     }
