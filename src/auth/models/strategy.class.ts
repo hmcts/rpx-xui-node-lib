@@ -3,6 +3,8 @@ import * as express from 'express'
 import { NextFunction, Request, RequestHandler, Response } from 'express'
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
+import { OAuth2Metadata } from '../oauth2'
+import { OpenIDMetadata } from '../oidc'
 
 export abstract class Strategy extends events.EventEmitter {
     protected readonly strategyName: string
@@ -12,7 +14,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.strategyName = strategyName
     }
 
-    public abstract configure(options: any): express.RequestHandler
+    public abstract configure(options: OAuth2Metadata | OpenIDMetadata): express.RequestHandler
 
     public abstract logout(req: express.Request, res: express.Response): Promise<void>
 
