@@ -8,13 +8,13 @@ import { http } from '../../../http'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { ValidateOpenIdOptions } from '../validation'
 import { AUTH } from '../../auth.constants'
-import { Authentication } from '../../models'
+import { Strategy as AuthStrategy } from '../../models'
 import jwtDecode from 'jwt-decode'
 
 //TODO: move this as an option and proper logger
 const logger = console
 
-export class OpenID extends Authentication {
+export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
 
