@@ -7,7 +7,7 @@ import { OAuth2Metadata } from '../oauth2'
 import { OpenIDMetadata } from '../oidc'
 
 export abstract class Strategy extends events.EventEmitter {
-    protected readonly strategyName: string
+    public readonly strategyName: string
     protected readonly router = express.Router({ mergeParams: true })
     constructor(strategyName: string) {
         super()
