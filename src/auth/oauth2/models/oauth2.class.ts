@@ -8,6 +8,7 @@ import { VerifyCallback } from 'passport-oauth2'
 import { Authentication } from '../../models/authentication.class'
 import { http } from '../../../http/http'
 import { XUIOAuth2Strategy } from './XUIOAuth2Strategy.class'
+import { ValidateOAuth2Options } from '../validation/oauth2.validation'
 
 //TODO: move this as an option and proper logger
 const logger = console
@@ -29,6 +30,7 @@ export class OAuth2 extends Authentication {
     }
 
     public configure = (options: OAuth2Metadata): RequestHandler => {
+        ValidateOAuth2Options(options)
         logger.info('oAuth2 configure start')
         this.options = options
         passport.serializeUser((user, done) => {
