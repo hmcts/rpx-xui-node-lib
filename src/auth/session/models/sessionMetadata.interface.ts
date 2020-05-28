@@ -1,5 +1,3 @@
-import { Store } from 'express-session'
-
 export interface SessionMetadata {
     cookie: {
         httpOnly: boolean
@@ -10,5 +8,17 @@ export interface SessionMetadata {
     resave: boolean
     saveUninitialized: boolean
     secret: string
-    store: Store
+    storeOptions: SessionStoreOptions
+}
+
+export interface SessionStoreOptions {
+    useRedisStore: true
+    fileStoreOptions?: {
+        filePath: string
+    }
+    redisStoreOptions?: {
+        redisKeyPrefix: string
+        redisCloudUrl: string
+        redisTtl: number | string
+    }
 }
