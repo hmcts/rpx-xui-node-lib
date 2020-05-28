@@ -15,5 +15,8 @@ module.exports = {
         // e.g. "@typescript-eslint/explicit-function-return-type": "off",
         'no-extra-semi': "error",
 
+        "prettier/prettier": ["error", {
+           "endOfLine":"auto"
+         }],
     }
 };
