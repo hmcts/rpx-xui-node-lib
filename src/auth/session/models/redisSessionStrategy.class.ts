@@ -1,22 +1,21 @@
 import { SESSION } from '../session.constants'
 import { Strategy } from '../../models'
-import { SessionMetadata, SessionStoreOptions } from './sessionMetadata.interface'
+import { RedisSessionMetadata } from './sessionMetadata.interface'
 import * as express from 'express'
 import { default as session } from 'express-session'
 import { default as connectRedis } from 'connect-redis'
 import { default as redis } from 'redis'
-import { default as sessionFileStore } from 'session-file-store'
 const logger = console
 
-export class SessionStrategy extends Strategy {
+export class RedisSessionStrategy extends Strategy {
     protected redisClient: any
     constructor() {
-        super(SESSION.STRATEGY_NAME)
+        super(SESSION.REDIS_STRATEGY_NAME)
     }
 
-    public configure = (options: SessionMetadata): express.RequestHandler => {
-        const store = this.getStore(options.storeOptions)
-        const sessionOptions = SessionStrategy.mapSessionOptions(options, store)
+    public configure = (options: RedisSessionMetadata): express.RequestHandler => {
+        const store = this.getStore(options)
+        const sessionOptions = RedisSessionStrategy.mapSessionOptions(options, store)
         this.router.use(session(sessionOptions))
         return this.router
     }
@@ -25,12 +24,9 @@ export class SessionStrategy extends Strategy {
         throw new Error('Not yet implemented')
     }
 
-    public getStore = (storeOptions: SessionStoreOptions): session.Store => {
-        if (storeOptions.useRedisStore && storeOptions.redisStoreOptions) {
+    public getStore = (storeOptions: RedisSessionMetadata): session.Store => {
+        if (storeOptions.redisStoreOptions) {
             return this.getRedisStore(storeOptions.redisStoreOptions)
-        }
-        if (!storeOptions.useRedisStore && storeOptions.fileStoreOptions) {
-            return this.getFileStore(storeOptions.fileStoreOptions)
         }
         throw new Error('store Options are missing')
     }
@@ -60,15 +56,7 @@ export class SessionStrategy extends Strategy {
         })
     }
 
-    public getFileStore = (options: { filePath: string }): session.Store => {
-        logger.info('using FileStore')
-        const fileStore = sessionFileStore(session)
-        return new fileStore({
-            path: options.filePath,
-        })
-    }
-
-    public static mapSessionOptions = (options: SessionMetadata, store: session.Store): any => {
+    public static mapSessionOptions = (options: RedisSessionMetadata, store: session.Store): any => {
         return {
             cookie: options.cookie,
             name: options.name,
@@ -80,4 +68,4 @@ export class SessionStrategy extends Strategy {
     }
 }
 
-export default new SessionStrategy()
+export default new RedisSessionStrategy()

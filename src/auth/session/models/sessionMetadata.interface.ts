@@ -8,15 +8,16 @@ export interface SessionMetadata {
     resave: boolean
     saveUninitialized: boolean
     secret: string
-    storeOptions: SessionStoreOptions
 }
 
-export interface SessionStoreOptions {
-    useRedisStore: true
-    fileStoreOptions?: {
+export interface FileSessionMetadata extends SessionMetadata {
+    fileStoreOptions: {
         filePath: string
     }
-    redisStoreOptions?: {
+}
+
+export interface RedisSessionMetadata extends SessionMetadata {
+    redisStoreOptions: {
         redisKeyPrefix: string
         redisCloudUrl: string
         redisTtl: number | string

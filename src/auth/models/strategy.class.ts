@@ -5,7 +5,7 @@ import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import { OAuth2Metadata } from '../oauth2'
 import { OpenIDMetadata } from '../oidc'
-import { SessionMetadata } from '../session/models/sessionMetadata.interface'
+import { FileSessionMetadata, RedisSessionMetadata } from '../session/models/sessionMetadata.interface'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -15,7 +15,9 @@ export abstract class Strategy extends events.EventEmitter {
         this.strategyName = strategyName
     }
 
-    public abstract configure(options: OAuth2Metadata | OpenIDMetadata | SessionMetadata): express.RequestHandler
+    public abstract configure(
+        options: OAuth2Metadata | OpenIDMetadata | FileSessionMetadata | RedisSessionMetadata,
+    ): express.RequestHandler
 
     public abstract logout(req: express.Request, res: express.Response): Promise<void>
 

@@ -1,3 +1,4 @@
 export const SESSION = {
-    STRATEGY_NAME: 'session',
+    REDIS_STRATEGY_NAME: 'redissession',
+    FILE_STRATEGY_NAME: 'filesession',
 }

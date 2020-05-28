@@ -13,8 +13,13 @@ test('openId Strategy factory', () => {
     expect(strategy.strategyName).toBe(OIDC.STRATEGY_NAME)
 })
 
-test('session Strategy factory', () => {
-    const strategy = strategyFactory.getStrategy('session')
-    expect(strategy.strategyName).toBe(SESSION.STRATEGY_NAME)
+test('file session Strategy factory', () => {
+    const strategy = strategyFactory.getStrategy('filesession')
+    expect(strategy.strategyName).toBe(SESSION.FILE_STRATEGY_NAME)
+})
+
+test('redis session Strategy factory', () => {
+    const strategy = strategyFactory.getStrategy('redissession')
+    expect(strategy.strategyName).toBe(SESSION.REDIS_STRATEGY_NAME)
 })
 /* eslint-disable @typescript-eslint/camelcase */
