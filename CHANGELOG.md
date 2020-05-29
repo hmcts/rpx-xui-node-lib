@@ -1,3 +1,10 @@
+## [2.6.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.6.0...v2.6.1) (2020-05-29)
+
+
+### Bug Fixes
+
+* **pipeline:** remove tarball config ([739c0ae](https://github.com/hmcts/rpx-xui-node-lib/commit/739c0ae6f7d2be368dc81f55974ed111ca83e976))
+
 # [2.6.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.5.2...v2.6.0) (2020-05-29)
 
 
