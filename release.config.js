@@ -8,7 +8,7 @@ module.exports = {
         [
             '@semantic-release/github',
             {
-                assets: ['CHANGELOG.md', 'package.json'],
+                assets: ['CHANGELOG.md', 'package.json', 'dist/*.tgz'],
             },
         ],
         [
