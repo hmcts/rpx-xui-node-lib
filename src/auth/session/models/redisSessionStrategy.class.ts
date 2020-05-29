@@ -43,10 +43,16 @@ export class RedisSessionStrategy extends Strategy {
         this.redisClient = redis.createClient(options.redisCloudUrl, tlsOptions)
 
         this.redisClient.on('ready', () => {
+            if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_READY)) {
+                this.emit(SESSION.EVENT.REDIS_CLIENT_READY, this.redisClient)
+            }
             logger.info('redis client connected successfully')
         })
 
         this.redisClient.on('error', (error: any) => {
+            if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_ERROR)) {
+                this.emit(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
+            }
             logger.error(error)
         })
         const redisStore = connectRedis(session)
