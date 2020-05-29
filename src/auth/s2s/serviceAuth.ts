@@ -1,4 +1,4 @@
-import * as otp from 'otp'
+import { totp } from 'node-otp'
 import { http } from '../../http/http'
 import { S2SConfig } from './s2sConfig.interface'
 
@@ -6,7 +6,7 @@ import { S2SConfig } from './s2sConfig.interface'
 const logger = console
 
 export async function postS2SLease(s2sConfig: S2SConfig): Promise<string> {
-    const oneTimePassword = otp({ secret: s2sConfig.s2sSecret }).totp()
+    const oneTimePassword = totp({ secret: s2sConfig.s2sSecret })
 
     logger.info('generating from secret: ', s2sConfig.s2sSecret, s2sConfig.microservice, oneTimePassword)
 
