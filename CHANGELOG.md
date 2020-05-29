@@ -1,3 +1,10 @@
+## [2.5.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.5.1...v2.5.2) (2020-05-29)
+
+
+### Bug Fixes
+
+* **pipeline:** test bugfix for master commit for changelog ([5dbd965](https://github.com/hmcts/rpx-xui-node-lib/commit/5dbd9655d0fbd2c95fff780c3f4bf98cd5cfd369))
+
 ## [2.5.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.5.0...v2.5.1) (2020-05-29)
 
 
