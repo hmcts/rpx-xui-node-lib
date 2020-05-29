@@ -1,3 +1,10 @@
+# [2.7.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.6.1...v2.7.0) (2020-05-29)
+
+
+### Features
+
+* **S2S:** implement S2S authentication as Express middleware ([#17](https://github.com/hmcts/rpx-xui-node-lib/issues/17)) ([08f5c14](https://github.com/hmcts/rpx-xui-node-lib/commit/08f5c140b286843e5516be4d9b3072fbf057187c))
+
 ## [2.6.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.6.0...v2.6.1) (2020-05-29)
 
 
