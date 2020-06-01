@@ -1,3 +1,21 @@
+# [2.8.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.7.0...v2.8.0) (2020-06-01)
+
+
+### Features
+
+* **auth:** implement S2S authentication as Express middleware ([f5c8da3](https://github.com/hmcts/rpx-xui-node-lib/commit/f5c8da38b76fbf56e10d1e0c0ecb3a5ddc8183df))
+* **auth:** implement S2S authentication as Express middleware ([548dd12](https://github.com/hmcts/rpx-xui-node-lib/commit/548dd12fb8d55b246cfeed40d7d45550f40ff2ba))
+* **auth:** implement S2S authentication as Express middleware ([90f9114](https://github.com/hmcts/rpx-xui-node-lib/commit/90f91149b208ea591e8941f8331c74379f29dbf4))
+* **auth:** implement S2S authentication as Express middleware ([2135c5c](https://github.com/hmcts/rpx-xui-node-lib/commit/2135c5c01e2e273ada4ca245f0a46f3eee5f1a7d))
+* **s2s:** address PR review comments from [@ronaldmansveld](https://github.com/ronaldmansveld) ([935dd52](https://github.com/hmcts/rpx-xui-node-lib/commit/935dd525a470b16fbeb42b8da7edeea7211e9df8))
+* **s2s:** move to node-otp for OTP generation ([23af6ed](https://github.com/hmcts/rpx-xui-node-lib/commit/23af6edb775cc0889f570440b78b89c94b1384e0))
+* **s2s:** move to node-otp for OTP generation ([afaddea](https://github.com/hmcts/rpx-xui-node-lib/commit/afaddeac538cbbfb1ce3e8299eca558cdf4f5b54))
+* **s2s:** move to node-otp for OTP generation ([952ca15](https://github.com/hmcts/rpx-xui-node-lib/commit/952ca152a30e93fe912548d59061ec0579b1b997))
+* **s2s:** move to node-otp for OTP generation ([1e1954e](https://github.com/hmcts/rpx-xui-node-lib/commit/1e1954efbefefd702aa418098837272a95b25280))
+* **s2s:** remove redundant "customTypes" entry from typeRoots ([55e2000](https://github.com/hmcts/rpx-xui-node-lib/commit/55e20003e2d22265730a1239a6ddaaef8fadea15))
+* **s2s:** remove redundant serviceAuth class ([f86c144](https://github.com/hmcts/rpx-xui-node-lib/commit/f86c14412441023e1a0bca9e9b61866b3b1d8c88))
+* **s2s:** remove redundant serviceAuth class ([175f0b9](https://github.com/hmcts/rpx-xui-node-lib/commit/175f0b9202edee4953acefb789dc5458d93cc713))
+
 # [2.7.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.6.1...v2.7.0) (2020-05-29)
 
 
