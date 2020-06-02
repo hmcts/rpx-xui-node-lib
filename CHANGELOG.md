@@ -1,3 +1,10 @@
+## [2.10.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.10.0...v2.10.1) (2020-06-02)
+
+
+### Bug Fixes
+
+* **pipeline:** remove sonar trigger from master ([154621a](https://github.com/hmcts/rpx-xui-node-lib/commit/154621aa755ff0d69eb3622e87bcdfe1808dcac7))
+
 # [2.10.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.9.0...v2.10.0) (2020-06-02)
 
 
