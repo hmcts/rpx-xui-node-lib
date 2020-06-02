@@ -1,3 +1,10 @@
+# [2.10.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.9.0...v2.10.0) (2020-06-02)
+
+
+### Features
+
+* **pipeline:** add master trigger ([b6b0b96](https://github.com/hmcts/rpx-xui-node-lib/commit/b6b0b96c5f843042cbcfb29c80bbac4d98c5f01c))
+
 # [2.9.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.8.0...v2.9.0) (2020-06-02)
 
 
