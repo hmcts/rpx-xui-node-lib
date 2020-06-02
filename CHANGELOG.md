@@ -1,3 +1,11 @@
+## [2.11.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.0...v2.11.1) (2020-06-02)
+
+
+### Bug Fixes
+
+* **pipeline:** add sonar config ([0286e86](https://github.com/hmcts/rpx-xui-node-lib/commit/0286e86731269bf197973cb942b9d71815f97109))
+* **pipeline:** add sonar config ([46142a5](https://github.com/hmcts/rpx-xui-node-lib/commit/46142a5c48ec36efb65946bb87460ddc8f7286ec))
+
 # [2.11.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.10.1...v2.11.0) (2020-06-02)
 
 
