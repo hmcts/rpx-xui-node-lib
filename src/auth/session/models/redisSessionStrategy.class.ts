@@ -2,7 +2,7 @@ import { SESSION } from '../session.constants'
 import { Strategy } from '../../models'
 import { RedisSessionMetadata } from './sessionMetadata.interface'
 import * as express from 'express'
-import { default as session } from 'express-session'
+import session from 'express-session'
 import { default as connectRedis } from 'connect-redis'
 import { default as redis } from 'redis'
 const logger = console
@@ -50,11 +50,13 @@ export class RedisSessionStrategy extends Strategy {
         })
 
         this.redisClient.on('error', (error: any) => {
+            logger.error(error)
+            logger.info('redisClient is ', this.redisClient)
             if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_ERROR)) {
                 this.emit(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
             }
-            logger.error(error)
         })
+        console.log('session options', session)
         const redisStore = connectRedis(session)
         return new redisStore({
             client: this.redisClient,
