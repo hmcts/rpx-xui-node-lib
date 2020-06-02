@@ -17,24 +17,9 @@ export class OptionsMapper {
             scope: openIdOptions.scope,
             sessionKey: openIdOptions.sessionKey,
             token_endpoint_auth_method: openIdOptions.tokenEndpointAuthMethod as ClientAuthMethod,
-            useRoutes: false,
+            useRoutes: openIdOptions.useRoutes,
         }
         /* eslint-disable @typescript-eslint/camelcase */
-        return options
-    }
-
-    public static getOAuth2Options(oAuth2Options: AuthOptions): OAuth2Metadata {
-        const options = {
-            authorizationURL: oAuth2Options.authorizationURL,
-            tokenURL: oAuth2Options.tokenURL,
-            clientID: oAuth2Options.clientID,
-            clientSecret: oAuth2Options.clientSecret,
-            callbackURL: oAuth2Options.callbackURL,
-            scope: oAuth2Options.scope,
-            sessionKey: oAuth2Options.sessionKey,
-            useRoutes: oAuth2Options.useRoutes,
-            logoutUrl: oAuth2Options.logoutUrl,
-        }
         return options
     }
 }
