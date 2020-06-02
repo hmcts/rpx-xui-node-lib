@@ -1,13 +1,11 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import passport from 'passport'
 import { OIDC } from '../oidc.constants'
 import { URL } from 'url'
-import { http } from '../../../http'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { AUTH } from '../../auth.constants'
 import { Authentication } from '../../models'
-import jwtDecode from 'jwt-decode'
 import Joi from '@hapi/joi'
 
 //TODO: move this as an option and proper logger
@@ -42,7 +40,7 @@ export class OpenID extends Authentication {
         if (req.session && this.client) {
             console.log('req.session and this.client')
             const userDetails = req.session.passport.user
-            const currentAccessToken = userDetails.tokenset.access_token
+            const currentAccessToken = userDetails.tokenset.accessToken
 
             req.headers['user-roles'] = userDetails.userinfo.roles.join()
 
@@ -53,10 +51,10 @@ export class OpenID extends Authentication {
                     if (this.isTokenExpired(currentAccessToken)) {
                         logger.log('token expired')
                         req.session.passport.user.tokenset = await this.client.refresh(
-                            req.session.passport.user.tokenset.refresh_token,
+                            req.session.passport.user.tokenset.refreshToken,
                             req.session.passport.user.tokenset,
                         )
-                        req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.access_token}`
+                        req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.accessToken}`
                         if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                             logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                             return next()
@@ -66,7 +64,7 @@ export class OpenID extends Authentication {
                         }
                     } else {
                         console.log('Adding req.headers.Authorization')
-                        req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.access_token}`
+                        req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.accessToken}`
                         return next()
                     }
                 } catch (e) {
@@ -142,7 +140,7 @@ export class OpenID extends Authentication {
         logger.info('verify okay, user:', userinfo)
 
         const userTokenSet = {
-            accessToken: tokenset.access_token,
+            accessToken: tokenset.accessToken,
             refreshToken: tokenset.refresh_token,
             idToken: tokenset.id_token,
         }
