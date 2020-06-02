@@ -1,3 +1,10 @@
+# [2.9.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.8.0...v2.9.0) (2020-06-02)
+
+
+### Features
+
+* **pipeline:** add PR build workflow ([716f46c](https://github.com/hmcts/rpx-xui-node-lib/commit/716f46cf9dc5a6731bc71da396d8901b9528c412))
+
 # [2.8.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.7.0...v2.8.0) (2020-06-01)
 
 
