@@ -1,5 +1,5 @@
 export interface AuthOptions {
-    authorizationURL: string
+    authorizationUrl: string
     tokenURL: string
     clientID: string
     clientSecret: string
