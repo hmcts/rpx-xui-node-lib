@@ -1,7 +1,6 @@
 import { AuthOptions } from './authOptions.interface'
 import { OpenIDMetadata } from '../oidc'
 import { ResponseType, ClientAuthMethod } from 'openid-client'
-import { OAuth2Metadata } from '../oauth2'
 
 export class OptionsMapper {
     /* eslint-disable @typescript-eslint/camelcase */
