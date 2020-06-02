@@ -2,7 +2,7 @@ import { OptionsMapper } from './optionsMapper.class'
 
 test('OIDC OptionsMapper', () => {
     const options = {
-        authorizationURL: '',
+        authorizationUrl: '',
         tokenURL: '',
         clientID: 'clientId',
         clientSecret: 'Clientsecret',
