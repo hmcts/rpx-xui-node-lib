@@ -1,3 +1,39 @@
+## [2.11.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.0...v2.11.1) (2020-06-02)
+
+
+### Bug Fixes
+
+* **pipeline:** add sonar config ([0286e86](https://github.com/hmcts/rpx-xui-node-lib/commit/0286e86731269bf197973cb942b9d71815f97109))
+* **pipeline:** add sonar config ([46142a5](https://github.com/hmcts/rpx-xui-node-lib/commit/46142a5c48ec36efb65946bb87460ddc8f7286ec))
+
+# [2.11.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.10.1...v2.11.0) (2020-06-02)
+
+
+### Features
+
+* **pipeline:** test pr build ([#20](https://github.com/hmcts/rpx-xui-node-lib/issues/20)) ([178c41c](https://github.com/hmcts/rpx-xui-node-lib/commit/178c41ce3fbe61158229799fa076a66a7d716787))
+
+## [2.10.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.10.0...v2.10.1) (2020-06-02)
+
+
+### Bug Fixes
+
+* **pipeline:** remove sonar trigger from master ([154621a](https://github.com/hmcts/rpx-xui-node-lib/commit/154621aa755ff0d69eb3622e87bcdfe1808dcac7))
+
+# [2.10.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.9.0...v2.10.0) (2020-06-02)
+
+
+### Features
+
+* **pipeline:** add master trigger ([b6b0b96](https://github.com/hmcts/rpx-xui-node-lib/commit/b6b0b96c5f843042cbcfb29c80bbac4d98c5f01c))
+
+# [2.9.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.8.0...v2.9.0) (2020-06-02)
+
+
+### Features
+
+* **pipeline:** add PR build workflow ([716f46c](https://github.com/hmcts/rpx-xui-node-lib/commit/716f46cf9dc5a6731bc71da396d8901b9528c412))
+
 # [2.8.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.7.0...v2.8.0) (2020-06-01)
 
 
