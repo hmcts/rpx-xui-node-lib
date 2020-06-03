@@ -1,0 +1,5 @@
+export { default as redisSession } from './redisSessionStrategy.class'
+export { default as fileSession } from './redisSessionStrategy.class'
+export { SessionMetadata } from './sessionMetadata.interface'
+export { RedisSessionStrategy } from './redisSessionStrategy.class'
+export { FileSessionStrategy } from './fileSessionStrategy.class'
