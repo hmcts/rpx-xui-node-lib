@@ -3,8 +3,6 @@ import { Strategy } from '../../models'
 import { SessionMetadata, FileSessionMetadata } from './sessionMetadata.interface'
 import * as express from 'express'
 import { default as session } from 'express-session'
-import { default as connectRedis } from 'connect-redis'
-import { default as redis } from 'redis'
 import { default as sessionFileStore } from 'session-file-store'
 const logger = console
 
@@ -21,7 +19,7 @@ export class FileSessionStrategy extends Strategy {
         return this.router
     }
 
-    public logout = (req: express.Request, res: express.Response): Promise<void> => {
+    public logout = (): Promise<void> => {
         throw new Error('Not yet implemented')
     }
 
