@@ -1,3 +1,10 @@
+## [2.11.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.1...v2.11.2) (2020-06-03)
+
+
+### Bug Fixes
+
+* **pipeline:** sonar test ([#23](https://github.com/hmcts/rpx-xui-node-lib/issues/23)) ([93097f7](https://github.com/hmcts/rpx-xui-node-lib/commit/93097f7a9b41b9296e6b8ddf496192ee178a6bee))
+
 ## [2.11.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.0...v2.11.1) (2020-06-02)
 
 
