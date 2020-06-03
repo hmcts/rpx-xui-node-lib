@@ -1,6 +1,5 @@
 import * as events from 'events'
-import * as express from 'express'
-import { NextFunction, Request, RequestHandler, Response } from 'express'
+import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import { OAuth2Metadata } from '../oauth2'
@@ -9,7 +8,7 @@ import { FileSessionMetadata, RedisSessionMetadata } from '../session/models/ses
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
-    protected readonly router = express.Router({ mergeParams: true })
+    protected readonly router = Router({ mergeParams: true })
     constructor(strategyName: string) {
         super()
         this.strategyName = strategyName
@@ -17,9 +16,9 @@ export abstract class Strategy extends events.EventEmitter {
 
     public abstract configure(
         options: OAuth2Metadata | OpenIDMetadata | FileSessionMetadata | RedisSessionMetadata,
-    ): express.RequestHandler
+    ): RequestHandler
 
-    public abstract logout(req: express.Request, res: express.Response): Promise<void>
+    public abstract logout(req: Request, res: Response): Promise<void>
 
     public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
         console.log('loginHandler Hit')
