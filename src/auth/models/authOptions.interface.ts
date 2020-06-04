@@ -1,16 +1,16 @@
 export interface AuthOptions {
-    authorizationUrl: string
+    authorizationURL: string
     tokenURL: string
     clientID: string
     clientSecret: string
     callbackURL: string
     scope: string
-    logoutUrl: string
+    logoutURL: string
     useRoutes?: boolean
     sessionKey?: string
     //openID options
     discoveryEndpoint: string
-    issuerUrl: string
+    issuerURL: string
     responseTypes: string[]
     tokenEndpointAuthMethod: string
 }

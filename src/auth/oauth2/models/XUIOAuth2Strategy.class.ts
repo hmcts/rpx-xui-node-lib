@@ -1,7 +1,7 @@
 import { OAuth2Metadata } from './OAuth2Metadata.interface'
 import OAuth2Strategy from 'passport-oauth2'
 import { AxiosResponse } from 'axios'
-import { http } from '../../../http/http'
+import { http } from '../../../http'
 
 export class XUIOAuth2Strategy extends OAuth2Strategy {
     private readonly options: OAuth2Metadata
@@ -14,10 +14,10 @@ export class XUIOAuth2Strategy extends OAuth2Strategy {
         done(null, userDetails.data)
     }
 
-    getUserDetails = async (jwt: string): Promise<AxiosResponse> => {
+    getUserDetails = (jwt: string): Promise<AxiosResponse> => {
         const options = {
             headers: { Authorization: `Bearer ${jwt}` },
         }
-        return await http.get(`${this.options.logoutUrl}/details`, options)
+        return http.get(`${this.options.logoutUrl}/details`, options)
     }
 }
