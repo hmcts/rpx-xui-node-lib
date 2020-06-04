@@ -12,12 +12,14 @@ test('OAuth2 configure', () => {
         clientSecret: 'secret',
         callbackURL: 'callbackUrl',
         scope: 'scope',
-        scopeSeparator: '',
-        sessionKey: '',
+        sessionKey: 'node-lib',
         useRoutes: false,
-        logoutUrl: 'logoutUrl',
+        logoutURL: 'logoutUrl',
+        discoveryEndpoint: 'string',
+        issuerURL: 'string',
+        responseTypes: [''],
+        tokenEndpointAuthMethod: 'string',
     }
     const handler = oauth2.configure(options)
     expect(handler).toBeTruthy()
-    console.log(handler)
 })

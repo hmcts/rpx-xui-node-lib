@@ -1,43 +1,26 @@
-import { OAuth2Metadata } from './OAuth2Metadata.interface'
 import passport from 'passport'
 import { OAUTH2 } from '../oauth2.constants'
 import { VerifyCallback } from 'passport-oauth2'
-import { Authentication } from '../../models'
-import { Strategy } from '../../models/strategy.class'
-import { http } from '../../../http/http'
+import { Strategy } from '../../models'
 import { XUIOAuth2Strategy } from './XUIOAuth2Strategy.class'
-import Joi from '@hapi/joi'
-
-//TODO: move this as an option and proper logger
-const logger = console
+import { AuthOptions } from '../../models/authOptions.interface'
+import { OAuth2Metadata } from './OAuth2Metadata.interface'
 
 export class OAuth2 extends Strategy {
     constructor() {
         super(OAUTH2.STRATEGY_NAME)
     }
 
-    public initialiseStrategy = async (options: OAuth2Metadata): Promise<void> => {
-        passport.use(this.strategyName, new XUIOAuth2Strategy(options, this.verify))
-        console.log('initialiseStrategy end')
+    public getOAuthOptions = (authOptions: AuthOptions): OAuth2Metadata => {
+        const options = { ...authOptions, ...{ logoutUrl: authOptions.logoutURL } }
+        delete options.logoutURL
+        return options
     }
 
-    public validateOptions(options: any): void {
-        const schema = Joi.object({
-            authorizationURL: Joi.string().required(),
-            clientID: Joi.string().required(),
-            clientSecret: Joi.string().required(),
-            logoutUrl: Joi.string().required(),
-            callbackURL: Joi.string().required(),
-            scope: Joi.string().required(),
-            sessionKey: Joi.string().required(),
-            tokenURL: Joi.string().required(),
-            useRoutes: Joi.bool().optional(),
-        })
-        /* eslint-enable @typescript-eslint/camelcase */
-        const { error } = schema.validate(options)
-        if (error) {
-            throw error
-        }
+    public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
+        const options = this.getOAuthOptions(authOptions)
+        passport.use(this.strategyName, new XUIOAuth2Strategy(options, this.verify))
+        this.logger.log('initialiseStrategy end')
     }
 
     public verify = (

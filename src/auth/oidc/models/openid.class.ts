@@ -6,7 +6,6 @@ import { URL } from 'url'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { AUTH } from '../../auth.constants'
 import { Strategy as AuthStrategy } from '../../models'
-import Joi from '@hapi/joi'
 import { AuthOptions } from '../../models/authOptions.interface'
 
 export class OpenID extends AuthStrategy {
@@ -17,14 +16,14 @@ export class OpenID extends AuthStrategy {
         super(OIDC.STRATEGY_NAME)
     }
 
-    public getOpenIDOptions(authOptions: AuthOptions): OpenIDMetadata {
+    public getOpenIDOptions = (authOptions: AuthOptions): OpenIDMetadata => {
         return {
             /* eslint-disable @typescript-eslint/camelcase */
             client_id: authOptions.clientID,
             client_secret: authOptions.clientSecret,
             discovery_endpoint: authOptions.discoveryEndpoint,
-            issuer_url: authOptions.issuerUrl,
-            logout_url: authOptions.logoutUrl,
+            issuer_url: authOptions.issuerURL,
+            logout_url: authOptions.logoutURL,
             redirect_uri: authOptions.callbackURL,
             response_types: authOptions.responseTypes as ResponseType[],
             scope: authOptions.scope,
@@ -64,7 +63,7 @@ export class OpenID extends AuthStrategy {
                             return
                         }
                     } else {
-                        logger.info('Adding req.headers.Authorization')
+                        this.logger.info('Adding req.headers.Authorization')
                         req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.accessToken}`
                         return next()
                     }
@@ -82,7 +81,7 @@ export class OpenID extends AuthStrategy {
         const issuer = await Issuer.discover(`${this.options.discoveryEndpoint}`)
 
         const metadata = issuer.metadata
-        metadata.issuer = this.options.issuerUrl
+        metadata.issuer = this.options.issuerURL
 
         this.logger.log('metadata', metadata)
 
@@ -112,28 +111,6 @@ export class OpenID extends AuthStrategy {
         )
     }
 
-    public validateOptions(options: OpenIDMetadata): void {
-        /* eslint-disable @typescript-eslint/camelcase */
-        const schema = Joi.object({
-            client_id: Joi.string().required(),
-            client_secret: Joi.string().required(),
-            discovery_endpoint: Joi.string().required(),
-            issuer_url: Joi.string().required(),
-            logout_url: Joi.string().required(),
-            redirect_uri: Joi.string().required(),
-            response_types: Joi.array().required().min(1),
-            scope: Joi.string().required(),
-            sessionKey: Joi.string().required(),
-            token_endpoint_auth_method: Joi.string().required(),
-            useRoutes: Joi.bool().optional(),
-        })
-        /* eslint-enable @typescript-eslint/camelcase */
-        const { error } = schema.validate(options)
-        if (error) {
-            throw error
-        }
-    }
-
     public verify = (tokenset: TokenSet, userinfo: UserinfoResponse, done: (err: any, user?: any) => void): void => {
         /*if (!propsExist(userinfo, ['roles'])) {
             this.logger.warn('User does not have any access roles.')
@@ -142,7 +119,7 @@ export class OpenID extends AuthStrategy {
         this.logger.info('verify okay, user:', userinfo)
 
         const userTokenSet = {
-            accessToken: tokenset.accessToken,
+            accessToken: tokenset.access_token,
             refreshToken: tokenset.refresh_token,
             idToken: tokenset.id_token,
         }

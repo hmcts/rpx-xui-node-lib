@@ -2,12 +2,10 @@ import * as events from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
-import { OAuth2Metadata } from '../oauth2'
-import { OpenIDMetadata } from '../oidc'
-import { FileSessionMetadata, RedisSessionMetadata } from '../session/models/sessionMetadata.interface'
 import jwtDecode from 'jwt-decode'
 import { http } from '../../http'
 import { AuthOptions } from './authOptions.interface'
+import Joi from '@hapi/joi'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -17,18 +15,18 @@ export abstract class Strategy extends events.EventEmitter {
     protected readonly logger = console
 
     protected options: AuthOptions = {
-        authorizationUrl: '',
+        authorizationURL: '',
         tokenURL: '',
         clientID: '',
         clientSecret: '',
         callbackURL: '',
         scope: '',
-        logoutUrl: '',
+        logoutURL: '',
         useRoutes: true,
         sessionKey: '',
         //openID options
         discoveryEndpoint: '',
-        issuerUrl: '',
+        issuerURL: '',
         responseTypes: [''],
         tokenEndpointAuthMethod: '',
     }
@@ -38,7 +36,35 @@ export abstract class Strategy extends events.EventEmitter {
         this.strategyName = strategyName
     }
 
-    public abstract validateOptions(options: any): void
+    public validateOptions(options: any): void {
+        const schema = Joi.object({
+            authorizationURL: Joi.string().required(),
+            tokenURL: Joi.string().required(),
+            clientID: Joi.string().required(),
+            clientSecret: Joi.string().required(),
+            callbackURL: Joi.string().required(),
+            discoveryEndpoint: Joi.string(),
+            issuerURL: Joi.string(),
+            logoutURL: Joi.string().required(),
+            scope: Joi.string().required(),
+            scopeSeparator: Joi.any(),
+            sessionKey: Joi.any(),
+            useRoutes: Joi.bool(),
+            skipUserProfile: Joi.any(),
+            responseTypes: Joi.array(),
+            tokenEndpointAuthMethod: Joi.string(),
+            pkce: Joi.any(),
+            proxy: Joi.any(),
+            store: Joi.any(),
+            state: Joi.any(),
+            customHeaders: Joi.any(),
+        })
+        const { error } = schema.validate(options)
+        if (error) {
+            throw error
+        }
+    }
+
     public initialiseStrategy = async (options: any): Promise<void> => {
         this.options = options
     }
@@ -58,12 +84,12 @@ export abstract class Strategy extends events.EventEmitter {
                 'base64',
             )}`
 
-            await http.delete(`${this.options.logoutUrl}/session/${accessToken}`, {
+            await http.delete(`${this.options.logoutURL}/session/${accessToken}`, {
                 headers: {
                     Authorization: auth,
                 },
             })
-            await http.delete(`${this.options.logoutUrl}/session/${refreshToken}`, {
+            await http.delete(`${this.options.logoutURL}/session/${refreshToken}`, {
                 headers: {
                     Authorization: auth,
                 },
