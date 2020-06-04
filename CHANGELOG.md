@@ -1,3 +1,10 @@
+## [2.13.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.0...v2.13.1) (2020-06-04)
+
+
+### Bug Fixes
+
+* **pipeline:** combine workflow ([#27](https://github.com/hmcts/rpx-xui-node-lib/issues/27)) ([3b8ee0e](https://github.com/hmcts/rpx-xui-node-lib/commit/3b8ee0e1497f3ef86497ba37f78a2f4e32269ac6))
+
 # [2.13.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.12.0...v2.13.0) (2020-06-04)
 
 
