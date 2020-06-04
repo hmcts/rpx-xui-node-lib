@@ -1,4 +1,7 @@
-import * as events from 'events'
+export * from './auth'
+export * from './session'
+
+/*import * as events from 'events'
 import { ClientMetadata } from 'openid-client'
 
 export * from 'openid-client'
@@ -21,7 +24,7 @@ const verifyCallback = (done: any, session: any, user: any) => {
     done()
 }
 
-xuiNodeLib.on('oidc.verify', verifyCallback)
+xuiNodeLib.on('oidc.verify', verifyCallback)*/
 
 /*
 import { NextFunction, Request, RequestHandler, Response } from 'express';

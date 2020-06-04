@@ -1,5 +1,5 @@
 export * from './oidc'
 export * from './oauth2'
-export * from './session'
+export * from './s2s'
 export * from './auth.constants'
 export * from './models'
