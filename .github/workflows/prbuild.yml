@@ -6,7 +6,7 @@ on:
       - master
   pull_request:
       types: [opened, synchronize, reopened]
-name: PR Build
+name: Build & Release
 jobs:
   build:
     runs-on: ubuntu-latest
