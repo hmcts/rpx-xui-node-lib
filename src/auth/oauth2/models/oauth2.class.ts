@@ -3,10 +3,15 @@ import passport from 'passport'
 import { OAUTH2 } from '../oauth2.constants'
 import { VerifyCallback } from 'passport-oauth2'
 import { Authentication } from '../../models'
+import { Strategy } from '../../models/strategy.class'
+import { http } from '../../../http/http'
 import { XUIOAuth2Strategy } from './XUIOAuth2Strategy.class'
 import Joi from '@hapi/joi'
 
-export class OAuth2 extends Authentication {
+//TODO: move this as an option and proper logger
+const logger = console
+
+export class OAuth2 extends Strategy {
     constructor() {
         super(OAUTH2.STRATEGY_NAME)
     }

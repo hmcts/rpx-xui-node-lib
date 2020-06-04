@@ -5,11 +5,11 @@ import { OIDC } from '../oidc.constants'
 import { URL } from 'url'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { AUTH } from '../../auth.constants'
-import { Authentication } from '../../models'
+import { Strategy as AuthStrategy } from '../../models'
 import Joi from '@hapi/joi'
 import { AuthOptions } from '../../models/authOptions.interface'
 
-export class OpenID extends Authentication {
+export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
 
@@ -64,12 +64,12 @@ export class OpenID extends Authentication {
                             return
                         }
                     } else {
-                        console.log('Adding req.headers.Authorization')
+                        logger.info('Adding req.headers.Authorization')
                         req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.accessToken}`
                         return next()
                     }
                 } catch (e) {
-                    this.logger.log('refresh error =>', e)
+                    this.logger.error('refresh error =>', e)
                     next(e)
                 }
             }
