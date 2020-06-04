@@ -148,9 +148,7 @@ export class OpenID extends AuthStrategy {
 
     public isTokenExpired = (token: string): boolean => {
         const jwtData = jwtDecode<any>(token)
-        const expires = new Date(jwtData.exp * 1000).getTime()
-        const now = new Date().getTime()
-        return expires < now
+        return this.jwTokenExpired(jwtData)
     }
 
     public authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -196,6 +194,12 @@ export class OpenID extends AuthStrategy {
             }
         }
         return res.redirect(AUTH.ROUTE.LOGIN)
+    }
+
+    public jwTokenExpired(jwtData: any): boolean {
+        const expires = new Date(jwtData.exp * 1000).getTime()
+        const now = new Date().getTime()
+        return expires < now
     }
 
     public initializePassport() {
