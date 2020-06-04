@@ -53,7 +53,7 @@ jobs:
 
   release:
     needs: sonarcloud
-    if: github.ref == 'refs/heads/master' && github.event_name == ‘push’  
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     name: Semantic-Release
     runs-on: ubuntu-latest
     steps:
