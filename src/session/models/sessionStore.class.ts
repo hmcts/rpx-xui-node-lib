@@ -26,7 +26,7 @@ export abstract class SessionStore extends events.EventEmitter {
         if (options) {
             return this.getStore(options)
         }
-        throw new Error('File store Options are missing')
+        throw new Error('Store Options are missing')
     }
 
     public mapSessionOptions = (options: SessionMetadata, store: session.Store): any => {
