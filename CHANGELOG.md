@@ -1,3 +1,10 @@
+# [2.12.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.3...v2.12.0) (2020-06-04)
+
+
+### Features
+
+* **pipeline:** new pr github action ([#24](https://github.com/hmcts/rpx-xui-node-lib/issues/24)) ([cd6f172](https://github.com/hmcts/rpx-xui-node-lib/commit/cd6f1728ccab9760cdc8ce545c2394c8432e5d10))
+
 ## [2.11.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.2...v2.11.3) (2020-06-03)
 
 
