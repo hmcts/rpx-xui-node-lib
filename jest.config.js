@@ -1,4 +1,5 @@
 module.exports = {
+    setupFiles: ['<rootDir>config.ts'],
     displayName: {
         name: 'XUI Node Lib',
         color: 'magenta',
@@ -17,4 +18,9 @@ module.exports = {
     //     },
     // },
     resetMocks: true,
+    globals: {
+        'ts-jest': {
+            compiler: 'ttypescript',
+        },
+    }
 }
