@@ -77,8 +77,7 @@ export abstract class Strategy extends events.EventEmitter {
     public logout = async (req: Request, res: Response): Promise<void> => {
         try {
             this.logger.log('logout start')
-            const accessToken = req.session?.passport.user.tokenset.accessToken
-            const refreshToken = req.session?.passport.user.tokenset.refreshToken
+            const { accessToken, refreshToken } = req.session?.passport.user.tokenset
 
             const auth = `Basic ${Buffer.from(`${this.options.clientID}:${this.options.clientSecret}`).toString(
                 'base64',
