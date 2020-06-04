@@ -21,6 +21,7 @@ jobs:
       - run: yarn ci
       - run: yarn test
       - run: yarn test:coverage
+      - run: sed -i 's/\/home\/runner\/work\/rpx-xui-node-lib\/rpx-xui-node-lib\//\/github\/workspace\//g' lcov.info
       - name: Archive code coverage results
         uses: actions/upload-artifact@v1
         with:
