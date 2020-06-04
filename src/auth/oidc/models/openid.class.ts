@@ -68,23 +68,8 @@ export class OpenID extends AuthStrategy {
     public configure = (options: OpenIDMetadata): RequestHandler => {
         this.options = options
         ValidateOpenIdOptions(options)
-        passport.serializeUser((user, done) => {
-            logger.info('oidc serializeUser', user)
-            if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
-                done(null, user)
-            } else {
-                this.emit(AUTH.EVENT.SERIALIZE_USER, user, done)
-            }
-        })
-
-        passport.deserializeUser((id, done) => {
-            logger.info('oidc de-serializeUser', id)
-            if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
-                done(null, id)
-            } else {
-                this.emit(AUTH.EVENT.DESERIALIZE_USER, id, done)
-            }
-        })
+        this.serializeUser()
+        this.deserializeUser()
         ;(async () => {
             try {
                 await this.initialiseStrategy(this.options)
@@ -95,8 +80,8 @@ export class OpenID extends AuthStrategy {
             }
         })()
 
-        this.router.use(passport.initialize())
-        this.router.use(passport.session())
+        this.initializePassport()
+        this.initializeSession()
 
         if (options.useRoutes) {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, (req, res) => {
@@ -211,6 +196,36 @@ export class OpenID extends AuthStrategy {
             }
         }
         return res.redirect(AUTH.ROUTE.LOGIN)
+    }
+
+    public initializePassport() {
+        this.router.use(passport.initialize())
+    }
+
+    public initializeSession() {
+        this.router.use(passport.session())
+    }
+
+    public deserializeUser() {
+        passport.deserializeUser((id, done) => {
+            logger.info('oidc de-serializeUser', id)
+            if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
+                done(null, id)
+            } else {
+                this.emit(AUTH.EVENT.DESERIALIZE_USER, id, done)
+            }
+        })
+    }
+
+    public serializeUser() {
+        passport.serializeUser((user, done) => {
+            logger.info('oidc serializeUser', user)
+            if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
+                done(null, user)
+            } else {
+                this.emit(AUTH.EVENT.SERIALIZE_USER, user, done)
+            }
+        })
     }
 }
 
