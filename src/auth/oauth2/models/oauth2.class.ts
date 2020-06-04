@@ -7,17 +7,6 @@ import { XUIOAuth2Strategy } from './XUIOAuth2Strategy.class'
 import Joi from '@hapi/joi'
 
 export class OAuth2 extends Authentication {
-    protected options: OAuth2Metadata = {
-        authorizationURL: '',
-        tokenURL: '',
-        clientID: '',
-        clientSecret: '',
-        scope: '',
-        logoutUrl: '',
-        sessionKey: '',
-        useRoutes: true,
-    }
-
     constructor() {
         super(OAUTH2.STRATEGY_NAME)
     }

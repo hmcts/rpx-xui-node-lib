@@ -1,21 +1,34 @@
 import * as events from 'events'
-import * as express from 'express'
-import { NextFunction, Request, RequestHandler, Response } from 'express'
+import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
-import { OpenIDMetadata } from '../oidc/models'
-import { OAuth2Metadata } from '../oauth2/models'
 import jwtDecode from 'jwt-decode'
 import { http } from '../../http'
+import { AuthOptions } from './authOptions.interface'
 
 export abstract class Authentication extends events.EventEmitter {
     protected readonly strategyName: string
 
-    protected readonly router = express.Router({ mergeParams: true })
+    protected readonly router = Router({ mergeParams: true })
 
     protected readonly logger = console
 
-    protected options: any
+    protected options: AuthOptions = {
+        authorizationUrl: '',
+        tokenURL: '',
+        clientID: '',
+        clientSecret: '',
+        callbackURL: '',
+        scope: '',
+        logoutUrl: '',
+        useRoutes: true,
+        sessionKey: '',
+        //openID options
+        discoveryEndpoint: '',
+        issuerUrl: '',
+        responseTypes: [''],
+        tokenEndpointAuthMethod: '',
+    }
 
     protected constructor(strategyName: string) {
         super()
@@ -42,12 +55,12 @@ export abstract class Authentication extends events.EventEmitter {
                 'base64',
             )}`
 
-            await http.delete(`${this.options.logout_url}/session/${accessToken}`, {
+            await http.delete(`${this.options.logoutUrl}/session/${accessToken}`, {
                 headers: {
                     Authorization: auth,
                 },
             })
-            await http.delete(`${this.options.logout_url}/session/${refreshToken}`, {
+            await http.delete(`${this.options.logoutUrl}/session/${refreshToken}`, {
                 headers: {
                     Authorization: auth,
                 },
@@ -68,7 +81,11 @@ export abstract class Authentication extends events.EventEmitter {
         this.logger.log('logout end')
     }
 
-    public configure = (options: OpenIDMetadata | OAuth2Metadata): RequestHandler => {
+    public authRouteHandler = (req: Request, res: Response): Response => {
+        return res.send(req.isAuthenticated())
+    }
+
+    public configure = (options: AuthOptions): RequestHandler => {
         this.validateOptions(options)
         this.options = options
         passport.serializeUser((user, done) => {
@@ -96,9 +113,7 @@ export abstract class Authentication extends events.EventEmitter {
         this.router.use(passport.session())
 
         if (options.useRoutes) {
-            this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, (req, res) => {
-                res.send(req.isAuthenticated())
-            })
+            this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
             this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
             this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
             this.router.get(AUTH.ROUTE.LOGOUT, async (req: Request, res: Response) => {
