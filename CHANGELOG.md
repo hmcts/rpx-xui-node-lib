@@ -1,3 +1,10 @@
+# [2.13.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.12.0...v2.13.0) (2020-06-04)
+
+
+### Features
+
+* **pipeline:** enable sonar on master ([#25](https://github.com/hmcts/rpx-xui-node-lib/issues/25)) ([beae26b](https://github.com/hmcts/rpx-xui-node-lib/commit/beae26beb0aaef8d0bd050c95812f3918ea0a9d5))
+
 # [2.12.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.3...v2.12.0) (2020-06-04)
 
 
