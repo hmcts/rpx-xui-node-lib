@@ -1,5 +1,6 @@
 import oidc from './openid.class'
 import passport from 'passport'
+import { Request, Response, NextFunction } from 'express'
 
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
@@ -14,6 +15,18 @@ test('OIDC configure serializeUser', () => {
 test('OIDC configure deserializeUser', () => {
     const spy = jest.spyOn(passport, 'deserializeUser')
     oidc.deserializeUser()
+    expect(spy).toBeCalled()
+})
+
+test('OIDC loginHandler', () => {
+    const spy = jest.spyOn(passport, 'authenticate')
+    const mockRequest = {
+        body: {},
+    } as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+
+    oidc.loginHandler(mockRequest, mockResponse, next)
     expect(spy).toBeCalled()
 })
 
