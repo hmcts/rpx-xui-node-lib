@@ -1,9 +1,9 @@
 on:
   # Trigger analysis when pushing in master or pull requests, and when creating
   # a pull request. 
-  # push:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - master
   pull_request:
       types: [opened, synchronize, reopened]
 name: PR Build
@@ -13,15 +13,17 @@ jobs:
     steps:
       - name: Clone Repo
         uses: actions/checkout@v2
-      - name: Setup Node & Generate report
+      - name: Setup Node
         uses: actions/setup-node@v1
         with:
           node-version: 12
       - run: yarn install
       - run: yarn ci
       - run: yarn test
-      - run: yarn test:coverage
-      - run: sed -i 's+/home/runner/work/rpx-xui-node-lib/rpx-xui-node-lib+/github/workspace+g' coverage/lcov.info
+      - name: Create code coverage report
+        run: yarn test:coverage
+      - name: Change Report Path
+        run: sed -i 's+/home/runner/work/rpx-xui-node-lib/rpx-xui-node-lib+/github/workspace+g' coverage/lcov.info
       - name: Archive code coverage results
         uses: actions/upload-artifact@v1
         with:
