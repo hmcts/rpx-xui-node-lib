@@ -111,11 +111,9 @@ test('test validateOptions', () => {
         tokenEndpointAuthMethod: 'client_secret_basic',
         useRoutes: false,
     }
-    try {
+    expect(() => {
         oidc.validateOptions(options)
-    } catch (error) {
-        expect(error.message).toContain('"authorizationURL" is not allowed to be empty')
-    }
+    }).toThrowError('authorizationURL')
 
     //positive case
     options.authorizationURL = 'something'
