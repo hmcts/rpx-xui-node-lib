@@ -116,29 +116,15 @@ export abstract class Strategy extends events.EventEmitter {
     public configure = (options: AuthOptions): RequestHandler => {
         this.validateOptions(options)
         this.options = options
-        passport.serializeUser((user, done) => {
-            this.logger.log(`${this.strategyName} serializeUser`, user)
-            if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
-                done(null, user)
-            } else {
-                this.emit(AUTH.EVENT.SERIALIZE_USER, user, done)
-            }
-        })
 
-        passport.deserializeUser((id, done) => {
-            this.logger.log(`${this.strategyName} deserializeUser`, id)
-            if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
-                done(null, id)
-            } else {
-                this.emit(AUTH.EVENT.DESERIALIZE_USER, id, done)
-            }
-        })
+        this.serializeUser()
+        this.deserializeUser()
         ;(async () => {
             await this.initialiseStrategy(this.options)
         })()
 
-        this.router.use(passport.initialize())
-        this.router.use(passport.session())
+        this.initializePassport()
+        this.initializeSession()
 
         if (options.useRoutes) {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
@@ -184,9 +170,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     public isTokenExpired = (token: string): boolean => {
         const jwtData = jwtDecode<any>(token)
-        const expires = new Date(jwtData.exp * 1000).getTime()
-        const now = new Date().getTime()
-        return expires < now
+        return this.jwTokenExpired(jwtData)
     }
 
     public authenticate = (req: Request, res: Response, next: NextFunction): void => {
@@ -195,5 +179,41 @@ export abstract class Strategy extends events.EventEmitter {
             return res.redirect(AUTH.ROUTE.LOGIN)
         }
         next()
+    }
+
+    public initializePassport() {
+        this.router.use(passport.initialize())
+    }
+
+    public initializeSession() {
+        this.router.use(passport.session())
+    }
+
+    public serializeUser() {
+        passport.serializeUser((user, done) => {
+            this.logger.log(`${this.strategyName} serializeUser`, user)
+            if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
+                done(null, user)
+            } else {
+                this.emit(AUTH.EVENT.SERIALIZE_USER, user, done)
+            }
+        })
+    }
+
+    public deserializeUser() {
+        passport.deserializeUser((id, done) => {
+            this.logger.log(`${this.strategyName} deserializeUser`, id)
+            if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
+                done(null, id)
+            } else {
+                this.emit(AUTH.EVENT.DESERIALIZE_USER, id, done)
+            }
+        })
+    }
+
+    public jwTokenExpired(jwtData: any): boolean {
+        const expires = new Date(jwtData.exp * 1000).getTime()
+        const now = new Date().getTime()
+        return expires < now
     }
 }
