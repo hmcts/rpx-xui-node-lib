@@ -1,3 +1,10 @@
+## [2.13.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.2...v2.13.3) (2020-06-05)
+
+
+### Bug Fixes
+
+* **pipeline:** test protected branch ([#30](https://github.com/hmcts/rpx-xui-node-lib/issues/30)) ([c609cfd](https://github.com/hmcts/rpx-xui-node-lib/commit/c609cfd1b53e719f6f67ea015d1d5cb876964e5a))
+
 ## [2.13.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.1...v2.13.2) (2020-06-05)
 
 
