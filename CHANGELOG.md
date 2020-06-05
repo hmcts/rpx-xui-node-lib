@@ -1,3 +1,61 @@
+## [2.13.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.2...v2.13.3) (2020-06-05)
+
+
+### Bug Fixes
+
+* **pipeline:** test protected branch ([#30](https://github.com/hmcts/rpx-xui-node-lib/issues/30)) ([c609cfd](https://github.com/hmcts/rpx-xui-node-lib/commit/c609cfd1b53e719f6f67ea015d1d5cb876964e5a))
+
+## [2.13.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.1...v2.13.2) (2020-06-05)
+
+
+### Bug Fixes
+
+* **auth:** Unit Tests ([#28](https://github.com/hmcts/rpx-xui-node-lib/issues/28)) ([fa27be5](https://github.com/hmcts/rpx-xui-node-lib/commit/fa27be5c292024fdeeae501f47759f582b160940))
+
+## [2.13.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.0...v2.13.1) (2020-06-04)
+
+
+### Bug Fixes
+
+* **pipeline:** combine workflow ([#27](https://github.com/hmcts/rpx-xui-node-lib/issues/27)) ([3b8ee0e](https://github.com/hmcts/rpx-xui-node-lib/commit/3b8ee0e1497f3ef86497ba37f78a2f4e32269ac6))
+
+# [2.13.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.12.0...v2.13.0) (2020-06-04)
+
+
+### Features
+
+* **pipeline:** enable sonar on master ([#25](https://github.com/hmcts/rpx-xui-node-lib/issues/25)) ([beae26b](https://github.com/hmcts/rpx-xui-node-lib/commit/beae26beb0aaef8d0bd050c95812f3918ea0a9d5))
+
+# [2.12.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.3...v2.12.0) (2020-06-04)
+
+
+### Features
+
+* **pipeline:** new pr github action ([#24](https://github.com/hmcts/rpx-xui-node-lib/issues/24)) ([cd6f172](https://github.com/hmcts/rpx-xui-node-lib/commit/cd6f1728ccab9760cdc8ce545c2394c8432e5d10))
+
+## [2.11.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.2...v2.11.3) (2020-06-03)
+
+
+### Bug Fixes
+
+* **pipeline:** add package ([3ca2752](https://github.com/hmcts/rpx-xui-node-lib/commit/3ca2752cf7d33bf0a121cf292af8de22c916b20a))
+* **pipeline:** fix sonar source path ([b834595](https://github.com/hmcts/rpx-xui-node-lib/commit/b8345957dd76d5e65f13c4642eac257ce324a199))
+
+## [2.11.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.1...v2.11.2) (2020-06-03)
+
+
+### Bug Fixes
+
+* **pipeline:** sonar test ([#23](https://github.com/hmcts/rpx-xui-node-lib/issues/23)) ([93097f7](https://github.com/hmcts/rpx-xui-node-lib/commit/93097f7a9b41b9296e6b8ddf496192ee178a6bee))
+
+## [2.11.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.11.0...v2.11.1) (2020-06-02)
+
+
+### Bug Fixes
+
+* **pipeline:** add sonar config ([0286e86](https://github.com/hmcts/rpx-xui-node-lib/commit/0286e86731269bf197973cb942b9d71815f97109))
+* **pipeline:** add sonar config ([46142a5](https://github.com/hmcts/rpx-xui-node-lib/commit/46142a5c48ec36efb65946bb87460ddc8f7286ec))
+
 # [2.11.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.10.1...v2.11.0) (2020-06-02)
 
 
