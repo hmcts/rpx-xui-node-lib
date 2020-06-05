@@ -117,7 +117,7 @@ describe('S2SAuth', () => {
         expect(result).toBeUndefined
     })
 
-    it('should catch any error occurring and return next() with the error', async () => {
+    it('should catch any error occurring and call next() with the error', async () => {
         const req = {
             headers: {},
         } as Request
