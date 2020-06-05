@@ -1,3 +1,10 @@
+## [2.13.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.1...v2.13.2) (2020-06-05)
+
+
+### Bug Fixes
+
+* **auth:** Unit Tests ([#28](https://github.com/hmcts/rpx-xui-node-lib/issues/28)) ([fa27be5](https://github.com/hmcts/rpx-xui-node-lib/commit/fa27be5c292024fdeeae501f47759f582b160940))
+
 ## [2.13.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.0...v2.13.1) (2020-06-04)
 
 
