@@ -36,7 +36,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.strategyName = strategyName
     }
 
-    public validateOptions(options: any): void {
+    public validateOptions(options: any): boolean {
         const schema = Joi.object({
             authorizationURL: Joi.string().required(),
             tokenURL: Joi.string().required(),
@@ -63,6 +63,7 @@ export abstract class Strategy extends events.EventEmitter {
         if (error) {
             throw error
         }
+        return true
     }
 
     public initialiseStrategy = async (options: any): Promise<void> => {
@@ -154,17 +155,7 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.info('No user found, redirecting')
                 return res.redirect(AUTH.ROUTE.LOGIN)
             }
-            req.logIn(user, (err) => {
-                if (err) {
-                    return next(err)
-                }
-                if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
-                    this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
-                    res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
-                } else {
-                    this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, this, false, req, res, next)
-                }
-            })
+            this.verifyLogin(req, user, next, res)
         })(req, res, next)
     }
 
@@ -181,15 +172,29 @@ export abstract class Strategy extends events.EventEmitter {
         next()
     }
 
-    public initializePassport() {
+    public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response<any>): void => {
+        req.logIn(user, (err) => {
+            if (err) {
+                return next(err)
+            }
+            if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
+                this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
+                res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
+            } else {
+                this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, this, false, req, res, next)
+            }
+        })
+    }
+
+    public initializePassport = (): void => {
         this.router.use(passport.initialize())
     }
 
-    public initializeSession() {
+    public initializeSession = (): void => {
         this.router.use(passport.session())
     }
 
-    public serializeUser() {
+    public serializeUser = (): void => {
         passport.serializeUser((user, done) => {
             this.logger.log(`${this.strategyName} serializeUser`, user)
             if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
@@ -200,7 +205,7 @@ export abstract class Strategy extends events.EventEmitter {
         })
     }
 
-    public deserializeUser() {
+    public deserializeUser = (): void => {
         passport.deserializeUser((id, done) => {
             this.logger.log(`${this.strategyName} deserializeUser`, id)
             if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
@@ -211,7 +216,7 @@ export abstract class Strategy extends events.EventEmitter {
         })
     }
 
-    public jwTokenExpired(jwtData: any): boolean {
+    public jwTokenExpired = (jwtData: any): boolean => {
         const expires = new Date(jwtData.exp * 1000).getTime()
         const now = new Date().getTime()
         return expires < now

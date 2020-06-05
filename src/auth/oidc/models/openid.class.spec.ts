@@ -118,5 +118,6 @@ test('test validateOptions', () => {
 
     //positive case
     options.authorizationURL = 'something'
-    oidc.validateOptions(options)
+    const isValid = oidc.validateOptions(options)
+    expect(isValid).toBeTruthy()
 })
