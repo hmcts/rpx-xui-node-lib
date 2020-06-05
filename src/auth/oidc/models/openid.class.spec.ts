@@ -1,6 +1,7 @@
 import oidc from './openid.class'
 import passport from 'passport'
 import { Request, Response, NextFunction } from 'express'
+import { AUTH } from '../../auth.constants'
 
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
@@ -120,4 +121,59 @@ test('test validateOptions', () => {
     options.authorizationURL = 'something'
     const isValid = oidc.validateOptions(options)
     expect(isValid).toBeTruthy()
+})
+test('OIDC verifyLogin error Path', () => {
+    const mockRequest = {
+        body: {},
+    } as Request
+    mockRequest.logIn = (user: any, done: (err: any) => void) => {
+        console.log('mockRequest.logIn')
+        done({})
+    }
+    const mockResponse = {} as Response
+    const next = jest.fn()
+    const user = {}
+
+    oidc.verifyLogin(mockRequest, user, next, mockResponse)
+    expect(next).toBeCalledWith({})
+})
+
+test('OIDC verifyLogin happy Path with no subscription', () => {
+    const mockRequest = {
+        body: {},
+    } as Request
+    mockRequest.logIn = (user: any, done: (err: any) => void) => {
+        console.log('mockRequest.logIn')
+        done(undefined)
+    }
+    const mockResponse = {} as Response
+    const mockRedirect = jest.fn()
+    mockResponse.redirect = mockRedirect
+    const next = jest.fn()
+    const user = {}
+
+    oidc.verifyLogin(mockRequest, user, next, mockResponse)
+    expect(next).not.toBeCalledWith({})
+    expect(mockRedirect).toBeCalledWith(AUTH.ROUTE.DEFAULT_REDIRECT)
+})
+
+test('OIDC verifyLogin happy Path with subscribtion', () => {
+    const mockRequest = {
+        body: {},
+    } as Request
+    mockRequest.logIn = (user: any, done: (err: any) => void) => {
+        console.log('mockRequest.logIn')
+        done(undefined)
+    }
+    const mockResponse = {} as Response
+    const mockRedirect = jest.fn()
+    mockResponse.redirect = mockRedirect
+    const next = jest.fn()
+    const user = {}
+
+    oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (authObject, isVerify) => {
+        expect(isVerify).toBeFalsy()
+    })
+    oidc.verifyLogin(mockRequest, user, next, mockResponse)
+    expect(next).not.toBeCalledWith({})
 })
