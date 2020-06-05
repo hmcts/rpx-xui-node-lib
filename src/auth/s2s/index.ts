@@ -1,0 +1,5 @@
+export { DecodedJWT } from './decodedJwt.interface'
+export { default as s2s } from './s2s.class'
+export { S2S } from './s2s.constants'
+export { S2SConfig } from './s2sConfig.interface'
+export { S2SToken } from './s2sToken.interface'
