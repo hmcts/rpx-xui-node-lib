@@ -93,3 +93,30 @@ test('OIDC OptionsMapper', () => {
     expect(openIdOptions.token_endpoint_auth_method).toEqual(options.tokenEndpointAuthMethod)
     expect(openIdOptions.useRoutes).toEqual(options.useRoutes)
 })
+
+test('test validateOptions', () => {
+    const options = {
+        authorizationURL: '',
+        tokenURL: '454',
+        clientID: 'clientId',
+        clientSecret: 'Clientsecret',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'logouturl',
+        callbackURL: 'redirect_uri',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+    }
+    try {
+        oidc.validateOptions(options)
+    } catch (error) {
+        expect(error.message).toContain('"authorizationURL" is not allowed to be empty')
+    }
+
+    //positive case
+    options.authorizationURL = 'something'
+    oidc.validateOptions(options)
+})
