@@ -1,3 +1,22 @@
+# [2.14.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.3...v2.14.0) (2020-06-05)
+
+
+### Bug Fixes
+
+* **pipeline:** test protected branch ([#36](https://github.com/hmcts/rpx-xui-node-lib/issues/36)) ([80415c1](https://github.com/hmcts/rpx-xui-node-lib/commit/80415c1d3b3e75fd85aa47695ba22f8ab43d213a))
+
+
+### Features
+
+* **s2s:** add unit tests and refactor ([#34](https://github.com/hmcts/rpx-xui-node-lib/issues/34)) ([71c27a3](https://github.com/hmcts/rpx-xui-node-lib/commit/71c27a309161bae46f58f0712ed8616fca7aa0bd)), closes [#35](https://github.com/hmcts/rpx-xui-node-lib/issues/35) [#36](https://github.com/hmcts/rpx-xui-node-lib/issues/36) [#29](https://github.com/hmcts/rpx-xui-node-lib/issues/29)
+
+## [2.13.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.2...v2.13.3) (2020-06-05)
+
+
+### Bug Fixes
+
+* **pipeline:** test protected branch ([#30](https://github.com/hmcts/rpx-xui-node-lib/issues/30)) ([c609cfd](https://github.com/hmcts/rpx-xui-node-lib/commit/c609cfd1b53e719f6f67ea015d1d5cb876964e5a))
+
 ## [2.13.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.1...v2.13.2) (2020-06-05)
 
 
