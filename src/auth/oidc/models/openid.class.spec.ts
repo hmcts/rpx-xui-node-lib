@@ -3,6 +3,10 @@ import passport from 'passport'
 import { Request, Response, NextFunction } from 'express'
 import { AUTH } from '../../auth.constants'
 
+afterEach(() => {
+    jest.restoreAllMocks()
+})
+
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
 })
@@ -53,7 +57,7 @@ test('OIDC configure initializePassport', () => {
     expect(spy).toBeCalled()
 })
 
-xtest('OIDC configure initializeSession', () => {
+test('OIDC configure initializeSession', () => {
     const spy = jest.spyOn(passport, 'session')
     oidc.initializeSession()
     expect(spy).toBeCalled()
