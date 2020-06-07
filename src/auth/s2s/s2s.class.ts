@@ -2,7 +2,7 @@ import events from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 // eslint-disable-next-line @typescript-eslint/camelcase
 import jwt_decode from 'jwt-decode'
-import { totp } from 'node-otp'
+import OTP from 'otp'
 import { http } from '../../http/http'
 import { DecodedJWT } from './decodedJwt.interface'
 import { S2S } from './s2s.constants'
@@ -56,7 +56,7 @@ export class S2SAuth extends events.EventEmitter {
                 // If there are no listeners for a success event from this emitter, just return this middleware using
                 // next(), else emit a success event with the S2S token
                 if (!this.listenerCount(S2S.EVENT.AUTHENTICATE_SUCCESS)) {
-                    this.logger.log(`S2SAuth: no listener count: ${S2S.EVENT.AUTHENTICATE_SUCCESS}`)
+                    this.logger.info(`S2SAuth: no listener count: ${S2S.EVENT.AUTHENTICATE_SUCCESS}`)
                     return next()
                 } else {
                     this.emit(S2S.EVENT.AUTHENTICATE_SUCCESS, token, req, res, next)
@@ -64,7 +64,7 @@ export class S2SAuth extends events.EventEmitter {
                 }
             }
         } catch (error) {
-            this.logger.log('S2SAuth error:', error)
+            this.logger.error('S2SAuth error:', error.message)
             next(error)
         }
     }
@@ -103,7 +103,7 @@ export class S2SAuth extends events.EventEmitter {
     }
 
     private postS2SLease = async (): Promise<string> => {
-        const oneTimePassword = totp({ secret: this.s2sConfig.s2sSecret })
+        const oneTimePassword = OTP({ secret: this.s2sConfig.s2sSecret }).totp()
 
         this.logger.info('Requesting S2S token for microservice: ', this.s2sConfig.microservice)
 

@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios'
 import { Request, Response } from 'express'
-import * as nodeOtp from 'node-otp'
+import OTP from 'otp'
 import { http } from '../../http/http'
 import { S2SAuth } from './s2s.class'
 import { S2S } from './s2s.constants'
@@ -22,7 +22,7 @@ describe('S2SAuth', () => {
         s2sAuth = new S2SAuth()
         s2sAuth.configure(s2sConfig, {}, console)
 
-        jest.spyOn(nodeOtp, 'totp').mockReturnValue(oneTimePassword)
+        jest.spyOn(OTP.prototype, 'totp').mockReturnValue(oneTimePassword)
         jest.spyOn(http, 'post').mockImplementation(
             () => (Promise.resolve(postS2SResponse) as unknown) as AxiosPromise<string>,
         )
@@ -37,7 +37,8 @@ describe('S2SAuth', () => {
 
     it('should generate an S2S token', async () => {
         const s2sToken = await s2sAuth.serviceTokenGenerator()
-        expect(nodeOtp.totp).toHaveBeenCalledWith({ secret: s2sConfig.s2sSecret })
+        // Check the value of the secret passed as an argument to the OTP generator is as expected
+        expect(OTP.prototype.totp.mock.calls[0][0].secret).toEqual(s2sConfig.s2sSecret)
         expect(http.post).toHaveBeenCalledWith(`${s2sConfig.s2sEndpointUrl}`, {
             microservice: s2sConfig.microservice,
             oneTimePassword,
@@ -51,7 +52,7 @@ describe('S2SAuth', () => {
 
         // Second time around, it should return the cached S2S token instead of generating a new one
         s2sToken = await s2sAuth.serviceTokenGenerator()
-        expect(nodeOtp.totp).toHaveBeenCalledTimes(1)
+        expect(OTP.prototype.totp).toHaveBeenCalledTimes(1)
         expect(http.post).toHaveBeenCalledTimes(1)
         expect(s2sToken).toEqual('abc123')
     })
@@ -66,7 +67,7 @@ describe('S2SAuth', () => {
 
         // Second time around, it should generate a new S2S token (because the cached one has expired)
         await s2sAuth.serviceTokenGenerator()
-        expect(nodeOtp.totp).toHaveBeenCalledTimes(2)
+        expect(OTP.prototype.totp).toHaveBeenCalledTimes(2)
         expect(http.post).toHaveBeenCalledTimes(2)
     })
 
@@ -114,7 +115,7 @@ describe('S2SAuth', () => {
         expect(req.headers).toEqual({ ServiceAuthorization: 'Bearer abc123' })
         // The handler should not return any result because next() should not be called, given that it should emit an
         // event instead
-        expect(result).toBeUndefined
+        expect(result).toBeUndefined()
     })
 
     it('should catch any error occurring and call next() with the error', async () => {
@@ -133,6 +134,6 @@ describe('S2SAuth', () => {
         // There should not be any S2S token in the request headers
         expect(req.headers).toEqual({})
         expect(next).toHaveBeenCalledWith(Error('Failed to request S2S token'))
-        expect(result).toBeUndefined
+        expect(result).toBeUndefined()
     })
 })
