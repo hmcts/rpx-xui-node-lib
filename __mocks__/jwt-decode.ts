@@ -1,4 +1,4 @@
-import { DecodedJWT } from '../src/auth/s2s/decodedJwt.interface'
+import { DecodedJWT } from '../src/auth/s2s'
 
 // Mock implementation for the default export (jwt_decode), which returns an object of type DecodedJWT, with an "exp"
 // property
