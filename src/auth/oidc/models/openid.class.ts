@@ -111,11 +111,15 @@ export class OpenID extends AuthStrategy {
         )
     }
 
-    public verify = (tokenset: TokenSet, userinfo: UserinfoResponse, done: (err: any, user?: any) => void): void => {
-        /*if (!propsExist(userinfo, ['roles'])) {
+    public verify = (
+        tokenset: TokenSet,
+        userinfo: UserinfoResponse,
+        done: (err: any, user?: any, message?: any) => void,
+    ): void => {
+        if (!userinfo?.roles) {
             this.logger.warn('User does not have any access roles.')
-            return done(null, false, {message: 'User does not have any access roles.'})
-        }*/
+            return done(null, false, { message: 'User does not have any access roles.' })
+        }
         this.logger.info('verify okay, user:', userinfo)
 
         const userTokenSet = {
