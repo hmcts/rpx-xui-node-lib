@@ -1,3 +1,19 @@
+# [2.15.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.14.1...v2.15.0) (2020-06-08)
+
+
+### Features
+
+* **oidc:** reinstate previously failing test (now passing) ([1630ce0](https://github.com/hmcts/rpx-xui-node-lib/commit/1630ce047c4eaac1cfcdba56f79c2c5ab197b583))
+* **s2s:** add unit tests and refactor ([620cd77](https://github.com/hmcts/rpx-xui-node-lib/commit/620cd7728a446594b5e3d2aa79791d98d9e27436))
+* **s2s:** add unit tests and refactor ([ede1d55](https://github.com/hmcts/rpx-xui-node-lib/commit/ede1d5544b59fa697b05d1508f523d6c9c40b136))
+* **s2s:** minor rename of test ([7e08929](https://github.com/hmcts/rpx-xui-node-lib/commit/7e0892901d73dc83e3c19d9eaaed6ec6f2817a14))
+* **s2s:** move back to otp for OTP generation ([60539b8](https://github.com/hmcts/rpx-xui-node-lib/commit/60539b893e0a216dcf4a13679f1f2a944054207e))
+* **s2s:** move package ordering ([a1b52b4](https://github.com/hmcts/rpx-xui-node-lib/commit/a1b52b43d374feb0a18f69dbd8733acc0341a291))
+* **s2s:** revert move back to otp for OTP generation ([208ea9e](https://github.com/hmcts/rpx-xui-node-lib/commit/208ea9e24da47ec014e8f215957853e03d66e57b)), closes [#40](https://github.com/hmcts/rpx-xui-node-lib/issues/40)
+* **s2s:** temporarily disable failing test ([8131d89](https://github.com/hmcts/rpx-xui-node-lib/commit/8131d891e5a5374b1e83dc6e95b95190628cfe40))
+* **s2s:** unit tests ([520e27d](https://github.com/hmcts/rpx-xui-node-lib/commit/520e27da3ac7e0b9f3c55b2c5506d5f1a25be911))
+* **s2s:** unit tests ([51852de](https://github.com/hmcts/rpx-xui-node-lib/commit/51852de7d1b2f2669e1553d4fd238c982a5ee5f0))
+
 ## [2.14.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.14.0...v2.14.1) (2020-06-08)
 
 
