@@ -1,9 +1,13 @@
 import redisSessionStore from './redisSessionStore.class'
 import { createMock } from 'ts-auto-mock'
 import { RedisSessionMetadata } from './sessionMetadata.interface'
-import { default as redis, RedisClient } from 'redis'
+import { default as redis } from 'redis'
 
 describe('getStore()', () => {
+    afterEach(() => {
+        jest.restoreAllMocks()
+    })
+
     it('should call redis.createClient() with the redisCloudUrl.', () => {
         const MOCK_REDIS_CLOUD_URL = 'redis://i.am.a.redis.cloud.url'
         const MOCK_REDIS_KEY_PREFIX = 'mockRedisKeyPrefix'
@@ -20,29 +24,32 @@ describe('getStore()', () => {
         expect(spyOnRedisCreateClient).toBeCalledWith(MOCK_REDIS_CLOUD_URL, { prefix: MOCK_REDIS_KEY_PREFIX })
     })
 
-    it("should listen for redisClient on 'ready' event.", () => {
-        const REDIS_CLIENT_LISTENER = 'on'
-        const REDIS_CLIENT_READY_EVENT = 'ready'
+    describe('Redis client event listeners', () => {
+        let redisClient: redis.RedisClient
+        let spyOnRedisClientOnEvent: any
 
-        const redisClient = createMock<redis.RedisClient>()
+        beforeEach(() => {
+            const REDIS_CLIENT_LISTENER = 'on'
 
-        const spyOnRedisClientOnEvent = jest.spyOn(redisClient, REDIS_CLIENT_LISTENER)
+            redisClient = createMock<redis.RedisClient>()
 
-        redisSessionStore.redisClientReadyListener(redisClient)
+            spyOnRedisClientOnEvent = jest.spyOn(redisClient, REDIS_CLIENT_LISTENER)
+        })
 
-        expect(spyOnRedisClientOnEvent).toBeCalledWith(REDIS_CLIENT_READY_EVENT, expect.any(Function))
-    })
+        it("should listen for redisClient on 'ready' event.", () => {
+            const REDIS_CLIENT_READY_EVENT = 'ready'
 
-    it("should listen for redisClient on 'error' event.", () => {
-        const REDIS_CLIENT_LISTENER = 'on'
-        const REDIS_CLIENT_ERROR_EVENT = 'error'
+            redisSessionStore.redisClientReadyListener(redisClient)
 
-        const redisClient = createMock<redis.RedisClient>()
+            expect(spyOnRedisClientOnEvent).toBeCalledWith(REDIS_CLIENT_READY_EVENT, expect.any(Function))
+        })
 
-        const spyOnRedisClientOnEvent = jest.spyOn(redisClient, REDIS_CLIENT_LISTENER)
+        it("should listen for redisClient on 'error' event.", () => {
+            const REDIS_CLIENT_ERROR_EVENT = 'error'
 
-        redisSessionStore.redisClientErrorListener(redisClient)
+            redisSessionStore.redisClientErrorListener(redisClient)
 
-        expect(spyOnRedisClientOnEvent).toBeCalledWith(REDIS_CLIENT_ERROR_EVENT, expect.any(Function))
+            expect(spyOnRedisClientOnEvent).toBeCalledWith(REDIS_CLIENT_ERROR_EVENT, expect.any(Function))
+        })
     })
 })
