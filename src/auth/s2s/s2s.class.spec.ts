@@ -114,7 +114,7 @@ describe('S2SAuth', () => {
         expect(req.headers).toEqual({ ServiceAuthorization: 'Bearer abc123' })
         // The handler should not return any result because next() should not be called, given that it should emit an
         // event instead
-        expect(result).toBeUndefined
+        expect(result).toBeUndefined()
     })
 
     it('should catch any error occurring and call next() with the error', async () => {
@@ -133,6 +133,6 @@ describe('S2SAuth', () => {
         // There should not be any S2S token in the request headers
         expect(req.headers).toEqual({})
         expect(next).toHaveBeenCalledWith(Error('Failed to request S2S token'))
-        expect(result).toBeUndefined
+        expect(result).toBeUndefined()
     })
 })
