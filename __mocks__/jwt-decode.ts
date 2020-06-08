@@ -1,6 +1,6 @@
 import { DecodedJWT } from '../src/auth/s2s'
 
-// Mock implementation for the default export (jwt_decode), which returns an object of type DecodedJWT, with an "exp"
+// Mock implementation for the default export (jwtDecode), which returns an object of type DecodedJWT, with an "exp"
 // property
 export default (): DecodedJWT => {
     return {

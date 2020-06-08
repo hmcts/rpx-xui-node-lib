@@ -1,7 +1,6 @@
 import events from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
-// eslint-disable-next-line @typescript-eslint/camelcase
-import jwt_decode from 'jwt-decode'
+import jwtDecode from 'jwt-decode'
 import { authenticator } from 'otplib'
 import { http } from '../../http'
 import { DecodedJWT } from './decodedJwt.interface'
@@ -92,7 +91,7 @@ export class S2SAuth extends events.EventEmitter {
         this.logger.info('Getting new S2S token')
         const token = await this.postS2SLease()
 
-        const tokenData: DecodedJWT = jwt_decode(token)
+        const tokenData: DecodedJWT = jwtDecode(token)
 
         this.store[this.s2sConfig.microservice] = {
             expiresAt: tokenData.exp,
