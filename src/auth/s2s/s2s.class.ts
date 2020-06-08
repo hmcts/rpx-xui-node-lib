@@ -64,7 +64,6 @@ export class S2SAuth extends events.EventEmitter {
                 }
             }
         } catch (error) {
-            this.logger.error('S2SAuth error:', error.message)
             next(error)
         }
     }
