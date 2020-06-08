@@ -6259,6 +6259,11 @@ node-notifier@^5.4.2:
     shellwords "^0.1.1"
     which "^1.3.0"
 
+node-otp@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/node-otp/-/node-otp-1.2.2.tgz#d4e07ed2e1f4c64839be24d5b640efba351b9eb2"
+  integrity sha512-dYRBE4aiPnQ1SLFQoV1HGflpiWnyXCw3kAwN5r75j6ffJISAYTHQalowk61zRDFLK3YPd2xKbEV63nOf2RSv6w==
+
 nopt@^4.0.1, nopt@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/nopt/-/nopt-4.0.3.tgz#a375cad9d02fd921278d954c2254d5aa57e15e48"
@@ -6755,13 +6760,6 @@ osenv@^0.1.4, osenv@^0.1.5:
   dependencies:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.0"
-
-otp@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/otp/-/otp-0.1.3.tgz#c257bf25d2f9027af77ac52269b3c14268d2bd6b"
-  integrity sha1-wle/JdL5Anr3esUiabPBQmjSvWs=
-  dependencies:
-    thirty-two "^0.0.2"
 
 p-any@^3.0.0:
   version "3.0.0"
@@ -8787,11 +8785,6 @@ text-table@^0.2.0, text-table@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
-
-thirty-two@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/thirty-two/-/thirty-two-0.0.2.tgz#4253e29d8cb058f0480267c5698c0e4927e54b6a"
-  integrity sha1-QlPinYywWPBIAmfFaYwOSSflS2o=
 
 throat@^4.0.0:
   version "4.1.0"

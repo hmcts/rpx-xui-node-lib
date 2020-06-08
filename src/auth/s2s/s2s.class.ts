@@ -2,7 +2,7 @@ import events from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 // eslint-disable-next-line @typescript-eslint/camelcase
 import jwt_decode from 'jwt-decode'
-import OTP from 'otp'
+import { totp } from 'node-otp'
 import { http } from '../../http/http'
 import { DecodedJWT } from './decodedJwt.interface'
 import { S2S } from './s2s.constants'
@@ -103,7 +103,7 @@ export class S2SAuth extends events.EventEmitter {
     }
 
     private postS2SLease = async (): Promise<string> => {
-        const oneTimePassword = OTP({ secret: this.s2sConfig.s2sSecret }).totp()
+        const oneTimePassword = totp({ secret: this.s2sConfig.s2sSecret })
 
         this.logger.info('Requesting S2S token for microservice: ', this.s2sConfig.microservice)
 

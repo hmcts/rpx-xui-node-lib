@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios'
 import { Request, Response } from 'express'
-import OTP from 'otp'
+import * as nodeOtp from 'node-otp'
 import { http } from '../../http/http'
 import { S2SAuth } from './s2s.class'
 import { S2S } from './s2s.constants'
@@ -22,7 +22,7 @@ describe('S2SAuth', () => {
         s2sAuth = new S2SAuth()
         s2sAuth.configure(s2sConfig, {}, console)
 
-        jest.spyOn(OTP.prototype, 'totp').mockReturnValue(oneTimePassword)
+        jest.spyOn(nodeOtp, 'totp').mockReturnValue(oneTimePassword)
         jest.spyOn(http, 'post').mockImplementation(
             () => (Promise.resolve(postS2SResponse) as unknown) as AxiosPromise<string>,
         )
@@ -37,8 +37,7 @@ describe('S2SAuth', () => {
 
     it('should generate an S2S token', async () => {
         const s2sToken = await s2sAuth.serviceTokenGenerator()
-        // Check the value of the secret passed as an argument to the OTP generator is as expected
-        expect(OTP.prototype.totp.mock.calls[0][0].secret).toEqual(s2sConfig.s2sSecret)
+        expect(nodeOtp.totp).toHaveBeenCalledWith({ secret: s2sConfig.s2sSecret })
         expect(http.post).toHaveBeenCalledWith(`${s2sConfig.s2sEndpointUrl}`, {
             microservice: s2sConfig.microservice,
             oneTimePassword,
@@ -52,7 +51,7 @@ describe('S2SAuth', () => {
 
         // Second time around, it should return the cached S2S token instead of generating a new one
         s2sToken = await s2sAuth.serviceTokenGenerator()
-        expect(OTP.prototype.totp).toHaveBeenCalledTimes(1)
+        expect(nodeOtp.totp).toHaveBeenCalledTimes(1)
         expect(http.post).toHaveBeenCalledTimes(1)
         expect(s2sToken).toEqual('abc123')
     })
@@ -67,7 +66,7 @@ describe('S2SAuth', () => {
 
         // Second time around, it should generate a new S2S token (because the cached one has expired)
         await s2sAuth.serviceTokenGenerator()
-        expect(OTP.prototype.totp).toHaveBeenCalledTimes(2)
+        expect(nodeOtp.totp).toHaveBeenCalledTimes(2)
         expect(http.post).toHaveBeenCalledTimes(2)
     })
 
