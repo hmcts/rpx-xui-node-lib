@@ -78,14 +78,15 @@ export class OpenID extends AuthStrategy {
 
     public discover = async (): Promise<Issuer<Client>> => {
         this.logger.log(`discovering endpoint: ${this.options.discoveryEndpoint}`)
-        const issuer = await Issuer.discover(`${this.options.discoveryEndpoint}`)
+        const issuer = await this.discoverIssuer()
 
         const metadata = issuer.metadata
         metadata.issuer = this.options.issuerURL
 
         this.logger.log('metadata', metadata)
 
-        return new Issuer(metadata)
+        const newIssuer = this.newIssuer(metadata)
+        return newIssuer
     }
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
@@ -93,22 +94,20 @@ export class OpenID extends AuthStrategy {
         const redirectUri = new URL(AUTH.ROUTE.OAUTH_CALLBACK, options.redirect_uri)
         this.issuer = await this.discover()
         this.client = new this.issuer.Client(options)
-        passport.use(
-            this.strategyName,
-            new Strategy(
-                {
-                    client: this.client,
-                    params: {
-                        prompt: OIDC.PROMPT,
-                        // eslint-disable-next-line @typescript-eslint/camelcase
-                        redirect_uri: redirectUri.toString(),
-                        scope: options.scope,
-                    },
-                    sessionKey: options.sessionKey, // being explicit here so we can set manually on logout
+        const strategy = new Strategy(
+            {
+                client: this.client,
+                params: {
+                    prompt: OIDC.PROMPT,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    redirect_uri: redirectUri.toString(),
+                    scope: options.scope,
                 },
-                this.verify,
-            ),
+                sessionKey: options.sessionKey,
+            },
+            this.verify,
         )
+        this.useStrategy(this.strategyName, strategy)
     }
 
     public verify = (tokenset: TokenSet, userinfo: UserinfoResponse, done: (err: any, user?: any) => void): void => {
@@ -124,6 +123,19 @@ export class OpenID extends AuthStrategy {
             idToken: tokenset.id_token,
         }
         return done(null, { tokenset: { ...tokenset, ...userTokenSet }, userinfo })
+    }
+
+    public discoverIssuer = async (): Promise<any> => {
+        return await Issuer.discover(`${this.options.discoveryEndpoint}`)
+    }
+
+    public newIssuer = (metadata: any): Issuer<Client> => {
+        this.logger.log('newIssuer')
+        return new Issuer(metadata)
+    }
+
+    public useStrategy = (strategyName: string, strategy: Strategy<any, any>): void => {
+        passport.use(strategyName, strategy)
     }
 }
 
