@@ -1,3 +1,10 @@
+## [2.14.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.14.0...v2.14.1) (2020-06-08)
+
+
+### Bug Fixes
+
+* **oidc logout and s2s:** new implementation using otplib ([d45cfe4](https://github.com/hmcts/rpx-xui-node-lib/commit/d45cfe4037848fbf1e350d3a7fc2ec1f8a56763b))
+
 # [2.14.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.13.3...v2.14.0) (2020-06-05)
 
 
