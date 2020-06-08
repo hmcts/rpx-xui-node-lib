@@ -55,7 +55,7 @@ export class S2SAuth extends events.EventEmitter {
                 // If there are no listeners for a success event from this emitter, just return this middleware using
                 // next(), else emit a success event with the S2S token
                 if (!this.listenerCount(S2S.EVENT.AUTHENTICATE_SUCCESS)) {
-                    this.logger.log(`S2SAuth: no listener count: ${S2S.EVENT.AUTHENTICATE_SUCCESS}`)
+                    this.logger.info(`S2SAuth: no listener count: ${S2S.EVENT.AUTHENTICATE_SUCCESS}`)
                     return next()
                 } else {
                     this.emit(S2S.EVENT.AUTHENTICATE_SUCCESS, token, req, res, next)
@@ -63,7 +63,6 @@ export class S2SAuth extends events.EventEmitter {
                 }
             }
         } catch (error) {
-            this.logger.log('S2SAuth error:', error)
             next(error)
         }
     }
