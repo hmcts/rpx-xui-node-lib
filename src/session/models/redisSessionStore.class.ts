@@ -2,7 +2,7 @@ import { SESSION } from '../session.constants'
 import { RedisSessionMetadata } from './sessionMetadata.interface'
 import session from 'express-session'
 import { default as connectRedis } from 'connect-redis'
-import {default as redis} from 'redis'
+import { default as redis } from 'redis'
 import { SessionStore } from './sessionStore.class'
 
 export class RedisSessionStore extends SessionStore {
@@ -13,15 +13,14 @@ export class RedisSessionStore extends SessionStore {
     }
 
     public getStore = (options: RedisSessionMetadata): connectRedis.RedisStore => {
-
         const tlsOptions = {
             prefix: options.redisStoreOptions.redisKeyPrefix,
         }
 
         this.redisClient = redis.createClient(options.redisStoreOptions.redisCloudUrl, tlsOptions)
 
-        this.redisClientReadyListener(this.redisClient);
-        this.redisClientErrorListener(this.redisClient);
+        this.redisClientReadyListener(this.redisClient)
+        this.redisClientErrorListener(this.redisClient)
 
         const redisStore = connectRedis(session)
         return new redisStore({
@@ -33,7 +32,7 @@ export class RedisSessionStore extends SessionStore {
     // TODO: This should be a pure function. Remove side effecting on redisClient,
     // listenerCount, emit and logger, when you have Redis setup on a local machine,
     // ( to check that it still works )
-    public redisClientReadyListener = (redisClient:redis.RedisClient) => {
+    public redisClientReadyListener = (redisClient: redis.RedisClient) => {
         redisClient.on('ready', () => {
             if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_READY)) {
                 this.emit(SESSION.EVENT.REDIS_CLIENT_READY, redisClient)
@@ -42,7 +41,7 @@ export class RedisSessionStore extends SessionStore {
         })
     }
 
-    public redisClientErrorListener = (redisClient:redis.RedisClient) => {
+    public redisClientErrorListener = (redisClient: redis.RedisClient) => {
         redisClient.on('error', (error: any) => {
             this.logger.error(error)
             this.logger.info('redisClient is ', redisClient)
