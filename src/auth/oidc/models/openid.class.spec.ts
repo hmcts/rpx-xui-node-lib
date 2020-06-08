@@ -2,9 +2,17 @@ import oidc from './openid.class'
 import passport from 'passport'
 import { Request, Response, NextFunction } from 'express'
 import { AUTH } from '../../auth.constants'
+import { Issuer, Strategy } from 'openid-client'
 
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
+})
+
+test('OIDC configure strategy', () => {
+    const spy = jest.spyOn(passport, 'use')
+    const strategy = {} as Strategy<any, any>
+    oidc.useStrategy('name', strategy)
+    expect(spy).toBeCalledWith('name', strategy)
 })
 
 test('OIDC configure serializeUser', () => {
@@ -43,11 +51,6 @@ test('OIDC jwTokenExpired', () => {
 })
 
 test('OIDC configure initializePassport', () => {
-    jest.mock('express', () => ({
-        Router: () => ({
-            use: jest.fn(),
-        }),
-    }))
     const spy = jest.spyOn(passport, 'initialize')
     oidc.initializePassport()
     expect(spy).toBeCalled()
@@ -169,4 +172,19 @@ test('OIDC verifyLogin happy Path with subscribtion', () => {
     })
     oidc.verifyLogin(mockRequest, user, next, mockResponse)
     expect(next).not.toBeCalledWith({})
+})
+
+test('OIDC discoverIssuer', () => {
+    const spy = jest.spyOn(Issuer, 'discover')
+    oidc.discoverIssuer()
+    expect(spy).toBeCalled()
+})
+
+test('OIDC discover', () => {
+    const issuer = {}
+    const spyNewIssuer = jest.spyOn(oidc, 'newIssuer')
+    const spy = jest.spyOn(oidc, 'discoverIssuer').mockImplementation(() => Promise.resolve({ metadata: issuer }))
+
+    const result = oidc.discover()
+    expect(spy).toBeCalled()
 })
