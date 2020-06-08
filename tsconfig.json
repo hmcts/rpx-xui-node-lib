@@ -9,7 +9,13 @@
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types"],
+    "plugins": [
+     {
+         "transform": "ts-auto-mock/transformer",
+         "cacheBetweenTests": false
+     }
+    ]
   },
   "include": ["typings.d.ts", "src"],
   "exclude": ["node_modules", "**/*.spec.ts"]
