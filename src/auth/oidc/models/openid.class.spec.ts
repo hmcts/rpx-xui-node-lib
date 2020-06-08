@@ -2,7 +2,7 @@ import oidc from './openid.class'
 import passport from 'passport'
 import { Request, Response, NextFunction } from 'express'
 import { AUTH } from '../../auth.constants'
-import { Issuer, Strategy } from 'openid-client'
+import { Issuer, Strategy, Client } from 'openid-client'
 
 afterEach(() => {
     jest.restoreAllMocks()
@@ -249,8 +249,36 @@ test('OIDC initialiseStrategy', async () => {
         useRoutes: false,
     }
 
-    const result = await oidc.initialiseStrategy(options)
+    await oidc.initialiseStrategy(options)
     expect(spyGetOptions).toBeCalled()
     expect(spyGetNewStrategy).toBeCalled()
     expect(spyUseStrategy).toBeCalled()
+})
+
+test('test createNewStrategy', async () => {
+    /* eslint-disable @typescript-eslint/camelcase */
+    const options = {
+        redirect_uri: 'http://oauth/callback',
+        tokenURL: '',
+        client_id: 'clientId',
+        clientSecret: 'Clientsecret',
+        discovery_endpoint: 'someEndpoint',
+        issuer_url: 'issuer_url',
+        logout_url: 'logouturl',
+        callbackURL: 'redirect_uri',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+    }
+    /* eslint-disable @typescript-eslint/camelcase */
+    const spyDiscover = jest.spyOn(oidc, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<any>))
+    const spyGetClient = jest.spyOn(oidc, 'getClientFromIssuer').mockReturnValue({} as Client)
+    const spyOnStrategy = jest.spyOn(oidc, 'getNewStrategy').mockReturnValue({} as Strategy<any, Client>)
+    await oidc.createNewStrategy(options)
+
+    expect(spyDiscover).toBeCalled()
+    expect(spyGetClient).toBeCalled()
+    expect(spyOnStrategy).toBeCalled()
 })
