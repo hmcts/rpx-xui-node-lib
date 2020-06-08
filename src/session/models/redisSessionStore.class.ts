@@ -2,7 +2,7 @@ import { SESSION } from '../session.constants'
 import { RedisSessionMetadata } from './sessionMetadata.interface'
 import session from 'express-session'
 import { default as connectRedis } from 'connect-redis'
-import {default as redis, RedisClient} from 'redis'
+import {default as redis} from 'redis'
 import { SessionStore } from './sessionStore.class'
 
 export class RedisSessionStore extends SessionStore {
@@ -12,45 +12,17 @@ export class RedisSessionStore extends SessionStore {
         super(SESSION.REDIS_STORE_NAME)
     }
 
-    /**
-     * If we use this as an interface to set the Redis Client, we are then
-     * able to mock what redisClient this class uses, and therefore mock
-     * functions such as 'on()' on it.
-     *
-     * @param {redis.RedisClient} redisClient
-     */
-    public setRedisClient = (redisClient: redis.RedisClient) => {
-        this.redisClient = redisClient;
-    }
-
-    public getRedisClient = () => this.redisClient;
-
     public getStore = (options: RedisSessionMetadata): connectRedis.RedisStore => {
 
-        // tested by spying on createClient
         const tlsOptions = {
             prefix: options.redisStoreOptions.redisKeyPrefix,
         }
 
-        // Tested spying on createClient and passing in of params
         this.redisClient = redis.createClient(options.redisStoreOptions.redisCloudUrl, tlsOptions)
 
-        // Break out
-        this.redisClient.on('ready', () => {
-            if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_READY)) {
-                this.emit(SESSION.EVENT.REDIS_CLIENT_READY, this.redisClient)
-            }
-            this.logger.info('redis client connected successfully')
-        })
-        // this.redisClientReadyListener(this.redisClient);
+        this.redisClientReadyListener(this.redisClient);
+        this.redisClientErrorListener(this.redisClient);
 
-        this.redisClient.on('error', (error: any) => {
-            this.logger.error(error)
-            this.logger.info('redisClient is ', this.redisClient)
-            if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_ERROR)) {
-                this.emit(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
-            }
-        })
         const redisStore = connectRedis(session)
         return new redisStore({
             client: this.redisClient,
@@ -58,9 +30,10 @@ export class RedisSessionStore extends SessionStore {
         })
     }
 
-    // TODO: Remove side effecting on redisClient, listenerCount, emit and logger.
-    // change type
-    public redisClientReadyListener = (redisClient:any) => {
+    // TODO: This should be a pure function. Remove side effecting on redisClient,
+    // listenerCount, emit and logger, when you have Redis setup on a local machine,
+    // ( to check that it still works )
+    public redisClientReadyListener = (redisClient:redis.RedisClient) => {
         redisClient.on('ready', () => {
             if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_READY)) {
                 this.emit(SESSION.EVENT.REDIS_CLIENT_READY, redisClient)
@@ -69,17 +42,15 @@ export class RedisSessionStore extends SessionStore {
         })
     }
 
-    // TODO: Remove side effects on listenerCount, emit and logger.
-    // public dispatchRedisClientReady = (redisClient: RedisClient, listenerCount: any) => {
-    //     redisClient.on('ready', () => {
-    //         if (listenerCount) {
-    //             this.emit(SESSION.EVENT.REDIS_CLIENT_READY, redisClient)
-    //         }
-    //         this.logger.info('redis client connected successfully')
-    //     })
-    // }
-
-    public shouldReturnTrue = () => true;
+    public redisClientErrorListener = (redisClient:redis.RedisClient) => {
+        redisClient.on('error', (error: any) => {
+            this.logger.error(error)
+            this.logger.info('redisClient is ', redisClient)
+            if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_ERROR)) {
+                this.emit(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
+            }
+        })
+    }
 }
 
 export default new RedisSessionStore()
