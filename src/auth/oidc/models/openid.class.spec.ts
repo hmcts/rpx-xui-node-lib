@@ -224,3 +224,33 @@ test('OIDC authenticate when authenticated but session and client not initialise
     await oidc.authenticate(mockRequest, mockResponse, next)
     expect(mockRedirect).toBeCalledWith(AUTH.ROUTE.LOGIN)
 })
+
+test('OIDC initialiseStrategy', async () => {
+    const issuer = {}
+    const spyGetOptions = jest.spyOn(oidc, 'getOpenIDOptions')
+    const spyGetNewStrategy = jest
+        .spyOn(oidc, 'createNewStrategy')
+        .mockImplementation(() => Promise.resolve({} as Strategy<any, any>))
+    const spyUseStrategy = jest.spyOn(oidc, 'useStrategy')
+
+    const options = {
+        authorizationURL: '',
+        tokenURL: '',
+        clientID: 'clientId',
+        clientSecret: 'Clientsecret',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'logouturl',
+        callbackURL: 'redirect_uri',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+    }
+
+    const result = await oidc.initialiseStrategy(options)
+    expect(spyGetOptions).toBeCalled()
+    expect(spyGetNewStrategy).toBeCalled()
+    expect(spyUseStrategy).toBeCalled()
+})

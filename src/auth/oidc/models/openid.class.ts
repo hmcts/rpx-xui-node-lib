@@ -91,22 +91,7 @@ export class OpenID extends AuthStrategy {
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
         const options = this.getOpenIDOptions(authOptions)
-        const redirectUri = new URL(AUTH.ROUTE.OAUTH_CALLBACK, options.redirect_uri)
-        this.issuer = await this.discover()
-        this.client = new this.issuer.Client(options)
-        const strategy = new Strategy(
-            {
-                client: this.client,
-                params: {
-                    prompt: OIDC.PROMPT,
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    redirect_uri: redirectUri.toString(),
-                    scope: options.scope,
-                },
-                sessionKey: options.sessionKey,
-            },
-            this.verify,
-        )
+        const strategy = await this.createNewStrategy(options)
         this.useStrategy(this.strategyName, strategy)
     }
 
@@ -140,6 +125,26 @@ export class OpenID extends AuthStrategy {
 
     public useStrategy = (strategyName: string, strategy: Strategy<any, any>): void => {
         passport.use(strategyName, strategy)
+    }
+
+    public createNewStrategy = async (options: OpenIDMetadata): Promise<Strategy<any, any>> => {
+        const redirectUri = new URL(AUTH.ROUTE.OAUTH_CALLBACK, options.redirect_uri)
+        this.issuer = await this.discover()
+        this.client = new this.issuer.Client(options)
+        const strategy = new Strategy(
+            {
+                client: this.client,
+                params: {
+                    prompt: OIDC.PROMPT,
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    redirect_uri: redirectUri.toString(),
+                    scope: options.scope,
+                },
+                sessionKey: options.sessionKey,
+            },
+            this.verify,
+        )
+        return strategy
     }
 }
 
