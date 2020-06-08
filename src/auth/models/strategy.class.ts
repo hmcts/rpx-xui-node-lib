@@ -98,12 +98,16 @@ export abstract class Strategy extends events.EventEmitter {
             //passport provides this method on request object
             req.logout()
 
-            if (!req.query.noredirect && req.query.redirect) {
-                // 401 is when no accessToken
-                res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
-            } else {
-                res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
+            this.logger.log('noredirect => ', req.query.noredirect)
+            if (req.query.noredirect) {
+                res.status(200).send({ message: 'You have been logged out!' })
+                return Promise.resolve()
             }
+
+            const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
+            this.logger.log('redirecting to => ', redirect)
+            // 401 is when no accessToken
+            res.redirect(redirect as string)
         } catch (e) {
             res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
         }
@@ -131,9 +135,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
             this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
             this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
-            this.router.get(AUTH.ROUTE.LOGOUT, async (req: Request, res: Response) => {
-                await this.logout(req, res)
-            })
+            this.router.get(AUTH.ROUTE.LOGOUT, this.logout)
         }
         this.emit(`${this.strategyName}.bootstrap.success`)
         return this.router
