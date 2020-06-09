@@ -53,7 +53,7 @@ jobs:
 
   lint-pr:
     needs: build
-    if: github.ref == 'refs/heads/master' && github.event_name == 'pull_request'
+    if: github.base_ref == 'refs/heads/master' && github.event_name == 'pull_request'
     name: Lint-PR
     runs-on: ubuntu-latest
     steps:
