@@ -4,10 +4,6 @@ import { Request, Response, NextFunction } from 'express'
 import { AUTH } from '../../auth.constants'
 import { Issuer, Strategy, Client } from 'openid-client'
 
-afterEach(() => {
-    jest.restoreAllMocks()
-})
-
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
 })
