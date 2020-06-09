@@ -2,7 +2,7 @@ import events from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import jwtDecode from 'jwt-decode'
 import { authenticator } from 'otplib'
-import { http } from '../../http'
+import { http } from '../../common'
 import { DecodedJWT } from './decodedJwt.interface'
 import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
@@ -35,10 +35,18 @@ export class S2SAuth extends events.EventEmitter {
      * @param store The cache for storing S2S tokens, indexed by microservice name
      * @param logger The logger for logging function call output
      */
-    public configure = (s2sConfig: S2SConfig, store: { [key: string]: S2SToken }, logger: Console): RequestHandler => {
+    public configure = (
+        s2sConfig: S2SConfig,
+        store?: { [key: string]: S2SToken },
+        logger?: Console,
+    ): RequestHandler => {
         this.s2sConfig = s2sConfig
-        this.store = store
-        this.logger = logger
+        if (store) {
+            this.store = store
+        }
+        if (logger) {
+            this.logger = logger
+        }
         this.router.use(this.s2sHandler)
 
         return this.router
@@ -101,12 +109,13 @@ export class S2SAuth extends events.EventEmitter {
     }
 
     private postS2SLease = async (): Promise<string> => {
-        const oneTimePassword = authenticator.generate(this.s2sConfig.s2sSecret)
+        const { s2sSecret, microservice, s2sEndpointUrl } = this.s2sConfig
+        const oneTimePassword = authenticator.generate(s2sSecret)
 
-        this.logger.info('Requesting S2S token for microservice: ', this.s2sConfig.microservice)
+        this.logger.info('Requesting S2S token for microservice: ', microservice)
 
-        const request = await http.post(`${this.s2sConfig.s2sEndpointUrl}`, {
-            microservice: this.s2sConfig.microservice,
+        const request = await http.post(`${s2sEndpointUrl}`, {
+            microservice,
             oneTimePassword,
         })
 

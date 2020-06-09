@@ -1,3 +1,3 @@
 export { SessionMetadata } from './sessionMetadata.interface'
-export { RedisSessionStore } from './redisSessionStore.class'
-export { FileSessionStore } from './fileSessionStore.class'
+export { default as redisStore } from './redisSessionStore.class'
+export { default as fileStore } from './fileSessionStore.class'

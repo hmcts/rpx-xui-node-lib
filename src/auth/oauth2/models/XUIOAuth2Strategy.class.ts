@@ -1,7 +1,7 @@
 import { OAuth2Metadata } from './OAuth2Metadata.interface'
 import OAuth2Strategy from 'passport-oauth2'
 import { AxiosResponse } from 'axios'
-import { http } from '../../../http'
+import { http } from '../../../common'
 
 export class XUIOAuth2Strategy extends OAuth2Strategy {
     private readonly options: OAuth2Metadata

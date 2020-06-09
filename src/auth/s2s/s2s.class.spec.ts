@@ -1,7 +1,7 @@
 import { AxiosPromise } from 'axios'
 import { Request, Response } from 'express'
 import { authenticator } from 'otplib'
-import { http } from '../../http'
+import { http } from '../../common'
 import { S2SAuth } from './s2s.class'
 import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
