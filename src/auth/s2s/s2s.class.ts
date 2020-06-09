@@ -1,4 +1,4 @@
-import events from 'events'
+import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import jwtDecode from 'jwt-decode'
 import { authenticator } from 'otplib'
@@ -8,7 +8,7 @@ import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
 import { S2SToken } from './s2sToken.interface'
 
-export class S2SAuth extends events.EventEmitter {
+export class S2SAuth extends EventEmitter {
     protected readonly router = Router({ mergeParams: true })
 
     protected s2sConfig: S2SConfig = {
@@ -112,7 +112,7 @@ export class S2SAuth extends events.EventEmitter {
         const { s2sSecret, microservice, s2sEndpointUrl } = this.s2sConfig
         const oneTimePassword = authenticator.generate(s2sSecret)
 
-        this.logger.info('Requesting S2S token for microservice: ', microservice)
+        this.logger.info('Requesting S2S token for microservice:', microservice)
 
         const request = await http.post(`${s2sEndpointUrl}`, {
             microservice,
