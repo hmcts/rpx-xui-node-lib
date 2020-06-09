@@ -1,3 +1,10 @@
+# [2.16.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.15.2...v2.16.0) (2020-06-09)
+
+
+### Features
+
+* **nodelib:** added node library wrapper and refactored file structure ([#46](https://github.com/hmcts/rpx-xui-node-lib/issues/46)) ([2440d46](https://github.com/hmcts/rpx-xui-node-lib/commit/2440d46311b5f1bafc050a54922e856bad99f85f))
+
 # [2.15.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.14.1...v2.15.0) (2020-06-08)
 
 
