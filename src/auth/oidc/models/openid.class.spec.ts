@@ -2,7 +2,7 @@ import oidc from './openid.class'
 import passport from 'passport'
 import { Request, Response, NextFunction } from 'express'
 import { AUTH } from '../../auth.constants'
-import { Issuer, Strategy } from 'openid-client'
+import { Issuer, Strategy, Client } from 'openid-client'
 
 afterEach(() => {
     jest.restoreAllMocks()
@@ -178,9 +178,9 @@ test('OIDC verifyLogin happy Path with subscribtion', () => {
     expect(next).not.toBeCalledWith({})
 })
 
-test('OIDC discoverIssuer', () => {
-    const spy = jest.spyOn(Issuer, 'discover')
-    oidc.discoverIssuer()
+test('OIDC discoverIssuer', async () => {
+    const spy = jest.spyOn(Issuer, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<Client>))
+    await oidc.discoverIssuer()
     expect(spy).toBeCalled()
 })
 
@@ -191,4 +191,90 @@ test('OIDC discover', () => {
 
     const result = oidc.discover()
     expect(spy).toBeCalled()
+})
+
+test('OIDC authenticate when not authenticated', async () => {
+    const mockRequest = {
+        body: {},
+    } as Request
+    mockRequest.isUnauthenticated = () => true
+    const mockResponse = {} as Response
+    const mockRedirect = jest.fn()
+    mockResponse.redirect = mockRedirect
+
+    const next = jest.fn()
+    await oidc.authenticate(mockRequest, mockResponse, next)
+    expect(mockRedirect).toBeCalledWith(AUTH.ROUTE.LOGIN)
+})
+
+test('OIDC authenticate when authenticated but session and client not initialised', async () => {
+    const mockRequest = {
+        body: {},
+    } as Request
+    mockRequest.isUnauthenticated = () => false
+    const mockResponse = {} as Response
+    const mockRedirect = jest.fn()
+    mockResponse.redirect = mockRedirect
+
+    const next = jest.fn()
+    await oidc.authenticate(mockRequest, mockResponse, next)
+    expect(mockRedirect).toBeCalledWith(AUTH.ROUTE.LOGIN)
+})
+
+test('OIDC initialiseStrategy', async () => {
+    const issuer = {}
+    const spyGetOptions = jest.spyOn(oidc, 'getOpenIDOptions')
+    const spyGetNewStrategy = jest
+        .spyOn(oidc, 'createNewStrategy')
+        .mockImplementation(() => Promise.resolve({} as Strategy<any, any>))
+    const spyUseStrategy = jest.spyOn(oidc, 'useStrategy')
+
+    const options = {
+        authorizationURL: '',
+        tokenURL: '',
+        clientID: 'clientId',
+        clientSecret: 'Clientsecret',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'logouturl',
+        callbackURL: 'redirect_uri',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+    }
+
+    await oidc.initialiseStrategy(options)
+    expect(spyGetOptions).toBeCalled()
+    expect(spyGetNewStrategy).toBeCalled()
+    expect(spyUseStrategy).toBeCalled()
+})
+
+test('test createNewStrategy', async () => {
+    /* eslint-disable @typescript-eslint/camelcase */
+    const options = {
+        redirect_uri: 'http://oauth/callback',
+        tokenURL: '',
+        client_id: 'clientId',
+        clientSecret: 'Clientsecret',
+        discovery_endpoint: 'someEndpoint',
+        issuer_url: 'issuer_url',
+        logout_url: 'logouturl',
+        callbackURL: 'redirect_uri',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+    }
+    /* eslint-disable @typescript-eslint/camelcase */
+    const spyDiscover = jest.spyOn(oidc, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<any>))
+    const spyGetClient = jest.spyOn(oidc, 'getClientFromIssuer').mockReturnValue({} as Client)
+    const spyOnStrategy = jest.spyOn(oidc, 'getNewStrategy').mockReturnValue({} as Strategy<any, Client>)
+    await oidc.createNewStrategy(options)
+
+    expect(spyDiscover).toBeCalled()
+    expect(spyGetClient).toBeCalled()
+    expect(spyOnStrategy).toBeCalled()
 })
