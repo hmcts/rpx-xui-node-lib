@@ -178,9 +178,9 @@ test('OIDC verifyLogin happy Path with subscribtion', () => {
     expect(next).not.toBeCalledWith({})
 })
 
-test('OIDC discoverIssuer', () => {
-    const spy = jest.spyOn(Issuer, 'discover')
-    oidc.discoverIssuer()
+test('OIDC discoverIssuer', async () => {
+    const spy = jest.spyOn(Issuer, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<Client>))
+    await oidc.discoverIssuer()
     expect(spy).toBeCalled()
 })
 
