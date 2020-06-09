@@ -3,7 +3,7 @@ import { NextFunction, Request, RequestHandler, Response, Router } from 'express
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import jwtDecode from 'jwt-decode'
-import { http } from '../../http'
+import { http } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from '@hapi/joi'
 
