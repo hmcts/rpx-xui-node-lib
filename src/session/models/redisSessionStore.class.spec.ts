@@ -4,10 +4,6 @@ import { RedisSessionMetadata } from './sessionMetadata.interface'
 import { default as redis } from 'redis'
 
 describe('getStore()', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    })
-
     it('should call redis.createClient() with the redisCloudUrl.', () => {
         const MOCK_REDIS_CLOUD_URL = 'redis://i.am.a.redis.cloud.url'
         const MOCK_REDIS_KEY_PREFIX = 'mockRedisKeyPrefix'
