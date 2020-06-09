@@ -103,7 +103,7 @@ export class S2SAuth extends events.EventEmitter {
     private postS2SLease = async (): Promise<string> => {
         const oneTimePassword = authenticator.generate(this.s2sConfig.s2sSecret)
 
-        this.logger.info('Requesting S2S token for microservice: ', this.s2sConfig.microservice)
+        this.logger.info('Requesting S2S token for microservice:', this.s2sConfig.microservice)
 
         const request = await http.post(`${this.s2sConfig.s2sEndpointUrl}`, {
             microservice: this.s2sConfig.microservice,

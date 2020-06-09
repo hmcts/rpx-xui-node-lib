@@ -135,4 +135,23 @@ describe('S2SAuth', () => {
         expect(next).toHaveBeenCalledWith(Error('Failed to request S2S token'))
         expect(result).toBeUndefined()
     })
+
+    it('should do nothing if no S2S token is returned or generated', async () => {
+        const req = {
+            headers: {},
+        } as Request
+        const res = {} as Response
+        const next = jest.fn()
+
+        // Mock the http.post call to return no token data
+        jest.spyOn(http, 'post').mockImplementation(
+            () => (Promise.resolve({ data: null }) as unknown) as AxiosPromise<string>,
+        )
+
+        const result = await s2sAuth.s2sHandler(req, res, next)
+        // There should not be any S2S token in the request headers
+        expect(req.headers).toEqual({})
+        expect(next).not.toHaveBeenCalled()
+        expect(result).toBeUndefined()
+    })
 })
