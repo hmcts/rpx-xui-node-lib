@@ -197,9 +197,7 @@ test('OIDC authenticate when not authenticated', async () => {
     const mockRequest = {
         body: {},
     } as Request
-    mockRequest.isUnauthenticated = () => {
-        return true
-    }
+    mockRequest.isUnauthenticated = () => true
     const mockResponse = {} as Response
     const mockRedirect = jest.fn()
     mockResponse.redirect = mockRedirect
@@ -213,9 +211,7 @@ test('OIDC authenticate when authenticated but session and client not initialise
     const mockRequest = {
         body: {},
     } as Request
-    mockRequest.isUnauthenticated = () => {
-        return false
-    }
+    mockRequest.isUnauthenticated = () => false
     const mockResponse = {} as Response
     const mockRedirect = jest.fn()
     mockResponse.redirect = mockRedirect
