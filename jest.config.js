@@ -17,7 +17,7 @@ module.exports = {
     //         statements: 80,
     //     },
     // },
-    resetMocks: true,
+    restoreMocks: true,
     globals: {
         'ts-jest': {
             compiler: 'ttypescript',
