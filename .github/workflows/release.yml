@@ -1,22 +1,12 @@
-name: PR Build
+name: Build & Release
 
 on:
-  # Trigger analysis when creating a pull request. 
-  pull_request:
-      types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - master
 
 jobs:
-  lint-pr-title:
-    # if: github.ref != 'refs/heads/master' && github.event_name == 'pull_request'
-    name: Lint PR Title
-    runs-on: ubuntu-latest
-    steps:
-      - uses: amannn/action-semantic-pull-request@v1.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
   build:
-    needs: lint-pr-title
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repo
@@ -59,5 +49,29 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+  release:
+    needs: sonarcloud
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    name: Semantic-Release
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{github.ref}}
+      - name: Lint PR title going into Master
+        uses: amannn/action-semantic-pull-request@v1.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Install dependencies
+        run: yarn ci
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.npm_token }}
+        run: npx semantic-release  
 
     
