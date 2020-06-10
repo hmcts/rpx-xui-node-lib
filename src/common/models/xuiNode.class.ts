@@ -3,7 +3,7 @@ import { NextFunction, Request, RequestHandler, Response, Router } from 'express
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import * as path from 'path'
 import { hasKey } from '../util'
-import { AUTH } from '../../auth'
+import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail
 
 export class XuiNode extends EventEmitter {
     protected readonly router: Router
