@@ -1,3 +1,22 @@
+# [2.17.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.16.0...v2.17.0) (2020-06-10)
+
+
+### Bug Fixes
+
+* **pipeline:** fix stpes ([#58](https://github.com/hmcts/rpx-xui-node-lib/issues/58)) ([a976a0b](https://github.com/hmcts/rpx-xui-node-lib/commit/a976a0bcfacd3b625f60db2d582c7fba5f36a7a9))
+* **pipeline:** seperate pr title lint to another workflow ([#60](https://github.com/hmcts/rpx-xui-node-lib/issues/60)) ([8e4cee7](https://github.com/hmcts/rpx-xui-node-lib/commit/8e4cee7f39fa6dee9f1191b8d21094e0d1d1990b))
+
+
+### Features
+
+* **pipeline:** add PR commit rules for master ([#47](https://github.com/hmcts/rpx-xui-node-lib/issues/47)) ([45d89fe](https://github.com/hmcts/rpx-xui-node-lib/commit/45d89fe511316a619a43054362a0fcf612c67f8a))
+* **pipeline:** amend steps ([#56](https://github.com/hmcts/rpx-xui-node-lib/issues/56)) ([c6f5480](https://github.com/hmcts/rpx-xui-node-lib/commit/c6f5480f2a448bc3eca24ecd574bce53f2b02ef9))
+* **pipeline:** amend workflow steps ([#55](https://github.com/hmcts/rpx-xui-node-lib/issues/55)) ([a63b85e](https://github.com/hmcts/rpx-xui-node-lib/commit/a63b85e26ed4f7dfdbb59e520f601ee41507ac1d))
+* **pipeline:** Enforce commit rule ([#54](https://github.com/hmcts/rpx-xui-node-lib/issues/54)) ([165df77](https://github.com/hmcts/rpx-xui-node-lib/commit/165df779cc3a504e2e4d4cb5d556a3cadb9950b4))
+* **pipeline:** Enforce commit rule ([#65](https://github.com/hmcts/rpx-xui-node-lib/issues/65)) ([6d84057](https://github.com/hmcts/rpx-xui-node-lib/commit/6d8405755a302951e3dd801e359228835697fac5))
+* **pipeline:** Separate pr lint ([#64](https://github.com/hmcts/rpx-xui-node-lib/issues/64)) ([3303203](https://github.com/hmcts/rpx-xui-node-lib/commit/330320333a5569e0b2d38766eb57d115328e688d))
+* **pipeline:** test new steps ([#62](https://github.com/hmcts/rpx-xui-node-lib/issues/62)) ([b9c9d13](https://github.com/hmcts/rpx-xui-node-lib/commit/b9c9d13513c2470ebb3d0ff1d5385a98c987e6a0))
+
 # [2.16.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.15.2...v2.16.0) (2020-06-09)
 
 
