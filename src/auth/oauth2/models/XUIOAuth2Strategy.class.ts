@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 import { OAuth2Metadata } from './OAuth2Metadata.interface'
 import OAuth2Strategy from 'passport-oauth2'
 import { AxiosResponse } from 'axios'
@@ -10,14 +12,14 @@ export class XUIOAuth2Strategy extends OAuth2Strategy {
         this.options = options
     }
     userProfile = async (accessToken: string, done: (err?: Error | null, profile?: any) => void): Promise<void> => {
-        const userDetails = await this.getUserDetails(accessToken)
+        const userDetails = await getUserDetails(accessToken, this.options.logoutUrl)
         done(null, userDetails.data)
     }
+}
 
-    getUserDetails = (jwt: string): Promise<AxiosResponse> => {
-        const options = {
-            headers: { Authorization: `Bearer ${jwt}` },
-        }
-        return http.get(`${this.options.logoutUrl}/details`, options)
+export const getUserDetails = (jwt: string, logoutUrl: string): Promise<AxiosResponse> => {
+    const options = {
+        headers: { Authorization: `Bearer ${jwt}` },
     }
+    return http.get(`${logoutUrl}/details`, options)
 }
