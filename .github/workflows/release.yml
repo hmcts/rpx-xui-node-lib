@@ -1,25 +1,12 @@
 name: Build & Release
 
 on:
-  # Trigger analysis when creating a pull request or push to master 
   push:
     branches:
       - master
-  pull_request:
-      types: [opened, synchronize, reopened]
 
 jobs:
-  lint-pr-title:
-    if: github.ref != 'refs/heads/master' && github.event_name == 'pull_request'
-    name: Lint PR Title
-    runs-on: ubuntu-latest
-    steps:
-      - uses: amannn/action-semantic-pull-request@v1.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
   build:
-    needs: lint-pr-title
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repo
@@ -69,6 +56,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo ${{github.ref}}
+      - name: Lint PR title going into Master
+        uses: amannn/action-semantic-pull-request@v1.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Node.js
@@ -82,7 +73,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.npm_token }}
         run: npx semantic-release  
-
-
 
     
