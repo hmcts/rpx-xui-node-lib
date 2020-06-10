@@ -10,6 +10,15 @@ on:
       types: [opened, synchronize, reopened]
 
 jobs:
+  lint-pr-title:
+    if: github.ref != 'refs/heads/master' && github.event_name == 'pull_request'
+    name: Lint PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v1.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
   build:
     runs-on: ubuntu-latest
     steps:
