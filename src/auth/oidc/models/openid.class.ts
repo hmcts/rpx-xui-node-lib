@@ -7,6 +7,7 @@ import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { AUTH } from '../../auth.constants'
 import { Strategy as AuthStrategy } from '../../models'
 import { AuthOptions } from '../../models/authOptions.interface'
+import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 
 export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
@@ -34,6 +35,10 @@ export class OpenID extends AuthStrategy {
         }
     }
 
+    public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
+
+    // TODO: this.client should be passed in
+    // This function is hard to mock, come back to once we've mocked out easier prod code.
     public authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (req.isUnauthenticated()) {
             this.logger.log('unauthenticated, redirecting')
@@ -51,10 +56,12 @@ export class OpenID extends AuthStrategy {
                     // TODO: ideally we need to introspect the tokens but currently unsupported in IDAM
                     if (this.isTokenExpired(currentAccessToken)) {
                         this.logger.log('token expired')
+
                         req.session.passport.user.tokenset = await this.client.refresh(
                             req.session.passport.user.tokenset,
                         )
-                        req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.accessToken}`
+                        req.headers.Authorization = this.makeAuthorization(req.session.passport)
+
                         if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                             this.logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                             return next()
@@ -64,7 +71,7 @@ export class OpenID extends AuthStrategy {
                         }
                     } else {
                         this.logger.info('Adding req.headers.Authorization')
-                        req.headers.Authorization = `Bearer ${req.session.passport.user.tokenset.accessToken}`
+                        req.headers.Authorization = this.makeAuthorization(req.session.passport)
                         return next()
                     }
                 } catch (e) {
@@ -101,8 +108,8 @@ export class OpenID extends AuthStrategy {
         done: (err: any, user?: any, message?: any) => void,
     ): void => {
         if (!userinfo?.roles) {
-            this.logger.warn('User does not have any access roles.')
-            return done(null, false, { message: 'User does not have any access roles.' })
+            this.logger.warn(VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES)
+            return done(null, false, { message: VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES })
         }
         this.logger.info('verify okay, user:', userinfo)
 
@@ -127,6 +134,9 @@ export class OpenID extends AuthStrategy {
         passport.use(strategyName, strategy)
     }
 
+    // TODO: Don't throw errors from inside functions as it's side effecting,
+    // get the function to return and throw the error in the caller function.
+    // Why? - this makes the function more pure, and allows it to be easily testable.
     public createNewStrategy = async (options: OpenIDMetadata): Promise<Strategy<any, any>> => {
         const redirectUri = new URL(AUTH.ROUTE.OAUTH_CALLBACK, options.redirect_uri)
         this.issuer = await this.discover()

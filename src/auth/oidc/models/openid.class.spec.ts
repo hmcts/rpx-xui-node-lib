@@ -1,8 +1,13 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 import oidc from './openid.class'
 import passport from 'passport'
 import { Request, Response, NextFunction } from 'express'
 import { AUTH } from '../../auth.constants'
-import { Issuer, Strategy, Client } from 'openid-client'
+import { Issuer, Strategy, Client, TokenSet, UserinfoResponse } from 'openid-client'
+import { createMock } from 'ts-auto-mock'
+import { OpenIDMetadata } from './OpenIDMetadata.interface'
+import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 
 afterEach(() => {
     jest.restoreAllMocks()
@@ -277,4 +282,66 @@ test('test createNewStrategy', async () => {
     expect(spyDiscover).toBeCalled()
     expect(spyGetClient).toBeCalled()
     expect(spyOnStrategy).toBeCalled()
+})
+
+test('verify() Should return a no access roles messages if the User has no roles.', async () => {
+    const tokenSet = createMock<TokenSet>()
+    const userinfo = createMock<UserinfoResponse>()
+
+    const doneFunction = jest.fn((err, user, message) => {})
+
+    oidc.verify(tokenSet, userinfo, doneFunction)
+
+    expect(doneFunction).toBeCalledWith(null, false, { message: VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES })
+})
+
+test('verify() Should return the user token set if a User has roles.', async () => {
+    const tokenSet = createMock<TokenSet>()
+    const userinfo = createMock<UserinfoResponse>()
+
+    userinfo.roles = ['pui-case-manager']
+    tokenSet.access_token = 'access_token'
+    tokenSet.refresh_token = 'refresh_token'
+    tokenSet.id_token = 'id_token'
+
+    const userTokenSet = {
+        accessToken: tokenSet.access_token,
+        refreshToken: tokenSet.refresh_token,
+        idToken: tokenSet.id_token,
+    }
+
+    const doneFunction = jest.fn((err, user, message) => {})
+
+    oidc.verify(tokenSet, userinfo, doneFunction)
+
+    expect(doneFunction).toBeCalledWith(null, { tokenset: { ...tokenSet, ...userTokenSet }, userinfo })
+})
+
+test('Should return an object from getClientFromIssuer()', async () => {
+    const issuer = createMock<Issuer<Client>>()
+    const options = createMock<OpenIDMetadata>()
+
+    expect(oidc.getClientFromIssuer(issuer, options)).toBeDefined()
+})
+
+test('Should return an object from getClientFromIssuer()', async () => {
+    const req = createMock<Request>()
+    const res = createMock<Response>()
+    const next = createMock<NextFunction>()
+
+    expect(oidc.authenticate(req, res, next)).toBeInstanceOf(Promise)
+})
+
+test('makeAuthorization() Should make an authorisation string', async () => {
+    const passport = {
+        user: {
+            tokenset: {
+                accessToken: 'accessToken',
+            },
+        },
+    }
+
+    const expectedAuthorisation = `Bearer ${passport.user.tokenset.accessToken}`
+
+    expect(oidc.makeAuthorization(passport)).toEqual(expectedAuthorisation)
 })
