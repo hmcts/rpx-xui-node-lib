@@ -62,7 +62,7 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   release:
-    needs: [lint-pr-title, sonarcloud]
+    needs: sonarcloud
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     name: Semantic-Release
     runs-on: ubuntu-latest
