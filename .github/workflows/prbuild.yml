@@ -1,3 +1,5 @@
+name: Build & Release
+
 on:
   # Trigger analysis when pushing in master or pull requests, and when creating
   # a pull request. 
@@ -6,7 +8,7 @@ on:
       - master
   pull_request:
       types: [opened, synchronize, reopened]
-name: Build & Release
+
 jobs:
   build:
     runs-on: ubuntu-latest
