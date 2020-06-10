@@ -131,6 +131,14 @@ export class S2SAuth extends EventEmitter {
             return await this.generateToken()
         }
     }
+
+    /**
+     * Get all the events that this strategy emits
+     * @return string[]
+     */
+    public getEvents = (): string[] => {
+        return Object.values<string>(S2S.EVENT)
+    }
 }
 
 export default new S2SAuth()
