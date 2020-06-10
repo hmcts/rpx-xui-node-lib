@@ -11,12 +11,13 @@ import session from 'express-session'
 // in via const?
 export abstract class SessionStore extends events.EventEmitter {
     protected readonly logger = console
-    protected readonly router = Router({ mergeParams: true })
+    protected readonly router: Router
     public readonly storeName: string
 
-    protected constructor(storeName: string) {
+    protected constructor(storeName: string, router: Router) {
         super()
         this.storeName = storeName
+        this.router = router
     }
 
     public abstract getStore(options: SessionMetadata): session.Store

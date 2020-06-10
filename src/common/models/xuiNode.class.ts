@@ -5,16 +5,24 @@ import * as path from 'path'
 import { hasKey } from '../util'
 
 export class XuiNode extends EventEmitter {
-    protected readonly router = Router({ mergeParams: true })
-    // deliberately done it this way as we need session first
-    protected readonly middlewares = ['session', 'auth']
+    protected readonly router: Router
+    protected readonly middlewares: Array<string>
+    public constructor(
+        router: Router = Router({ mergeParams: true }),
+        // deliberately done it this way as we need session first
+        middlewares: Array<string> = ['session', 'auth'],
+    ) {
+        super()
+        this.router = router
+        this.middlewares = middlewares
+    }
 
     public configure = (options: XuiNodeOptions): RequestHandler => {
-        this.middlewares.forEach((middleware) => this.applyMiddleware(middleware, options))
+        this.middlewares.forEach(async (middleware) => await this.applyMiddleware(middleware, options))
         return this.router
     }
 
-    public applyMiddleware = async (middleware: string, options: XuiNodeOptions) => {
+    public applyMiddleware = async (middleware: string, options: XuiNodeOptions): Promise<void> => {
         if (hasKey(options, middleware)) {
             const baseDir = path.join(__dirname, '../../')
             const middlewareLayerOptions = options[middleware]
