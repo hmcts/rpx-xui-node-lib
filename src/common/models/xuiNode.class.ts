@@ -21,6 +21,8 @@ export class XuiNode extends EventEmitter {
 
     /**
      * the proxied authenticate method which is publicly exposed
+     * what constitutes a user being unauthenticated?
+     * @see https://github.com/jaredhanson/passport/blob/597e289d6fa27a2c35d16dd411de284123e3817e/lib/http/request.js#L92
      * @param req
      * @param res
      * @param next
