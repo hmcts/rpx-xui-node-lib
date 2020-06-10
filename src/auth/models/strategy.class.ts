@@ -227,7 +227,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     /**
      * Get all the events that this strategy emits
-     * @return string[]
+     * @return {string[]} - ['auth.authenticate.success']
      */
     public getEvents = (): string[] => {
         return Object.values<string>(AUTH.EVENT)

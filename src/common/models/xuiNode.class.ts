@@ -3,7 +3,8 @@ import { NextFunction, Request, RequestHandler, Response, Router } from 'express
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import * as path from 'path'
 import { hasKey } from '../util'
-import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail
+import { AUTH } from '../../auth/auth.constants'
+import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface' // NOTE: do not shorten this path, tests fail
 
 export class XuiNode extends EventEmitter {
     protected readonly router: Router
@@ -61,9 +62,9 @@ export class XuiNode extends EventEmitter {
 
     /**
      * helper method to proxy any listened events onto the correct middleware
-     * @param middleware
+     * @param middleware - any middleware layer e.g s2s, oidc, fileStore etc this typically extends EventEmitter
      */
-    public proxyEvents = (middleware: any): void => {
+    public proxyEvents = (middleware: XuiNodeMiddlewareInterface): void => {
         const events = middleware.getEvents()
         events.forEach((event: string) => {
             if (this.listenerCount(event)) {
