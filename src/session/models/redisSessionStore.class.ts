@@ -4,12 +4,13 @@ import session from 'express-session'
 import { default as connectRedis } from 'connect-redis'
 import { default as redis } from 'redis'
 import { SessionStore } from './sessionStore.class'
+import { Router } from 'express'
 
 export class RedisSessionStore extends SessionStore {
     protected redisClient: redis.RedisClient | any
 
-    constructor() {
-        super(SESSION.REDIS_STORE_NAME)
+    constructor(router = Router({ mergeParams: true })) {
+        super(SESSION.REDIS_STORE_NAME, router)
     }
 
     public getStore = (options: RedisSessionMetadata): connectRedis.RedisStore => {
