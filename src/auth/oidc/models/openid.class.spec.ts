@@ -390,7 +390,7 @@ test('getEvents ', () => {
 test('emitIfListenersExist with no listeners', () => {
     const done = jest.fn()
     const spy = jest.spyOn(oidc, 'listenerCount').mockReturnValue(0)
-    oidc.emitIfListenersExist('id', done, 'eventName')
+    oidc.emitIfListenersExist('eventName', 'id', done)
     expect(done).toBeCalledWith(null, 'id')
 })
 
@@ -398,7 +398,7 @@ test('emitIfListenersExist with listeners', () => {
     const spy = jest.spyOn(oidc, 'listenerCount').mockReturnValue(1)
     const spyEmit = jest.spyOn(oidc, 'emit')
     const done = jest.fn()
-    oidc.emitIfListenersExist('id', done, 'eventName')
+    oidc.emitIfListenersExist('eventName', 'id', done)
     expect(spyEmit).toBeCalledWith('eventName', 'id', done)
 })
 
