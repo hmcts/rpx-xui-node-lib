@@ -80,16 +80,14 @@ export abstract class Strategy extends events.EventEmitter {
             this.logger.log('logout start')
             const { accessToken, refreshToken } = req.session?.passport.user.tokenset
 
-            const auth = `Basic ${Buffer.from(`${this.options.clientID}:${this.options.clientSecret}`).toString(
-                'base64',
-            )}`
+            const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
 
-            await http.delete(`${this.options.logoutURL}/session/${accessToken}`, {
+            await http.delete(this.urlFromToken(this.options.logoutURL, accessToken), {
                 headers: {
                     Authorization: auth,
                 },
             })
-            await http.delete(`${this.options.logoutURL}/session/${refreshToken}`, {
+            await http.delete(this.urlFromToken(this.options.logoutURL, refreshToken), {
                 headers: {
                     Authorization: auth,
                 },
@@ -222,5 +220,13 @@ export abstract class Strategy extends events.EventEmitter {
         const expires = new Date(jwtData.exp * 1000).getTime()
         const now = new Date().getTime()
         return expires < now
+    }
+
+    public urlFromToken = (url: string, token: any): string => {
+        return `${url}/session/${token}`
+    }
+
+    public getAuthorization = (clientID: string, clientSecret: string, encoding = 'base64') => {
+        return `Basic ${Buffer.from(`${clientID}:${clientSecret}`).toString(encoding)}`
     }
 }
