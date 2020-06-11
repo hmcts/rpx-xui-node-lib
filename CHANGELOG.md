@@ -1,3 +1,10 @@
+# [2.18.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.17.0...v2.18.0) (2020-06-11)
+
+
+### Features
+
+* **XuiNode:** node wrapper event hooks ([#68](https://github.com/hmcts/rpx-xui-node-lib/issues/68)) ([d63d51c](https://github.com/hmcts/rpx-xui-node-lib/commit/d63d51c8f15bec5d4f2e1874ed899446dc6db6ea))
+
 # [2.17.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.16.0...v2.17.0) (2020-06-10)
 
 
