@@ -22,7 +22,7 @@ jobs:
       - id: earlyexit
         name: Early exit job
         if: failure()
-        run: exit 1
+        uses: andymckay/cancel-action@0.2
   
   build:
     runs-on: ubuntu-latest
