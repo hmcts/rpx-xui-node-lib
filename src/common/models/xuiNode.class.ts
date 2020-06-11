@@ -25,8 +25,8 @@ export class XuiNode extends EventEmitter {
     /**
      * Import a middleware layer.
      *
-     * @param {string} baseDir
-     * @param {string} middleware
+     * @param {string} baseDir - ie. /Users/username/projects/rpx-xui-node-lib/src/
+     * @param {string} middleware - ie. 's2s'
      * @return {Promise<any>}
      */
     public importMiddleware = async (baseDir: string, middleware: string) =>
