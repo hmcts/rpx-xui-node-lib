@@ -21,7 +21,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - id: earlyexit
         name: Early exit job
-        if: steps.lintpr.outputs.status == 'failure'
+        if: steps.lintpr.outputs.status != 'success'
         run: exit 1
   
   build:
