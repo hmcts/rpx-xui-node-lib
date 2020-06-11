@@ -131,6 +131,7 @@ export abstract class Strategy extends events.EventEmitter {
 
         if (options.useRoutes) {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
+            this.router.get(AUTH.ROUTE.KEEPALIVE_ROUTE, this.authRouteHandler)
             this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
             this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
             this.router.get(AUTH.ROUTE.LOGOUT, this.logout)
@@ -222,11 +223,27 @@ export abstract class Strategy extends events.EventEmitter {
         return expires < now
     }
 
+    /**
+     * Get session URL
+     * @return {string}
+     */
     public urlFromToken = (url: string, token: any): string => {
         return `${url}/session/${token}`
     }
 
-    public getAuthorization = (clientID: string, clientSecret: string, encoding = 'base64') => {
+    /**
+     * Get authorization from ClientID and secret
+     * @return {string}
+     */
+    public getAuthorization = (clientID: string, clientSecret: string, encoding = 'base64'): string => {
         return `Basic ${Buffer.from(`${clientID}:${clientSecret}`).toString(encoding)}`
+    }
+
+    /**
+     * Get all the events that this strategy emits
+     * @return {string[]} - ['auth.authenticate.success']
+     */
+    public getEvents = (): string[] => {
+        return Object.values<string>(AUTH.EVENT)
     }
 }

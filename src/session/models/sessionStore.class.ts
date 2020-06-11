@@ -2,6 +2,7 @@ import { RequestHandler, Router } from 'express'
 import * as events from 'events'
 import { SessionMetadata } from './sessionMetadata.interface'
 import session from 'express-session'
+import { SESSION } from '../session.constants'
 
 // TODO : This is hard to mock and test as it doesn't have
 // an exported default, and when one is added the compiler
@@ -45,5 +46,13 @@ export abstract class SessionStore extends events.EventEmitter {
             secret: options.secret,
             store,
         }
+    }
+
+    /**
+     * Get all the events that this strategy emits
+     * @return string[]
+     */
+    public getEvents = (): string[] => {
+        return Object.values<string>(SESSION.EVENT)
     }
 }
