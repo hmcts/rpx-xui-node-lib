@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Request, Response, Router } from 'express'
 import { Client, ClientAuthMethod, Issuer, ResponseType, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import passport from 'passport'
 import { OIDC } from '../oidc.constants'
@@ -13,8 +13,8 @@ export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
 
-    constructor() {
-        super(OIDC.STRATEGY_NAME)
+    constructor(router = Router({ mergeParams: true })) {
+        super(OIDC.STRATEGY_NAME, router)
     }
 
     public getOpenIDOptions = (authOptions: AuthOptions): OpenIDMetadata => {

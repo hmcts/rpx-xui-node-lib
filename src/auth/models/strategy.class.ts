@@ -10,7 +10,7 @@ import Joi from '@hapi/joi'
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
 
-    protected readonly router = Router({ mergeParams: true })
+    protected readonly router: Router
 
     protected readonly logger = console
 
@@ -31,9 +31,10 @@ export abstract class Strategy extends events.EventEmitter {
         tokenEndpointAuthMethod: '',
     }
 
-    protected constructor(strategyName: string) {
+    protected constructor(strategyName: string, router: Router) {
         super()
         this.strategyName = strategyName
+        this.router = router
     }
 
     public validateOptions(options: any): boolean {

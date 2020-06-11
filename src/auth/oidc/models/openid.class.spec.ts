@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import oidc from './openid.class'
+import oidc, { OpenID } from './openid.class'
 import passport from 'passport'
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction, Router } from 'express'
 import { AUTH } from '../../auth.constants'
 import { Issuer, Strategy, Client, TokenSet, UserinfoResponse } from 'openid-client'
 import { createMock } from 'ts-auto-mock'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 import { http } from '../../../common'
+import { AuthOptions } from '../../models/authOptions.interface'
 
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
@@ -399,4 +400,43 @@ test('emitIfListenersExist with listeners', () => {
     const done = jest.fn()
     oidc.emitIfListenersExist('id', done, 'eventName')
     expect(spyEmit).toBeCalledWith('eventName', 'id', done)
+})
+
+test('configure with useRoutes', () => {
+    const mockRouter = createMock<Router>()
+    const options = createMock<AuthOptions>()
+    const openId = new OpenID(mockRouter)
+    const spyOnValidateOptions = spyOn(openId, 'validateOptions')
+    const spyOnSer = spyOn(openId, 'serializeUser')
+    const spyOnDeSer = spyOn(openId, 'deserializeUser')
+    const spyOnPass = spyOn(openId, 'initializePassport')
+    const spyOnSes = spyOn(openId, 'initializeSession')
+    options.useRoutes = true
+    openId.configure(options)
+    expect(spyOnValidateOptions).toBeCalled()
+    expect(spyOnSer).toBeCalled()
+    expect(spyOnDeSer).toBeCalled()
+    expect(spyOnPass).toBeCalled()
+    expect(spyOnSes).toBeCalled()
+    expect(mockRouter.get).toBeCalledTimes(5)
+})
+
+test('configure without useRoutes', () => {
+    const mockRouter = createMock<Router>()
+    const options = createMock<AuthOptions>()
+    const openId = new OpenID(mockRouter)
+    const spyOnValidateOptions = spyOn(openId, 'validateOptions')
+    const spyOnSer = spyOn(openId, 'serializeUser')
+    const spyOnDeSer = spyOn(openId, 'deserializeUser')
+    const spyOnPass = spyOn(openId, 'initializePassport')
+    const spyOnSes = spyOn(openId, 'initializeSession')
+
+    options.useRoutes = false
+    openId.configure(options)
+    expect(spyOnValidateOptions).toBeCalled()
+    expect(spyOnSer).toBeCalled()
+    expect(spyOnDeSer).toBeCalled()
+    expect(spyOnPass).toBeCalled()
+    expect(spyOnSes).toBeCalled()
+    expect(mockRouter.get).not.toBeCalled()
 })
