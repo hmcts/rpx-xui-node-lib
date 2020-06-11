@@ -22,11 +22,21 @@ export class XuiNode extends EventEmitter {
         return this.router
     }
 
+    /**
+     * Import a middleware layer.
+     *
+     * @param {string} baseDir
+     * @param {string} middleware
+     * @return {Promise<any>}
+     */
+    public importMiddleware = async (baseDir: string, middleware: string) =>
+        await import(path.join(baseDir, middleware))
+
     public applyMiddleware = async (middleware: string, options: XuiNodeOptions): Promise<void> => {
         if (hasKey(options, middleware)) {
             const baseDir = path.join(__dirname, '../../')
             const middlewareLayerOptions = options[middleware]
-            const middlewareLayer = await import(path.join(baseDir, middleware))
+            const middlewareLayer = await this.importMiddleware(baseDir, middleware)
             this.applyMiddlewareLayer(middlewareLayer, middlewareLayerOptions)
         }
     }
