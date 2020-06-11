@@ -198,22 +198,14 @@ export abstract class Strategy extends events.EventEmitter {
     public serializeUser = (): void => {
         passport.serializeUser((user, done) => {
             this.logger.log(`${this.strategyName} serializeUser`, user)
-            if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
-                done(null, user)
-            } else {
-                this.emit(AUTH.EVENT.SERIALIZE_USER, user, done)
-            }
+            this.emitIfListenersExist(user, done, AUTH.EVENT.SERIALIZE_USER)
         })
     }
 
     public deserializeUser = (): void => {
         passport.deserializeUser((id, done) => {
             this.logger.log(`${this.strategyName} deserializeUser`, id)
-            if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
-                done(null, id)
-            } else {
-                this.emit(AUTH.EVENT.DESERIALIZE_USER, id, done)
-            }
+            this.emitIfListenersExist(id, done, AUTH.EVENT.DESERIALIZE_USER)
         })
     }
 
@@ -245,5 +237,13 @@ export abstract class Strategy extends events.EventEmitter {
      */
     public getEvents = (): string[] => {
         return Object.values<string>(AUTH.EVENT)
+    }
+
+    public emitIfListenersExist(eventObject: unknown, done: (err: any, id?: unknown) => void, eventName: string) {
+        if (!this.listenerCount(eventName)) {
+            done(null, eventObject)
+        } else {
+            this.emit(eventName, eventObject, done)
+        }
     }
 }

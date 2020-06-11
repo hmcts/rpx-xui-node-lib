@@ -367,7 +367,36 @@ test('urlFromToken ', () => {
 })
 
 test('getAuthorization', () => {
-    const auth = oidc.getAuthorization('clientID', 'secret')
-    const buffer = Buffer.from('clientID:secret').toString('base64')
+    let auth = oidc.getAuthorization('clientID', 'secret', 'base64')
+    let buffer = Buffer.from('clientID:secret').toString('base64')
     expect(auth).toEqual(`Basic ${buffer}`)
+
+    auth = oidc.getAuthorization('clientID', 'secret')
+    buffer = Buffer.from('clientID:secret').toString('base64')
+    expect(auth).toEqual(`Basic ${buffer}`)
+})
+
+test('getEvents ', () => {
+    const events = oidc.getEvents()
+    expect(events).toEqual([
+        'auth.authenticate.success',
+        'auth.serializeUser',
+        'auth.deserializeUser',
+        'auth.authenticate.failure',
+    ])
+})
+
+test('emitIfListenersExist with no listeners', () => {
+    const done = jest.fn()
+    const spy = jest.spyOn(oidc, 'listenerCount').mockReturnValue(0)
+    oidc.emitIfListenersExist('id', done, 'eventName')
+    expect(done).toBeCalledWith(null, 'id')
+})
+
+test('emitIfListenersExist with listeners', () => {
+    const spy = jest.spyOn(oidc, 'listenerCount').mockReturnValue(1)
+    const spyEmit = jest.spyOn(oidc, 'emit')
+    const done = jest.fn()
+    oidc.emitIfListenersExist('id', done, 'eventName')
+    expect(spyEmit).toBeCalledWith('eventName', 'id', done)
 })
