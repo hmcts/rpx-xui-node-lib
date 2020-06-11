@@ -40,11 +40,21 @@ export class XuiNode extends EventEmitter {
         return this.router
     }
 
+    /**
+     * Import a middleware layer.
+     *
+     * @param {string} baseDir - ie. /Users/username/projects/rpx-xui-node-lib/src/
+     * @param {string} middleware - ie. 's2s'
+     * @return {Promise<any>}
+     */
+    public importMiddleware = async (baseDir: string, middleware: string) =>
+        await import(path.join(baseDir, middleware))
+
     public applyMiddleware = async (middleware: string, options: XuiNodeOptions): Promise<void> => {
         if (hasKey(options, middleware)) {
             const baseDir = path.join(__dirname, '../../')
             const middlewareLayerOptions = options[middleware]
-            const middlewareLayer = await import(path.join(baseDir, middleware))
+            const middlewareLayer = await this.importMiddleware(baseDir, middleware)
             this.applyMiddlewareLayer(middlewareLayer, middlewareLayerOptions)
         }
     }
