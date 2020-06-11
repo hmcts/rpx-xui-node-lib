@@ -8,6 +8,7 @@ import { Issuer, Strategy, Client, TokenSet, UserinfoResponse } from 'openid-cli
 import { createMock } from 'ts-auto-mock'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
+import { http } from '../../../common'
 
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
@@ -45,7 +46,6 @@ test('OIDC loginHandler', () => {
 })
 
 test('OIDC jwTokenExpired', () => {
-    const spy = jest
     let jwtData = { exp: new Date('Jun 04, 2020').getTime() / 1000 }
     let isTokenExpired = oidc.jwTokenExpired(jwtData)
     expect(isTokenExpired).toBeTruthy()
@@ -340,4 +340,34 @@ test('makeAuthorization() Should make an authorisation string', async () => {
     const expectedAuthorisation = `Bearer ${passport.user.tokenset.accessToken}`
 
     expect(oidc.makeAuthorization(passport)).toEqual(expectedAuthorisation)
+})
+
+test('strategy logout', async () => {
+    const session = createMock<Express.Session>()
+    const mockRequest = createMock<Request>()
+    session.passport = {
+        user: {
+            tokenset: {
+                accessToken: 'access t',
+                refreshToken: 'refresh34',
+            },
+        },
+    }
+    mockRequest.session = session
+    const mockResponse = {} as Response
+    mockResponse.redirect = jest.fn()
+    const spyhttp = jest.spyOn(http, 'delete').mockImplementation(() => Promise.resolve({} as any))
+    await oidc.logout(mockRequest, mockResponse)
+    expect(spyhttp).toHaveBeenCalled()
+})
+
+test('urlFromToken ', () => {
+    const url = oidc.urlFromToken('http://localhost', 'token1')
+    expect(url).toEqual('http://localhost/session/token1')
+})
+
+test('getAuthorization', () => {
+    const auth = oidc.getAuthorization('clientID', 'secret')
+    const buffer = Buffer.from('clientID:secret').toString('base64')
+    expect(auth).toEqual(`Basic ${buffer}`)
 })
