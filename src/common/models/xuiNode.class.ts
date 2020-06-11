@@ -1,8 +1,10 @@
 import { EventEmitter } from 'events'
-import { RequestHandler, Router } from 'express'
+import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import * as path from 'path'
 import { hasKey } from '../util'
+import { AUTH } from '../../auth/auth.constants'
+import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface' // NOTE: do not shorten this path, tests fail
 
 export class XuiNode extends EventEmitter {
     protected readonly router: Router
@@ -15,6 +17,22 @@ export class XuiNode extends EventEmitter {
         super()
         this.router = router
         this.middlewares = middlewares
+    }
+
+    /**
+     * the proxied authenticate method which is publicly exposed
+     * what constitutes a user being unauthenticated?
+     * @see https://github.com/jaredhanson/passport/blob/597e289d6fa27a2c35d16dd411de284123e3817e/lib/http/request.js#L92
+     * @param req
+     * @param res
+     * @param next
+     */
+    public authenticate = (req: Request, res: Response, next: NextFunction): void => {
+        if (req.isUnauthenticated()) {
+            console.log('unauthenticated, redirecting')
+            return res.redirect(AUTH.ROUTE.LOGIN)
+        }
+        next()
     }
 
     public configure = (options: XuiNodeOptions): RequestHandler => {
@@ -35,9 +53,26 @@ export class XuiNode extends EventEmitter {
         for (const [key, value] of Object.entries(options)) {
             if (hasKey(middlewareLayer, key)) {
                 const middleware = middlewareLayer[key]
+                this.proxyEvents(middleware)
+                if (hasKey(middleware, 'authenticate')) {
+                    this.authenticate = middleware.authenticate
+                }
                 this.router.use(middleware.configure(value))
             }
         }
+    }
+
+    /**
+     * helper method to proxy any listened events onto the correct middleware
+     * @param middleware - any middleware layer e.g s2s, oidc, fileStore etc this typically extends EventEmitter
+     */
+    public proxyEvents = (middleware: XuiNodeMiddlewareInterface): void => {
+        const events = middleware.getEvents()
+        events.forEach((event: string) => {
+            if (this.listenerCount(event)) {
+                middleware.on(event, (...args: any) => this.emit(event, ...args))
+            }
+        })
     }
 }
 

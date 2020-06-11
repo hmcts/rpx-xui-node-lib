@@ -133,6 +133,7 @@ export abstract class Strategy extends events.EventEmitter {
 
         if (options.useRoutes) {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
+            this.router.get(AUTH.ROUTE.KEEPALIVE_ROUTE, this.authRouteHandler)
             this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
             this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
             this.router.get(AUTH.ROUTE.LOGOUT, this.logout)
@@ -222,5 +223,13 @@ export abstract class Strategy extends events.EventEmitter {
         const expires = new Date(jwtData.exp * 1000).getTime()
         const now = new Date().getTime()
         return expires < now
+    }
+
+    /**
+     * Get all the events that this strategy emits
+     * @return {string[]} - ['auth.authenticate.success']
+     */
+    public getEvents = (): string[] => {
+        return Object.values<string>(AUTH.EVENT)
     }
 }
