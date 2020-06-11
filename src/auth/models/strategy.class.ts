@@ -240,6 +240,9 @@ export abstract class Strategy extends events.EventEmitter {
         return Object.values<string>(AUTH.EVENT)
     }
 
+    /**
+     * emit Events if any subscribtions available
+     */
     public emitIfListenersExist(eventName: string, eventObject: unknown, done: (err: any, id?: unknown) => void) {
         if (!this.listenerCount(eventName)) {
             done(null, eventObject)
