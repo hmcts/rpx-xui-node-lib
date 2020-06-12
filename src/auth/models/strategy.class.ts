@@ -10,7 +10,7 @@ import Joi from '@hapi/joi'
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
 
-    protected readonly router = Router({ mergeParams: true })
+    protected readonly router: Router
 
     protected readonly logger = console
 
@@ -31,9 +31,10 @@ export abstract class Strategy extends events.EventEmitter {
         tokenEndpointAuthMethod: '',
     }
 
-    protected constructor(strategyName: string) {
+    protected constructor(strategyName: string, router: Router) {
         super()
         this.strategyName = strategyName
+        this.router = router
     }
 
     public validateOptions(options: any): boolean {
@@ -198,22 +199,14 @@ export abstract class Strategy extends events.EventEmitter {
     public serializeUser = (): void => {
         passport.serializeUser((user, done) => {
             this.logger.log(`${this.strategyName} serializeUser`, user)
-            if (!this.listenerCount(AUTH.EVENT.SERIALIZE_USER)) {
-                done(null, user)
-            } else {
-                this.emit(AUTH.EVENT.SERIALIZE_USER, user, done)
-            }
+            this.emitIfListenersExist(AUTH.EVENT.SERIALIZE_USER, user, done)
         })
     }
 
     public deserializeUser = (): void => {
         passport.deserializeUser((id, done) => {
             this.logger.log(`${this.strategyName} deserializeUser`, id)
-            if (!this.listenerCount(AUTH.EVENT.DESERIALIZE_USER)) {
-                done(null, id)
-            } else {
-                this.emit(AUTH.EVENT.DESERIALIZE_USER, id, done)
-            }
+            this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, done)
         })
     }
 
@@ -245,5 +238,16 @@ export abstract class Strategy extends events.EventEmitter {
      */
     public getEvents = (): string[] => {
         return Object.values<string>(AUTH.EVENT)
+    }
+
+    /**
+     * emit Events if any subscribtions available
+     */
+    public emitIfListenersExist(eventName: string, eventObject: unknown, done: (err: any, id?: unknown) => void) {
+        if (!this.listenerCount(eventName)) {
+            done(null, eventObject)
+        } else {
+            this.emit(eventName, eventObject, done)
+        }
     }
 }

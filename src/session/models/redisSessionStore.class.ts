@@ -35,9 +35,7 @@ export class RedisSessionStore extends SessionStore {
     // ( to check that it still works )
     public redisClientReadyListener = (redisClient: redis.RedisClient) => {
         redisClient.on('ready', () => {
-            if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_READY)) {
-                this.emit(SESSION.EVENT.REDIS_CLIENT_READY, redisClient)
-            }
+            this.emitEvent(SESSION.EVENT.REDIS_CLIENT_READY, redisClient)
             this.logger.info('redis client connected successfully')
         })
     }
@@ -46,10 +44,14 @@ export class RedisSessionStore extends SessionStore {
         redisClient.on('error', (error: any) => {
             this.logger.error(error)
             this.logger.info('redisClient is ', redisClient)
-            if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_ERROR)) {
-                this.emit(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
-            }
+            this.emitEvent(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
         })
+    }
+
+    public emitEvent = (eventName: string, eventObject: any) => {
+        if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_READY)) {
+            this.emit(eventName, eventObject)
+        }
     }
 }
 

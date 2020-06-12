@@ -5,10 +5,11 @@ import { Strategy } from '../../models'
 import { XUIOAuth2Strategy } from './XUIOAuth2Strategy.class'
 import { AuthOptions } from '../../models/authOptions.interface'
 import { OAuth2Metadata } from './OAuth2Metadata.interface'
+import { Router } from 'express'
 
 export class OAuth2 extends Strategy {
-    constructor() {
-        super(OAUTH2.STRATEGY_NAME)
+    constructor(router = Router({ mergeParams: true })) {
+        super(OAUTH2.STRATEGY_NAME, router)
     }
 
     public getOAuthOptions = (authOptions: AuthOptions): OAuth2Metadata => {
