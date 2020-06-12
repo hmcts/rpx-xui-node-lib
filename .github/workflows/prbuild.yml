@@ -14,16 +14,22 @@ jobs:
     name: Lint PR Title
     runs-on: ubuntu-latest
     steps:
-      - id: lintpr
-        name: Lint PR title
+      - name: Lint PR title
         uses: amannn/action-semantic-pull-request@v1.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - id: earlyexit
-        name: Early exit job
-        if: failure()
+      - name: Send slack 
+        if: failure() 
+        uses: sonots/slack-notice-action@v3
+        with:
+          status: ${{ job.status }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  
+      - name: Cancel job  
+        if: failure() 
         uses: andymckay/cancel-action@0.2
-  
+      
   build:
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +51,15 @@ jobs:
         with:
           name: code-coverage-report
           path: coverage 
-
+      - name: Send slack 
+        if: failure() 
+        uses: sonots/slack-notice-action@v3
+        with:
+          status: ${{ job.status }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
   sonarcloud:
     needs: build
     name: SonarCloud Trigger
@@ -66,6 +80,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: Send slack 
+      if: failure() 
+      uses: sonots/slack-notice-action@v3
+      with:
+        status: ${{ job.status }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   release:
     needs: sonarcloud
@@ -86,7 +108,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.npm_token }}
-        run: npx semantic-release  
+        run: npx semantic-release
+      - name: Send slack 
+        if: always() 
+        uses: sonots/slack-notice-action@v3
+        with:
+          status: ${{ job.status }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    
+
+      
+
+
 
 
 
