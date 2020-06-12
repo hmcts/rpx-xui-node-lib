@@ -52,14 +52,7 @@ jobs:
         with:
           name: code-coverage-report
           path: coverage 
-      - name: Send slack notification  
-        uses: sonots/slack-notice-action@v3
-        with:
-          status: ${{ job.status }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
-
+      
   sonarcloud:
     needs: build
     name: SonarCloud Trigger
@@ -80,13 +73,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    - name: Send slack notification  
-      uses: sonots/slack-notice-action@v3
-      with:
-        status: ${{ job.status }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
 
   release:
     needs: sonarcloud
@@ -108,13 +94,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.npm_token }}
         run: npx semantic-release
-      - name: Send slack notification  
-        uses: sonots/slack-notice-action@v3
-        with:
-          status: ${{ job.status }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
     
 
       
