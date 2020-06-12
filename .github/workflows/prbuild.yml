@@ -20,9 +20,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - id: earlyexit
-        name: Early exit job
-        if: failure()
+        name: Exit job
+        if: failure() 
         uses: andymckay/cancel-action@0.2
+      - name: Send slack notification  
+        uses: sonots/slack-notice-action@v3
+        with:
+          status: ${{ job.status }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 
+        if: always() # Pick up events even if the job fails or is canceled.
   
   build:
     runs-on: ubuntu-latest
