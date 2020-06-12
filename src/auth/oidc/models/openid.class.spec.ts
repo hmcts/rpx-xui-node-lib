@@ -77,7 +77,7 @@ test('OIDC OptionsMapper', () => {
         discoveryEndpoint: 'someEndpoint',
         issuerURL: 'issuer_url',
         logoutURL: 'logouturl',
-        callbackURL: 'redirect_uri',
+        callbackURL: 'http://localhost/callback',
         responseTypes: ['none'],
         scope: 'some scope',
         sessionKey: 'key',
