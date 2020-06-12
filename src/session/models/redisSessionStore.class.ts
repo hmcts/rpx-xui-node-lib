@@ -55,4 +55,4 @@ export class RedisSessionStore extends SessionStore {
     }
 }
 
-export default new RedisSessionStore()
+export const redisStore = new RedisSessionStore()
