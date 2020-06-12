@@ -23,7 +23,8 @@ jobs:
         with:
           status: failure
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}  
       - name: Cancel job  
         if: failure() 
         uses: andymckay/cancel-action@0.2
