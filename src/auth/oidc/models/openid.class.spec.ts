@@ -223,6 +223,42 @@ test('OIDC authenticate when authenticated but session and client not initialise
     expect(mockRedirect).toBeCalledWith(AUTH.ROUTE.LOGIN)
 })
 
+test('OIDC authenticate when authenticated but session and client initialised', async () => {
+    const mockRequest = {
+        body: {},
+    } as Request
+    mockRequest.isUnauthenticated = () => false
+    const mockResponse = {} as Response
+    const mockRedirect = jest.fn()
+    mockResponse.redirect = mockRedirect
+
+    const session = createMock<Express.Session>()
+    session.passport = {
+        user: {
+            tokenset: {
+                accessToken: 'token-access',
+            },
+            userinfo: {
+                roles: ['role1', 'role2'],
+            },
+        },
+    }
+    mockRequest.session = session
+    mockRequest.headers = {}
+    const mockClient = createMock<Client>()
+    const spyOnClient = jest.spyOn(oidc, 'getClient').mockReturnValue(mockClient)
+    const spyOnisTokenExpired = jest.spyOn(oidc, 'isTokenExpired').mockReturnValue(false)
+    const spyOnAuthorization = jest.spyOn(oidc, 'makeAuthorization').mockReturnValue('Auth')
+    const next = jest.fn()
+    await oidc.authenticate(mockRequest, mockResponse, next)
+    // expect(mockRedirect).toBeCalledWith(AUTH.ROUTE.LOGIN)
+    expect(spyOnClient).toBeCalled()
+    expect(spyOnisTokenExpired).toBeCalled()
+    expect(spyOnAuthorization).toBeCalled()
+    expect(mockRequest.headers.Authorization).toEqual('Auth')
+    expect(next).toHaveBeenCalled()
+})
+
 test('OIDC initialiseStrategy', async () => {
     const issuer = {}
     const spyGetOptions = jest.spyOn(oidc, 'getOpenIDOptions')

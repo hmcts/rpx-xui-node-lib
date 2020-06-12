@@ -45,7 +45,7 @@ export class OpenID extends AuthStrategy {
             return res.redirect(AUTH.ROUTE.LOGIN)
         }
 
-        if (req.session && this.client) {
+        if (req.session && this.getClient()) {
             const userDetails = req.session.passport.user
             const currentAccessToken = userDetails.tokenset.accessToken
 
@@ -57,7 +57,7 @@ export class OpenID extends AuthStrategy {
                     if (this.isTokenExpired(currentAccessToken)) {
                         this.logger.log('token expired')
 
-                        req.session.passport.user.tokenset = await this.client.refresh(
+                        req.session.passport.user.tokenset = await this.client?.refresh(
                             req.session.passport.user.tokenset,
                         )
                         req.headers.Authorization = this.makeAuthorization(req.session.passport)
@@ -168,6 +168,10 @@ export class OpenID extends AuthStrategy {
 
     public getClientFromIssuer = (issuer: Issuer<Client>, options: OpenIDMetadata): Client | undefined => {
         return new issuer.Client(options)
+    }
+
+    public getClient = (): Client | undefined => {
+        return this.client
     }
 }
 
