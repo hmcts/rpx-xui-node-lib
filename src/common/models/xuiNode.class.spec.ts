@@ -1,4 +1,4 @@
-import xuiNode, { XuiNode } from './xuiNode.class'
+import { xuiNode, XuiNode } from './xuiNode.class'
 import { Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 
@@ -25,5 +25,5 @@ test('applyMiddlewareLayer() should call importMiddleware with the baseDir and m
 
     xuiNode.applyMiddleware(middleware, xuiNodeOptions)
 
-    expect(spyOnImportMiddleware).toHaveBeenCalledWith(expect.any(String), middleware)
+    expect(spyOnImportMiddleware).toHaveBeenCalledWith(middleware)
 })

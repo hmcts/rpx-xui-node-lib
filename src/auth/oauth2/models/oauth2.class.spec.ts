@@ -1,4 +1,4 @@
-import oauth2 from './oauth2.class'
+import { oauth2 } from './oauth2.class'
 
 test('OIDC Auth', () => {
     expect(oauth2).toBeDefined()
