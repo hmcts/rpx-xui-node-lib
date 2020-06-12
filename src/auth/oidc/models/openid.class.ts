@@ -57,7 +57,7 @@ export class OpenID extends AuthStrategy {
                     if (this.isTokenExpired(currentAccessToken)) {
                         this.logger.log('token expired')
 
-                        req.session.passport.user.tokenset = await this.client?.refresh(
+                        req.session.passport.user.tokenset = await this.getClient()?.refresh(
                             req.session.passport.user.tokenset,
                         )
                         req.headers.Authorization = this.makeAuthorization(req.session.passport)

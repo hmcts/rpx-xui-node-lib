@@ -476,3 +476,8 @@ test('configure without useRoutes', () => {
     expect(spyOnSes).toBeCalled()
     expect(mockRouter.get).not.toBeCalled()
 })
+
+test('getClient', () => {
+    const client = oidc.getClient()
+    expect(client).toBeTruthy()
+})
