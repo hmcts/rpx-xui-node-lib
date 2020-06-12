@@ -113,3 +113,25 @@ test('sessionStore mapSessionOptions', () => {
     expect(result.secret).toEqual(options.secret)
     expect(result.store).toEqual(mockStore)
 })
+
+test('emitEvent with no subscribers', () => {
+    const mockRouter = createMock<Router>()
+    const redisSessionStore = new RedisSessionStore(mockRouter)
+
+    const spyEmit = jest.spyOn(redisSessionStore, 'emit')
+    const spy = jest.spyOn(redisSessionStore, 'listenerCount').mockReturnValue(0)
+    redisSessionStore.emitEvent('eventName', {})
+    expect(spy).toBeCalled()
+    expect(spyEmit).not.toBeCalled()
+})
+
+test('emitEvent with subscribers', () => {
+    const mockRouter = createMock<Router>()
+    const redisSessionStore = new RedisSessionStore(mockRouter)
+
+    const spyEmit = jest.spyOn(redisSessionStore, 'emit')
+    const spy = jest.spyOn(redisSessionStore, 'listenerCount').mockReturnValue(1)
+    redisSessionStore.emitEvent('eventName', {})
+    expect(spy).toBeCalled()
+    expect(spyEmit).toBeCalled()
+})

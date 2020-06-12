@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import oidc from './openid.class'
+import oidc, { OpenID } from './openid.class'
 import passport from 'passport'
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction, Router } from 'express'
 import { AUTH } from '../../auth.constants'
 import { Issuer, Strategy, Client, TokenSet, UserinfoResponse } from 'openid-client'
 import { createMock } from 'ts-auto-mock'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 import { http } from '../../../common'
+import { AuthOptions } from '../../models/authOptions.interface'
 
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
@@ -367,7 +368,75 @@ test('urlFromToken ', () => {
 })
 
 test('getAuthorization', () => {
-    const auth = oidc.getAuthorization('clientID', 'secret')
-    const buffer = Buffer.from('clientID:secret').toString('base64')
+    let auth = oidc.getAuthorization('clientID', 'secret', 'base64')
+    let buffer = Buffer.from('clientID:secret').toString('base64')
     expect(auth).toEqual(`Basic ${buffer}`)
+
+    auth = oidc.getAuthorization('clientID', 'secret')
+    buffer = Buffer.from('clientID:secret').toString('base64')
+    expect(auth).toEqual(`Basic ${buffer}`)
+})
+
+test('getEvents ', () => {
+    const events = oidc.getEvents()
+    expect(events).toEqual([
+        'auth.authenticate.success',
+        'auth.serializeUser',
+        'auth.deserializeUser',
+        'auth.authenticate.failure',
+    ])
+})
+
+test('emitIfListenersExist with no listeners', () => {
+    const done = jest.fn()
+    const spy = jest.spyOn(oidc, 'listenerCount').mockReturnValue(0)
+    oidc.emitIfListenersExist('eventName', 'id', done)
+    expect(done).toBeCalledWith(null, 'id')
+})
+
+test('emitIfListenersExist with listeners', () => {
+    const spy = jest.spyOn(oidc, 'listenerCount').mockReturnValue(1)
+    const spyEmit = jest.spyOn(oidc, 'emit')
+    const done = jest.fn()
+    oidc.emitIfListenersExist('eventName', 'id', done)
+    expect(spyEmit).toBeCalledWith('eventName', 'id', done)
+})
+
+test('configure with useRoutes', () => {
+    const mockRouter = createMock<Router>()
+    const options = createMock<AuthOptions>()
+    const openId = new OpenID(mockRouter)
+    const spyOnValidateOptions = spyOn(openId, 'validateOptions')
+    const spyOnSer = spyOn(openId, 'serializeUser')
+    const spyOnDeSer = spyOn(openId, 'deserializeUser')
+    const spyOnPass = spyOn(openId, 'initializePassport')
+    const spyOnSes = spyOn(openId, 'initializeSession')
+    options.useRoutes = true
+    openId.configure(options)
+    expect(spyOnValidateOptions).toBeCalled()
+    expect(spyOnSer).toBeCalled()
+    expect(spyOnDeSer).toBeCalled()
+    expect(spyOnPass).toBeCalled()
+    expect(spyOnSes).toBeCalled()
+    expect(mockRouter.get).toBeCalledTimes(5)
+})
+
+test('configure without useRoutes', () => {
+    const mockRouter = createMock<Router>()
+    const options = createMock<AuthOptions>()
+    const openId = new OpenID(mockRouter)
+    const spyOnValidateOptions = spyOn(openId, 'validateOptions')
+    const spyOnSer = spyOn(openId, 'serializeUser')
+    const spyOnDeSer = spyOn(openId, 'deserializeUser')
+    const spyOnPass = spyOn(openId, 'initializePassport')
+    const spyOnSes = spyOn(openId, 'initializeSession')
+
+    options.useRoutes = false
+    openId.configure(options)
+    expect(spyOnValidateOptions).toBeCalled()
+    expect(spyOnSer).toBeCalled()
+    expect(spyOnDeSer).toBeCalled()
+    expect(spyOnPass).toBeCalled()
+    expect(spyOnSes).toBeCalled()
+    expect(mockRouter.get).not.toBeCalled()
 })
