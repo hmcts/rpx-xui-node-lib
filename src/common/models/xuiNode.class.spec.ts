@@ -27,3 +27,27 @@ test('applyMiddlewareLayer() should call importMiddleware with the baseDir and m
 
     expect(spyOnImportMiddleware).toHaveBeenCalledWith(middleware)
 })
+
+test('importMiddleware should throw error', async () => {
+    await xuiNode.importMiddleware('some').catch((error) => {
+        expect(error.message).toEqual('unknown middleware')
+    })
+})
+
+test('importMiddleware should return auth', async () => {
+    const auth = (await xuiNode.importMiddleware('auth')) as any
+    expect(auth.oidc).toBeTruthy()
+    expect(auth.OIDC).toBeTruthy()
+    expect(auth.oauth2).toBeTruthy()
+    expect(auth.XUIOAuth2Strategy).toBeTruthy()
+    expect(auth.OAUTH2).toBeTruthy()
+    expect(auth.s2s).toBeTruthy()
+    expect(auth.S2S).toBeTruthy()
+})
+
+test('importMiddleware should return session', async () => {
+    const session = (await xuiNode.importMiddleware('session')) as any
+    expect(session.redisStore).toBeTruthy()
+    expect(session.fileStore).toBeTruthy()
+    expect(session.SESSION).toBeTruthy()
+})
