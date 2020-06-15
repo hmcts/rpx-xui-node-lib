@@ -1,6 +1,8 @@
 import { xuiNode, XuiNode } from './xuiNode.class'
 import { Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
+import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
+import { createMock } from 'ts-auto-mock'
 
 test('xuiNode isTruthy', () => {
     expect(xuiNode).toBeTruthy()
@@ -50,4 +52,14 @@ test('importMiddleware should return session', async () => {
     expect(session.redisStore).toBeTruthy()
     expect(session.fileStore).toBeTruthy()
     expect(session.SESSION).toBeTruthy()
+})
+
+test('proxyEvents ', () => {
+    const middleWare = createMock<XuiNodeMiddlewareInterface>()
+    const spyOnMiddleware = jest.spyOn(middleWare, 'getEvents').mockReturnValue(['event1', 'event2'])
+    const spyOnXuinode = jest.spyOn(xuiNode, 'listenerCount').mockReturnValue(0)
+    xuiNode.proxyEvents(middleWare)
+    expect(spyOnMiddleware).toHaveBeenCalledWith()
+    expect(spyOnXuinode).toHaveBeenCalledWith('event1')
+    expect(spyOnXuinode).toHaveBeenCalledWith('event2')
 })
