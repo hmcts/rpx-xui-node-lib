@@ -35,4 +35,4 @@ export class OAuth2 extends Strategy {
     }
 }
 
-export default new OAuth2()
+export const oauth2 = new OAuth2()

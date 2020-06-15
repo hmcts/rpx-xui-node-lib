@@ -141,4 +141,4 @@ export class S2SAuth extends EventEmitter {
     }
 }
 
-export default new S2SAuth()
+export const s2s = new S2SAuth()

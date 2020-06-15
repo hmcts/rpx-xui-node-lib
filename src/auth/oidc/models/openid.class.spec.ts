@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import oidc, { OpenID } from './openid.class'
+import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
 import { Request, Response, NextFunction, Router } from 'express'
 import { AUTH } from '../../auth.constants'

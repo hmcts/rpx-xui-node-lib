@@ -19,4 +19,4 @@ export class FileSessionStore extends SessionStore {
     }
 }
 
-export default new FileSessionStore()
+export const fileStore = new FileSessionStore()

@@ -175,4 +175,4 @@ export class OpenID extends AuthStrategy {
     }
 }
 
-export default new OpenID()
+export const oidc = new OpenID()

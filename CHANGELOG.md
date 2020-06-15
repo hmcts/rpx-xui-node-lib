@@ -1,3 +1,10 @@
+## [2.18.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.18.0...v2.18.1) (2020-06-12)
+
+
+### Bug Fixes
+
+* **xuinode:** fixed dynamic import issue when compiling with webpack ([#75](https://github.com/hmcts/rpx-xui-node-lib/issues/75)) ([215f80e](https://github.com/hmcts/rpx-xui-node-lib/commit/215f80e0b5fcb1d057eec9b53e0853292e87fd37))
+
 # [2.18.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.17.0...v2.18.0) (2020-06-11)
 
 

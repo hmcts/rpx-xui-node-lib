@@ -1,14 +1,14 @@
 import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
-import * as path from 'path'
 import { hasKey } from '../util'
-import { AUTH } from '../../auth/auth.constants'
-import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface' // NOTE: do not shorten this path, tests fail
+import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail
+import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
 
 export class XuiNode extends EventEmitter {
     protected readonly router: Router
     protected readonly middlewares: Array<string>
+    public authenticateMiddleware: any
     public constructor(
         router: Router = Router({ mergeParams: true }),
         // deliberately done it this way as we need session first
@@ -19,6 +19,11 @@ export class XuiNode extends EventEmitter {
         this.middlewares = middlewares
     }
 
+    public authenticate = (req: Request, res: Response, next: NextFunction): void => {
+        const authMiddleware = this.authenticateMiddleware ? this.authenticateMiddleware : this.authenticateDefault
+        authMiddleware(req, res, next)
+    }
+
     /**
      * the proxied authenticate method which is publicly exposed
      * what constitutes a user being unauthenticated?
@@ -27,7 +32,8 @@ export class XuiNode extends EventEmitter {
      * @param res
      * @param next
      */
-    public authenticate = (req: Request, res: Response, next: NextFunction): void => {
+    public authenticateDefault = (req: Request, res: Response, next: NextFunction): void => {
+        console.log('xuiNode AUTHENTICATE CALLED!!!!!')
         if (req.isUnauthenticated()) {
             console.log('unauthenticated, redirecting')
             return res.redirect(AUTH.ROUTE.LOGIN)
@@ -43,18 +49,24 @@ export class XuiNode extends EventEmitter {
     /**
      * Import a middleware layer.
      *
-     * @param {string} baseDir - ie. /Users/username/projects/rpx-xui-node-lib/src/
      * @param {string} middleware - ie. 's2s'
      * @return {Promise<any>}
      */
-    public importMiddleware = async (baseDir: string, middleware: string) =>
-        await import(path.join(baseDir, middleware))
+    public importMiddleware = async (middleware: string) => {
+        switch (middleware) {
+            case 'auth':
+                return await import('../../auth')
+            case 'session':
+                return await import('../../session')
+            default:
+                throw new Error('unknown middleware')
+        }
+    }
 
     public applyMiddleware = async (middleware: string, options: XuiNodeOptions): Promise<void> => {
         if (hasKey(options, middleware)) {
-            const baseDir = path.join(__dirname, '../../')
             const middlewareLayerOptions = options[middleware]
-            const middlewareLayer = await this.importMiddleware(baseDir, middleware)
+            const middlewareLayer = await this.importMiddleware(middleware)
             this.applyMiddlewareLayer(middlewareLayer, middlewareLayerOptions)
         }
     }
@@ -65,7 +77,7 @@ export class XuiNode extends EventEmitter {
                 const middleware = middlewareLayer[key]
                 this.proxyEvents(middleware)
                 if (hasKey(middleware, 'authenticate')) {
-                    this.authenticate = middleware.authenticate
+                    this.authenticateMiddleware = middleware.authenticate
                 }
                 this.router.use(middleware.configure(value))
             }
@@ -86,4 +98,4 @@ export class XuiNode extends EventEmitter {
     }
 }
 
-export default new XuiNode()
+export const xuiNode = new XuiNode()

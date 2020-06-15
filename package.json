@@ -1,13 +1,13 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.18.0",
+  "version": "2.18.1",
   "description": "Common Nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest --env node",
     "test:coverage": "jest --env node --coverage",
-    "build": "tsc",
+    "build": "tsc --declarationMap --sourceMap",
     "lint": "eslint \"*/**/*.{js,ts}\" --quiet --fix",
     "commit": "git cz",
     "ci:lint": "eslint \"*/**/*.{js,ts}\" --quiet",
