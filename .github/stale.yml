@@ -17,4 +17,5 @@ markComment: >
 # Comment to post when closing a stale issue. Set to `false` to disable
 closeComment: >
   This issue is being closed automatically as it was stale
+  
 
