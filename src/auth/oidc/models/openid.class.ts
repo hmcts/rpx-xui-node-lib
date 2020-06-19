@@ -13,7 +13,7 @@ export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
 
-    constructor(router = Router({ mergeParams: true })) {
+    constructor(router: Router = Router({ mergeParams: true })) {
         super(OIDC.STRATEGY_NAME, router)
     }
 
@@ -34,8 +34,6 @@ export class OpenID extends AuthStrategy {
             /* eslint-enable @typescript-eslint/camelcase */
         }
     }
-
-    public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
 
     // TODO: this.client should be passed in
     // This function is hard to mock, come back to once we've mocked out easier prod code.
@@ -92,8 +90,7 @@ export class OpenID extends AuthStrategy {
 
         this.logger.log('metadata', metadata)
 
-        const newIssuer = this.newIssuer(metadata)
-        return newIssuer
+        return this.newIssuer(metadata)
     }
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {

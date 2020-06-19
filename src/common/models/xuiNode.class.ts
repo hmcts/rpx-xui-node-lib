@@ -55,9 +55,9 @@ export class XuiNode extends EventEmitter {
     public importMiddleware = async (middleware: string) => {
         switch (middleware) {
             case 'auth':
-                return await import('../../auth')
+                return await import(/* webpackChunkName: "xuiNodeAuth" */ '../../auth')
             case 'session':
-                return await import('../../session')
+                return await import(/* webpackChunkName: "xuiNodeSession" */ '../../session')
             default:
                 throw new Error('unknown middleware')
         }
