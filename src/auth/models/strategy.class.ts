@@ -137,6 +137,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
             this.router.get(AUTH.ROUTE.LOGOUT, this.logout)
         }
+        this.addHeaders()
         this.emit(`${this.strategyName}.bootstrap.success`)
         return this.router
     }
@@ -174,6 +175,16 @@ export abstract class Strategy extends events.EventEmitter {
         next()
     }
 
+    public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
+
+    public setHeaders = (req: Request, res: Response, next: NextFunction): void => {
+        if (req.session?.passport?.user) {
+            req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
+            req.headers.Authorization = this.makeAuthorization(req.session.passport)
+        }
+        next()
+    }
+
     public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response<any>): void => {
         req.logIn(user, (err) => {
             if (err) {
@@ -194,6 +205,10 @@ export abstract class Strategy extends events.EventEmitter {
 
     public initializeSession = (): void => {
         this.router.use(passport.session())
+    }
+
+    public addHeaders = (): void => {
+        this.router.use(this.setHeaders)
     }
 
     public serializeUser = (): void => {
