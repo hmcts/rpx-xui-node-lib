@@ -1,3 +1,10 @@
+# [2.19.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.18.1...v2.19.0) (2020-06-19)
+
+
+### Features
+
+* **auth:** added bearer tokens and roles onto request headers ([#83](https://github.com/hmcts/rpx-xui-node-lib/issues/83)) ([809e0a9](https://github.com/hmcts/rpx-xui-node-lib/commit/809e0a9bd5383ab5cbe6e9023993c1e02ca576c0))
+
 ## [2.18.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.18.0...v2.18.1) (2020-06-12)
 
 
