@@ -2,7 +2,6 @@ import { NextFunction, Request, Response, Router } from 'express'
 import { Client, ClientAuthMethod, Issuer, ResponseType, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import passport from 'passport'
 import { OIDC } from '../oidc.constants'
-import { URL } from 'url'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { AUTH } from '../../auth.constants'
 import { Strategy as AuthStrategy } from '../../models'
@@ -25,7 +24,6 @@ export class OpenID extends AuthStrategy {
             discovery_endpoint: authOptions.discoveryEndpoint,
             issuer_url: authOptions.issuerURL,
             logout_url: authOptions.logoutURL,
-            redirect_uri: authOptions.callbackURL,
             response_types: authOptions.responseTypes as ResponseType[],
             scope: authOptions.scope,
             sessionKey: authOptions.sessionKey,
@@ -135,7 +133,6 @@ export class OpenID extends AuthStrategy {
     // get the function to return and throw the error in the caller function.
     // Why? - this makes the function more pure, and allows it to be easily testable.
     public createNewStrategy = async (options: OpenIDMetadata): Promise<Strategy<any, any>> => {
-        const redirectUri = new URL(AUTH.ROUTE.OAUTH_CALLBACK, options.redirect_uri)
         this.issuer = await this.discover()
         if (!this.issuer) {
             throw new Error('auto discovery failed')
@@ -144,17 +141,15 @@ export class OpenID extends AuthStrategy {
         if (!this.client) {
             throw new Error('client not initialised')
         }
-        return this.getNewStrategy(redirectUri, options, this.client)
+        return this.getNewStrategy(options, this.client)
     }
 
-    public getNewStrategy = (redirectUri: URL, options: OpenIDMetadata, client: Client): Strategy<any, Client> => {
+    public getNewStrategy = (options: OpenIDMetadata, client: Client): Strategy<any, Client> => {
         return new Strategy(
             {
                 client,
                 params: {
                     prompt: OIDC.PROMPT,
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    redirect_uri: redirectUri.toString(),
                     scope: options.scope,
                 },
                 sessionKey: options.sessionKey,
