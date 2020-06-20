@@ -1,3 +1,10 @@
+# [2.20.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.19.0...v2.20.0) (2020-06-20)
+
+
+### Features
+
+* **callback url:** middleware for dynamic callback ([#84](https://github.com/hmcts/rpx-xui-node-lib/issues/84)) ([dd5915f](https://github.com/hmcts/rpx-xui-node-lib/commit/dd5915f755bfd732bb9703c1d3612ea453e36015))
+
 # [2.19.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.18.1...v2.19.0) (2020-06-19)
 
 
