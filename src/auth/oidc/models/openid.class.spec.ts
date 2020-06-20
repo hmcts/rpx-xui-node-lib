@@ -91,7 +91,6 @@ test('OIDC OptionsMapper', () => {
     expect(openIdOptions.discovery_endpoint).toEqual(options.discoveryEndpoint)
     expect(openIdOptions.issuer_url).toEqual(options.issuerURL)
     expect(openIdOptions.logout_url).toEqual(options.logoutURL)
-    expect(openIdOptions.redirect_uri).toEqual(options.callbackURL)
     expect(openIdOptions.response_types).toEqual(options.responseTypes)
     expect(openIdOptions.scope).toEqual(options.scope)
     expect(openIdOptions.sessionKey).toEqual(options.sessionKey)

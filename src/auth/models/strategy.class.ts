@@ -6,6 +6,7 @@ import jwtDecode from 'jwt-decode'
 import { http } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from '@hapi/joi'
+import * as URL from 'url'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -73,7 +74,22 @@ export abstract class Strategy extends events.EventEmitter {
 
     public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
         this.logger.log('loginHandler Hit')
-        return passport.authenticate(this.strategyName)(req, res, next)
+        return passport.authenticate(this.strategyName, {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            redirect_uri: req.session?.callbackURL,
+        } as any)(req, res, next)
+    }
+
+    public setCallbackURL = (req: Request, res: Response, next: NextFunction): void => {
+        if (req.session && !req.session.callbackURL) {
+            req.app.set('trust proxy', true)
+            req.session.callbackURL = URL.format({
+                protocol: req.protocol,
+                host: req.get('host'),
+                pathname: this.options.callbackURL,
+            })
+        }
+        next()
     }
 
     public logout = async (req: Request, res: Response): Promise<void> => {
@@ -97,7 +113,6 @@ export abstract class Strategy extends events.EventEmitter {
             //passport provides this method on request object
             req.logout()
 
-            this.logger.log('noredirect => ', req.query.noredirect)
             if (req.query.noredirect) {
                 res.status(200).send({ message: 'You have been logged out!' })
                 return Promise.resolve()
@@ -133,7 +148,7 @@ export abstract class Strategy extends events.EventEmitter {
         if (options.useRoutes) {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
             this.router.get(AUTH.ROUTE.KEEPALIVE_ROUTE, this.authRouteHandler)
-            this.router.get(AUTH.ROUTE.LOGIN, this.loginHandler)
+            this.router.get(AUTH.ROUTE.LOGIN, this.setCallbackURL, this.loginHandler)
             this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
             this.router.get(AUTH.ROUTE.LOGOUT, this.logout)
         }
@@ -143,23 +158,30 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
-        passport.authenticate(this.strategyName, (error, user, info) => {
-            this.logger.info('inside passport authenticate')
-            this.logger.error(error)
-            if (error) {
+        passport.authenticate(
+            this.strategyName,
+            {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                redirect_uri: req.session?.callbackURL,
+            } as any,
+            (error, user, info) => {
+                this.logger.info('inside passport authenticate')
                 this.logger.error(error)
-                // return next(error);
-            }
-            if (info) {
-                this.logger.info(info)
-                // return next(info);
-            }
-            if (!user) {
-                this.logger.info('No user found, redirecting')
-                return res.redirect(AUTH.ROUTE.LOGIN)
-            }
-            this.verifyLogin(req, user, next, res)
-        })(req, res, next)
+                if (error) {
+                    this.logger.error(error)
+                    // return next(error);
+                }
+                if (info) {
+                    this.logger.info(info)
+                    // return next(info);
+                }
+                if (!user) {
+                    this.logger.info('No user found, redirecting')
+                    return res.redirect(AUTH.ROUTE.LOGIN)
+                }
+                this.verifyLogin(req, user, next, res)
+            },
+        )(req, res, next)
     }
 
     public isTokenExpired = (token: string): boolean => {
@@ -191,7 +213,7 @@ export abstract class Strategy extends events.EventEmitter {
                 return next(err)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
-                this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`, req.session)
+                this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                 res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
             } else {
                 this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, this, false, req, res, next)
@@ -213,14 +235,14 @@ export abstract class Strategy extends events.EventEmitter {
 
     public serializeUser = (): void => {
         passport.serializeUser((user, done) => {
-            this.logger.log(`${this.strategyName} serializeUser`, user)
+            this.logger.log(`${this.strategyName} serializeUser`)
             this.emitIfListenersExist(AUTH.EVENT.SERIALIZE_USER, user, done)
         })
     }
 
     public deserializeUser = (): void => {
         passport.deserializeUser((id, done) => {
-            this.logger.log(`${this.strategyName} deserializeUser`, id)
+            this.logger.log(`${this.strategyName} deserializeUser`)
             this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, done)
         })
     }
@@ -258,7 +280,11 @@ export abstract class Strategy extends events.EventEmitter {
     /**
      * emit Events if any subscribtions available
      */
-    public emitIfListenersExist(eventName: string, eventObject: unknown, done: (err: any, id?: unknown) => void) {
+    public emitIfListenersExist = (
+        eventName: string,
+        eventObject: unknown,
+        done: (err: any, id?: unknown) => void,
+    ): void => {
         if (!this.listenerCount(eventName)) {
             done(null, eventObject)
         } else {
