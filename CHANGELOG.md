@@ -1,3 +1,10 @@
+## [2.20.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.20.0...v2.20.1) (2020-06-21)
+
+
+### Bug Fixes
+
+* **oidc:** refresh handler not being called ([#85](https://github.com/hmcts/rpx-xui-node-lib/issues/85)) ([e2ad5a0](https://github.com/hmcts/rpx-xui-node-lib/commit/e2ad5a0150aaf5d4332cdd1843c59a442ad180f9))
+
 # [2.20.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.19.0...v2.20.0) (2020-06-20)
 
 
