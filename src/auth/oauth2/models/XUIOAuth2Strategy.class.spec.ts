@@ -2,6 +2,7 @@ import { getUserDetails } from './XUIOAuth2Strategy.class'
 import { http } from '../../../common'
 
 test('getUserDetails() should return a promise', () => {
+    jest.spyOn(http, 'get')
     const jwt = 'jwtString'
     const logoutUrl = 'http://logout.url'
 

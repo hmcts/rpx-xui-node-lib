@@ -132,6 +132,10 @@ export abstract class Strategy extends events.EventEmitter {
         return res.send(req.isAuthenticated())
     }
 
+    public keepAliveHandler = (req: Request, res: Response, next: NextFunction): void => {
+        next()
+    }
+
     public configure = (options: AuthOptions): RequestHandler => {
         this.validateOptions(options)
         this.options = options
@@ -144,6 +148,7 @@ export abstract class Strategy extends events.EventEmitter {
 
         this.initializePassport()
         this.initializeSession()
+        this.initializeKeepAlive()
 
         if (options.useRoutes) {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
@@ -229,6 +234,10 @@ export abstract class Strategy extends events.EventEmitter {
         this.router.use(passport.session())
     }
 
+    public initializeKeepAlive = (): void => {
+        this.router.use(this.keepAliveHandler)
+    }
+
     public addHeaders = (): void => {
         this.router.use(this.setHeaders)
     }
@@ -278,7 +287,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /**
-     * emit Events if any subscribtions available
+     * emit Events if any subscriptions available
      */
     public emitIfListenersExist = (
         eventName: string,

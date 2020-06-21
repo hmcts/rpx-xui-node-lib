@@ -35,17 +35,14 @@ export class OpenID extends AuthStrategy {
 
     // TODO: this.client should be passed in
     // This function is hard to mock, come back to once we've mocked out easier prod code.
-    public authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        if (req.isUnauthenticated()) {
-            this.logger.log('unauthenticated, redirecting')
-            return res.redirect(AUTH.ROUTE.LOGIN)
+    public keepAliveHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        if (!req.session?.passport?.user) {
+            return next()
         }
 
-        if (req.session && this.getClient()) {
+        if (req.isAuthenticated() && this.getClient()) {
             const userDetails = req.session.passport.user
             const currentAccessToken = userDetails.tokenset.accessToken
-
-            req.headers['user-roles'] = userDetails.userinfo.roles.join()
 
             if (currentAccessToken) {
                 try {
@@ -53,22 +50,19 @@ export class OpenID extends AuthStrategy {
                     if (this.isTokenExpired(currentAccessToken)) {
                         this.logger.log('token expired')
 
-                        req.session.passport.user.tokenset = await this.getClient()?.refresh(
-                            req.session.passport.user.tokenset,
+                        const tokenSet: TokenSet | undefined = await this.getClient()?.refresh(
+                            req.session.passport.user.tokenset.refreshToken,
                         )
-                        req.headers.Authorization = this.makeAuthorization(req.session.passport)
+
+                        req.session.passport.user.tokenset = this.convertTokenSet(tokenSet)
 
                         if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                             this.logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                             return next()
                         } else {
-                            this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, true, req, res, next)
+                            this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, this, true, req, res, next)
                             return
                         }
-                    } else {
-                        this.logger.info('Adding req.headers.Authorization')
-                        req.headers.Authorization = this.makeAuthorization(req.session.passport)
-                        return next()
                     }
                 } catch (e) {
                     this.logger.error('refresh error =>', e)
@@ -76,7 +70,7 @@ export class OpenID extends AuthStrategy {
                 }
             }
         }
-        return res.redirect(AUTH.ROUTE.LOGIN)
+        next()
     }
 
     public discover = async (): Promise<Issuer<Client>> => {
@@ -97,6 +91,14 @@ export class OpenID extends AuthStrategy {
         this.useStrategy(this.strategyName, strategy)
     }
 
+    public convertTokenSet = (tokenset: TokenSet | undefined): any => {
+        return {
+            accessToken: tokenset?.access_token,
+            refreshToken: tokenset?.refresh_token,
+            idToken: tokenset?.id_token,
+        }
+    }
+
     public verify = (
         tokenset: TokenSet,
         userinfo: UserinfoResponse,
@@ -108,12 +110,7 @@ export class OpenID extends AuthStrategy {
         }
         this.logger.info('verify okay, user:', userinfo)
 
-        const userTokenSet = {
-            accessToken: tokenset.access_token,
-            refreshToken: tokenset.refresh_token,
-            idToken: tokenset.id_token,
-        }
-        return done(null, { tokenset: { ...tokenset, ...userTokenSet }, userinfo })
+        return done(null, { tokenset: this.convertTokenSet(tokenset), userinfo })
     }
 
     public discoverIssuer = async (): Promise<any> => {
