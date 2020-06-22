@@ -177,6 +177,7 @@ test('OIDC verifyLogin happy Path with subscribtion', () => {
     })
     oidc.verifyLogin(mockRequest, user, next, mockResponse)
     expect(next).not.toBeCalledWith({})
+    oidc.removeAllListeners()
 })
 
 test('OIDC discoverIssuer', async () => {
@@ -507,4 +508,61 @@ test('keepAliveHandler session but not authenticated', async () => {
 
     await oidc.keepAliveHandler(mockRequest, mockResponse, next)
     expect(next).toBeCalled()
+})
+
+test('keepAliveHandler session and isAuthenticated', async () => {
+    oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (authObject, isVerify) => {
+        expect(isVerify).toBeFalsy()
+    })
+    const mockRequest = {
+        body: {},
+    } as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+    const session = createMock<Express.Session>()
+    session.passport = {
+        user: {
+            tokenset: {
+                accessToken: 'token-access',
+            },
+            userinfo: {
+                roles: ['role1', 'role2'],
+            },
+        },
+    }
+    mockRequest.session = session
+    const isAuth = jest.fn()
+    isAuth.mockReturnValue(true)
+    mockRequest.isAuthenticated = isAuth
+    const spyOnClient = jest.spyOn(oidc, 'getClient')
+    const client = createMock<Client>()
+    spyOnClient.mockReturnValue(client)
+
+    const tokenSet = createMock<TokenSet>()
+    const spyOnRefresh = jest.fn().mockReturnValue(tokenSet)
+    client.refresh = spyOnRefresh
+
+    const spyConvertTokenSet = jest.spyOn(oidc, 'convertTokenSet')
+    const convertedTokenSet = createMock<TokenSet>()
+    spyConvertTokenSet.mockReturnValue(convertedTokenSet)
+
+    const spyOnIsTokenExpired = jest.spyOn(oidc, 'isTokenExpired')
+    spyOnIsTokenExpired.mockReturnValue(true)
+
+    const spyAuthSuccEmit = jest.spyOn(oidc, 'emit').mockReturnValue(false)
+
+    await oidc.keepAliveHandler(mockRequest, mockResponse, next)
+    expect(spyOnClient).toBeCalledTimes(2)
+    expect(spyOnRefresh).toBeCalled()
+    expect(spyConvertTokenSet).toBeCalled()
+    expect(mockRequest.session.passport.user.tokenset).toEqual(convertedTokenSet)
+    expect(spyAuthSuccEmit).toHaveBeenCalledWith(
+        AUTH.EVENT.AUTHENTICATE_SUCCESS,
+        oidc,
+        true,
+        mockRequest,
+        mockResponse,
+        next,
+    )
+    oidc.removeAllListeners()
 })
