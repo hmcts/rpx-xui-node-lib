@@ -472,3 +472,39 @@ test('getClient', () => {
     const client = oidc.getClient()
     expect(client).toBeTruthy()
 })
+
+test('keepAliveHandler no session', async () => {
+    const mockRequest = {
+        body: {},
+    } as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+    await oidc.keepAliveHandler(mockRequest, mockResponse, next)
+    expect(next).toBeCalled()
+})
+
+test('keepAliveHandler session but not authenticated', async () => {
+    const mockRequest = {
+        body: {},
+    } as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+    const session = createMock<Express.Session>()
+    session.passport = {
+        user: {
+            tokenset: {
+                accessToken: 'token-access',
+            },
+            userinfo: {
+                roles: ['role1', 'role2'],
+            },
+        },
+    }
+    mockRequest.session = session
+    const isAuth = jest.fn()
+    isAuth.mockReturnValue(false)
+    mockRequest.isAuthenticated = isAuth
+
+    await oidc.keepAliveHandler(mockRequest, mockResponse, next)
+    expect(next).toBeCalled()
+})
