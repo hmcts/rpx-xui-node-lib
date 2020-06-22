@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import jwtDecode from 'jwt-decode'
 import { authenticator } from 'otplib'
-import { http } from '../../common'
+import { http, logger as debugLogger } from '../../common'
 import { DecodedJWT } from './decodedJwt.interface'
 import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
@@ -21,10 +21,11 @@ export class S2SAuth extends EventEmitter {
     protected store: { [key: string]: S2SToken } = {}
 
     // Replace with a proper logging library
-    protected logger = console
+    protected logger: typeof debugLogger
 
-    constructor() {
+    constructor(logger: typeof debugLogger = debugLogger) {
         super()
+        this.logger = logger
     }
 
     /**
@@ -33,19 +34,11 @@ export class S2SAuth extends EventEmitter {
      *
      * @param s2sConfig The S2SConfig containing microservice name, S2S endpoint URL, and S2S secret
      * @param store The cache for storing S2S tokens, indexed by microservice name
-     * @param logger The logger for logging function call output
      */
-    public configure = (
-        s2sConfig: S2SConfig,
-        store?: { [key: string]: S2SToken },
-        logger?: Console,
-    ): RequestHandler => {
+    public configure = (s2sConfig: S2SConfig, store?: { [key: string]: S2SToken }): RequestHandler => {
         this.s2sConfig = s2sConfig
         if (store) {
             this.store = store
-        }
-        if (logger) {
-            this.logger = logger
         }
         this.router.use(this.s2sHandler)
 

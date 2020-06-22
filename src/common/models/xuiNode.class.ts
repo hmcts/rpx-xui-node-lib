@@ -1,22 +1,25 @@
 import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
-import { hasKey } from '../util'
+import { hasKey, logger as debugLogger } from '../util'
 import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail
 import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
 
 export class XuiNode extends EventEmitter {
     protected readonly router: Router
     protected readonly middlewares: Array<string>
+    protected readonly logger: typeof debugLogger
     public authenticateMiddleware: any
     public constructor(
         router: Router = Router({ mergeParams: true }),
         // deliberately done it this way as we need session first
         middlewares: Array<string> = ['session', 'auth'],
+        logger: typeof debugLogger = debugLogger,
     ) {
         super()
         this.router = router
         this.middlewares = middlewares
+        this.logger = logger
     }
 
     public authenticate = (req: Request, res: Response, next: NextFunction): void => {
@@ -33,9 +36,8 @@ export class XuiNode extends EventEmitter {
      * @param next
      */
     public authenticateDefault = (req: Request, res: Response, next: NextFunction): void => {
-        console.log('xuiNode AUTHENTICATE CALLED!!!!!')
         if (req.isUnauthenticated()) {
-            console.log('unauthenticated, redirecting')
+            this.logger.log('unauthenticated, redirecting')
             return res.redirect(AUTH.ROUTE.LOGIN)
         }
         next()
@@ -77,6 +79,7 @@ export class XuiNode extends EventEmitter {
                 const middleware = middlewareLayer[key]
                 this.proxyEvents(middleware)
                 if (hasKey(middleware, 'authenticate')) {
+                    this.logger.log('using authenticate middleware from ', middleware.constructor.name)
                     this.authenticateMiddleware = middleware.authenticate
                 }
                 this.router.use(middleware.configure(value))
@@ -92,6 +95,7 @@ export class XuiNode extends EventEmitter {
         const events = middleware.getEvents()
         events.forEach((event: string) => {
             if (this.listenerCount(event)) {
+                this.logger.log('proxying event ', event)
                 middleware.on(event, (...args: any) => this.emit(event, ...args))
             }
         })

@@ -20,7 +20,7 @@ describe('S2SAuth', () => {
 
     beforeEach(() => {
         s2sAuth = new S2SAuth()
-        s2sAuth.configure(s2sConfig, {}, console)
+        s2sAuth.configure(s2sConfig, {})
 
         jest.spyOn(authenticator, 'generate').mockReturnValue(oneTimePassword)
         jest.spyOn(http, 'post').mockImplementation(
