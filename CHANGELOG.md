@@ -1,3 +1,10 @@
+# [2.21.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.20.1...v2.21.0) (2020-06-23)
+
+
+### Features
+
+* **debug log:** replaced console with debug log ([#87](https://github.com/hmcts/rpx-xui-node-lib/issues/87)) ([a5ed0cb](https://github.com/hmcts/rpx-xui-node-lib/commit/a5ed0cb844f6fdaa6d202064567ac06b1cb34c7e))
+
 ## [2.20.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.20.0...v2.20.1) (2020-06-21)
 
 
