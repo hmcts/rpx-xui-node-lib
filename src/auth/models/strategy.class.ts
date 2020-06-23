@@ -7,13 +7,14 @@ import { http } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from '@hapi/joi'
 import * as URL from 'url'
+import { logger as debugLogger } from '../../common/util'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
 
     protected readonly router: Router
 
-    protected readonly logger = console
+    protected readonly logger: typeof debugLogger
 
     protected options: AuthOptions = {
         authorizationURL: '',
@@ -32,10 +33,11 @@ export abstract class Strategy extends events.EventEmitter {
         tokenEndpointAuthMethod: '',
     }
 
-    protected constructor(strategyName: string, router: Router) {
+    protected constructor(strategyName: string, router: Router, logger: typeof debugLogger = debugLogger) {
         super()
         this.strategyName = strategyName
         this.router = router
+        this.logger = logger
     }
 
     public validateOptions(options: any): boolean {

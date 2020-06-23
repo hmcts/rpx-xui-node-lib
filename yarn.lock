@@ -998,6 +998,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/debug@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
+  integrity sha512-Q1y515GcOdTHgagaVFhHnIFQ38ygs/kmxdNpvpou+raI9UO3YZcHDngBSYKQklcKlvA7iuQlmIKbzvmxcOE9CQ==
+
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
@@ -1927,6 +1932,13 @@ caller-callsite@^2.0.0:
   dependencies:
     callsites "^2.0.0"
 
+caller-callsite@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/caller-callsite/-/caller-callsite-4.1.0.tgz#3e33cb1d910e7b09332d59a3503b9af7462f7295"
+  integrity sha512-99nnnGlJexTc41xwQTr+mWl15OI5PPczUJzM4YRE7QjkefMKCXGa5gfQjCOuVrD+1TjI/fevIDHg2nz3iYN5Ig==
+  dependencies:
+    callsites "^3.1.0"
+
 caller-path@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/caller-path/-/caller-path-2.0.0.tgz#468f83044e369ab2010fac5f06ceee15bb2cb1f4"
@@ -1934,12 +1946,19 @@ caller-path@^2.0.0:
   dependencies:
     caller-callsite "^2.0.0"
 
+caller-path@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/caller-path/-/caller-path-3.0.0.tgz#a13cbec75eea1b355e3f92dc0df4288b7eebdc5f"
+  integrity sha512-8nvMBmBgTmEfAXywJf27jbPZlURi5xUWLwkTXa3hZFcEZa5iRnMP4sF0p00CstWNHKBENVyYWDRSByNRdshdgQ==
+  dependencies:
+    caller-callsite "^4.1.0"
+
 callsites@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/callsites/-/callsites-2.0.0.tgz#06eb84f00eea413da86affefacbffb36093b3c50"
   integrity sha1-BuuE8A7qQT2oav/vrL/7Ngk7PFA=
 
-callsites@^3.0.0:
+callsites@^3.0.0, callsites@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/callsites/-/callsites-3.1.0.tgz#b3630abd8943432f54b3f0519238e33cd7df2f73"
   integrity sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
