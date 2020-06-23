@@ -65,7 +65,7 @@ export class OpenID extends AuthStrategy {
                         }
                     }
                 } catch (e) {
-                    this.logger.error('refresh error =>', e)
+                    this.logger.error('refresh error => ', e)
                     next(e)
                 }
             }
