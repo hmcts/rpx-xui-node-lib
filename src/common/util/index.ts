@@ -1,3 +1,6 @@
 export { hasKey } from './hasKey'
 export { logger } from './debug.logger'
 export { callerPath } from './callerPath'
+export { sortArray } from './sortArray'
+export { isStringPatternMatch } from './stringPatternMatch'
+export { arrayPatternMatch } from './arrayPatternMatch'

@@ -1,7 +1,6 @@
-import { AxiosPromise } from 'axios'
 import { Request, Response } from 'express'
 import { authenticator } from 'otplib'
-import { http } from '../../common'
+import mockAxios from 'jest-mock-axios'
 import { S2SAuth } from './s2s.class'
 import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
@@ -23,22 +22,23 @@ describe('S2SAuth', () => {
         s2sAuth.configure(s2sConfig, {})
 
         jest.spyOn(authenticator, 'generate').mockReturnValue(oneTimePassword)
-        jest.spyOn(http, 'post').mockImplementation(
-            () => (Promise.resolve(postS2SResponse) as unknown) as AxiosPromise<string>,
-        )
 
         // Clear the S2S token cache of any existing token for the microservice
         s2sAuth.deleteCachedToken()
     })
+
+    afterEach(() => mockAxios.reset())
 
     it('should be true that S2SAuth is defined', () => {
         expect(S2SAuth).toBeDefined()
     })
 
     it('should generate an S2S token', async () => {
-        const s2sToken = await s2sAuth.serviceTokenGenerator()
+        const promise = s2sAuth.serviceTokenGenerator()
+        mockAxios.mockResponse(postS2SResponse)
+        const s2sToken = await promise
         expect(authenticator.generate).toHaveBeenCalledWith(s2sConfig.s2sSecret)
-        expect(http.post).toHaveBeenCalledWith(`${s2sConfig.s2sEndpointUrl}`, {
+        expect(mockAxios.post).toHaveBeenCalledWith(`${s2sConfig.s2sEndpointUrl}`, {
             microservice: s2sConfig.microservice,
             oneTimePassword,
         })
@@ -47,31 +47,40 @@ describe('S2SAuth', () => {
 
     it('should get a cached S2S token', async () => {
         // First time around, the S2S token cache is empty so a new token is generated and cached
-        let s2sToken = await s2sAuth.serviceTokenGenerator()
+        let promise = s2sAuth.serviceTokenGenerator()
+        mockAxios.mockResponse(postS2SResponse)
+        let s2sToken = await promise
 
         // Second time around, it should return the cached S2S token instead of generating a new one
-        s2sToken = await s2sAuth.serviceTokenGenerator()
+        promise = s2sAuth.serviceTokenGenerator()
+        s2sToken = await promise
         expect(authenticator.generate).toHaveBeenCalledTimes(1)
-        expect(http.post).toHaveBeenCalledTimes(1)
+        expect(mockAxios.post).toHaveBeenCalledTimes(1)
         expect(s2sToken).toEqual('abc123')
     })
 
     it('should generate a new S2S token if the existing one has expired', async () => {
         // First time around, the S2S token cache is empty so a new token is generated and cached
-        await s2sAuth.serviceTokenGenerator()
+        const promise = s2sAuth.serviceTokenGenerator()
+        mockAxios.mockResponse(postS2SResponse)
+        await promise
 
         // Get the S2S token from the cache and manually alter the expiration
         const cachedToken = s2sAuth.getToken()
         cachedToken.expiresAt = Math.floor(Date.now() / 1000)
 
         // Second time around, it should generate a new S2S token (because the cached one has expired)
-        await s2sAuth.serviceTokenGenerator()
+        const promise2 = s2sAuth.serviceTokenGenerator()
+        mockAxios.mockResponse(postS2SResponse)
+        await promise2
         expect(authenticator.generate).toHaveBeenCalledTimes(2)
-        expect(http.post).toHaveBeenCalledTimes(2)
+        expect(mockAxios.post).toHaveBeenCalledTimes(2)
     })
 
     it('should delete the cached S2S token', async () => {
-        await s2sAuth.serviceTokenGenerator()
+        const promise = s2sAuth.serviceTokenGenerator()
+        mockAxios.mockResponse(postS2SResponse)
+        await promise
         let cachedToken = s2sAuth.getToken()
         expect(cachedToken).toBeDefined()
         s2sAuth.deleteCachedToken()
@@ -87,8 +96,10 @@ describe('S2SAuth', () => {
         const next = (): string => {
             return 'Dummy next function'
         }
+        const promise = s2sAuth.s2sHandler(req, res, next)
+        mockAxios.mockResponse(postS2SResponse)
 
-        const result = await s2sAuth.s2sHandler(req, res, next)
+        const result = await promise
         expect(req.headers).toEqual({ ServiceAuthorization: 'Bearer abc123' })
         expect(result).toEqual('Dummy next function')
     })
@@ -110,7 +121,10 @@ describe('S2SAuth', () => {
             expect(emittedNext).toEqual(next)
         })
 
-        const result = await s2sAuth.s2sHandler(req, res, next)
+        const promise = s2sAuth.s2sHandler(req, res, next)
+        mockAxios.mockResponse(postS2SResponse)
+
+        const result = await promise
         expect(req.headers).toEqual({ ServiceAuthorization: 'Bearer abc123' })
         // The handler should not return any result because next() should not be called, given that it should emit an
         // event instead
@@ -124,12 +138,10 @@ describe('S2SAuth', () => {
         const res = {} as Response
         const next = jest.fn()
 
-        // Mock the http.post call to return an error
-        jest.spyOn(http, 'post').mockImplementation(
-            () => (Promise.reject(new Error('Failed to request S2S token')) as unknown) as AxiosPromise<string>,
-        )
+        const promise = s2sAuth.s2sHandler(req, res, next)
+        mockAxios.mockError(new Error('Failed to request S2S token'))
 
-        const result = await s2sAuth.s2sHandler(req, res, next)
+        const result = await promise
         // There should not be any S2S token in the request headers
         expect(req.headers).toEqual({})
         expect(next).toHaveBeenCalledWith(Error('Failed to request S2S token'))
@@ -143,12 +155,11 @@ describe('S2SAuth', () => {
         const res = {} as Response
         const next = jest.fn()
 
-        // Mock the http.post call to return no token data
-        jest.spyOn(http, 'post').mockImplementation(
-            () => (Promise.resolve({ data: null }) as unknown) as AxiosPromise<string>,
-        )
+        const promise = s2sAuth.s2sHandler(req, res, next)
 
-        const result = await s2sAuth.s2sHandler(req, res, next)
+        mockAxios.mockResponse({ data: null })
+
+        const result = await promise
         // There should not be any S2S token in the request headers
         expect(req.headers).toEqual({})
         expect(next).not.toHaveBeenCalled()

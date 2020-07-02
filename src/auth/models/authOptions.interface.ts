@@ -13,4 +13,5 @@ export interface AuthOptions {
     issuerURL: string
     responseTypes: string[]
     tokenEndpointAuthMethod: string
+    allowRolesRegex?: string
 }

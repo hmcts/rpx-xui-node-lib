@@ -2,14 +2,14 @@
 
 import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
-import { Request, Response, NextFunction, Router } from 'express'
+import { Request, Response, Router } from 'express'
 import { AUTH } from '../../auth.constants'
-import { Issuer, Strategy, Client, TokenSet, UserinfoResponse } from 'openid-client'
+import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import { createMock } from 'ts-auto-mock'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 import { http } from '../../../common'
-import { AuthOptions } from '../../models/authOptions.interface'
+import { AuthOptions } from '../../models'
 
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
@@ -128,12 +128,15 @@ test('OIDC verifyLogin error Path', () => {
         body: {},
     } as Request
     mockRequest.logIn = (user: any, done: (err: any) => void) => {
-        console.log('mockRequest.logIn')
         done({})
     }
     const mockResponse = {} as Response
     const next = jest.fn()
-    const user = {}
+    const user = {
+        userinfo: {
+            roles: ['test', 'admin'],
+        },
+    }
 
     oidc.verifyLogin(mockRequest, user, next, mockResponse)
     expect(next).toBeCalledWith({})
@@ -144,14 +147,17 @@ test('OIDC verifyLogin happy Path with no subscription', () => {
         body: {},
     } as Request
     mockRequest.logIn = (user: any, done: (err: any) => void) => {
-        console.log('mockRequest.logIn')
         done(undefined)
     }
     const mockResponse = {} as Response
     const mockRedirect = jest.fn()
     mockResponse.redirect = mockRedirect
     const next = jest.fn()
-    const user = {}
+    const user = {
+        userinfo: {
+            roles: ['test', 'admin'],
+        },
+    }
 
     oidc.verifyLogin(mockRequest, user, next, mockResponse)
     expect(next).not.toBeCalledWith({})
@@ -163,14 +169,16 @@ test('OIDC verifyLogin happy Path with subscribtion', () => {
         body: {},
     } as Request
     mockRequest.logIn = (user: any, done: (err: any) => void) => {
-        console.log('mockRequest.logIn')
         done(undefined)
     }
     const mockResponse = {} as Response
-    const mockRedirect = jest.fn()
-    mockResponse.redirect = mockRedirect
+    mockResponse.redirect = jest.fn()
     const next = jest.fn()
-    const user = {}
+    const user = {
+        userinfo: {
+            roles: ['test', 'admin'],
+        },
+    }
 
     oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (authObject, isVerify) => {
         expect(isVerify).toBeFalsy()
@@ -433,7 +441,8 @@ test('emitIfListenersExist with listeners', () => {
 test('configure with useRoutes', () => {
     const mockRouter = createMock<Router>()
     const options = createMock<AuthOptions>()
-    const openId = new OpenID(mockRouter)
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
     const spyOnValidateOptions = spyOn(openId, 'validateOptions')
     const spyOnSer = spyOn(openId, 'serializeUser')
     const spyOnDeSer = spyOn(openId, 'deserializeUser')
@@ -452,7 +461,8 @@ test('configure with useRoutes', () => {
 test('configure without useRoutes', () => {
     const mockRouter = createMock<Router>()
     const options = createMock<AuthOptions>()
-    const openId = new OpenID(mockRouter)
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
     const spyOnValidateOptions = spyOn(openId, 'validateOptions')
     const spyOnSer = spyOn(openId, 'serializeUser')
     const spyOnDeSer = spyOn(openId, 'deserializeUser')

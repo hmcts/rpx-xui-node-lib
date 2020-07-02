@@ -7,13 +7,14 @@ import { AUTH } from '../../auth.constants'
 import { Strategy as AuthStrategy } from '../../models'
 import { AuthOptions } from '../../models/authOptions.interface'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
+import { logger as debugLogger } from '../../../common/util'
 
 export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
 
-    constructor(router: Router = Router({ mergeParams: true })) {
-        super(OIDC.STRATEGY_NAME, router)
+    constructor(router: Router = Router({ mergeParams: true }), logger: typeof debugLogger = debugLogger) {
+        super(OIDC.STRATEGY_NAME, router, logger)
     }
 
     public getOpenIDOptions = (authOptions: AuthOptions): OpenIDMetadata => {
