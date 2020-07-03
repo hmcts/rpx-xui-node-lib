@@ -4,7 +4,7 @@ import * as path from 'path'
 
 const debugLogger = debug('xuiNode')
 
-export const logFn = (...args: any[]): any => {
+export const logFn = (...args: any[]): void => {
     const calledPath = callerPath()
     const layers = calledPath.split(path.sep).slice(0, 2).join(':')
     const loggerFn = debugLogger.extend(layers)

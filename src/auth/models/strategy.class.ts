@@ -3,7 +3,7 @@ import { NextFunction, Request, RequestHandler, Response, Router } from 'express
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import jwtDecode from 'jwt-decode'
-import { http } from '../../common'
+import { arrayPatternMatch, http } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from '@hapi/joi'
 import * as URL from 'url'
@@ -31,6 +31,7 @@ export abstract class Strategy extends events.EventEmitter {
         issuerURL: '',
         responseTypes: [''],
         tokenEndpointAuthMethod: '',
+        allowRolesRegex: '.',
     }
 
     protected constructor(strategyName: string, router: Router, logger: typeof debugLogger = debugLogger) {
@@ -62,6 +63,7 @@ export abstract class Strategy extends events.EventEmitter {
             store: Joi.any(),
             state: Joi.any(),
             customHeaders: Joi.any(),
+            allowRolesRegex: Joi.string(),
         })
         const { error } = schema.validate(options)
         if (error) {
@@ -214,10 +216,17 @@ export abstract class Strategy extends events.EventEmitter {
         next()
     }
 
-    public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response<any>): void => {
+    public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response): void => {
         req.logIn(user, (err) => {
+            const roles = user.userinfo.roles
             if (err) {
                 return next(err)
+            }
+            if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
+                this.logger.error(
+                    `User has no application access, as they do not have a ${this.options.allowRolesRegex} role.`,
+                )
+                return this.logout(req, res)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                 this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
