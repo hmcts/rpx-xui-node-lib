@@ -1,3 +1,10 @@
+# [2.22.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.21.0...v2.22.0) (2020-07-03)
+
+
+### Features
+
+* **allow roles:** added optional regex pattern for allowing roles ([#88](https://github.com/hmcts/rpx-xui-node-lib/issues/88)) ([e2203a3](https://github.com/hmcts/rpx-xui-node-lib/commit/e2203a3e9bddad9ffa8e5d6e2666f95b24a5ac03))
+
 # [2.21.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.20.1...v2.21.0) (2020-06-23)
 
 
