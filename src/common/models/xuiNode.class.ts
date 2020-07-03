@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import { hasKey, logger as debugLogger } from '../util'
-import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail
+import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail (circular import somewhere)
 import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
 
 export class XuiNode extends EventEmitter {

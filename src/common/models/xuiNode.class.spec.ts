@@ -10,8 +10,9 @@ test('xuiNode isTruthy', () => {
 
 test('xuiNode configure', () => {
     const mockRouter = {} as Router
+    const logger = createMock<typeof console>()
     const middlewares: Array<string> = ['session1', 'auth1']
-    const xuinode = new XuiNode(mockRouter, middlewares)
+    const xuinode = new XuiNode(mockRouter, middlewares, logger)
     const options = {} as XuiNodeOptions
     const spy = jest.spyOn(xuinode, 'applyMiddleware')
     xuinode.configure(options)
