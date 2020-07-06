@@ -232,7 +232,8 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                 res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
             } else {
-                this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, this, false, req, res, next)
+                req.isRefresh = false
+                this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
             }
         })
     }
