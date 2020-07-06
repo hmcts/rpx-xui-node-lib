@@ -5,7 +5,7 @@ import { OIDC } from '../oidc.constants'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { AUTH } from '../../auth.constants'
 import { Strategy as AuthStrategy } from '../../models'
-import { AuthOptions } from '../../models/authOptions.interface'
+import { AuthOptions } from '../../models'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 import { logger as debugLogger } from '../../../common/util'
 
@@ -61,7 +61,8 @@ export class OpenID extends AuthStrategy {
                             this.logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                             return next()
                         } else {
-                            this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, this, true, req, res, next)
+                            req.isRefresh = true
+                            this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
                             return
                         }
                     }

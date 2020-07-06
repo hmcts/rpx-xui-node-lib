@@ -164,7 +164,7 @@ test('OIDC verifyLogin happy Path with no subscription', () => {
     expect(mockRedirect).toBeCalledWith(AUTH.ROUTE.DEFAULT_REDIRECT)
 })
 
-test('OIDC verifyLogin happy Path with subscribtion', () => {
+test('OIDC verifyLogin happy Path with subscription', () => {
     const mockRequest = {
         body: {},
     } as Request
@@ -180,8 +180,8 @@ test('OIDC verifyLogin happy Path with subscribtion', () => {
         },
     }
 
-    oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (authObject, isVerify) => {
-        expect(isVerify).toBeFalsy()
+    oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (req) => {
+        expect(req.isRefresh).toBeFalsy()
     })
     oidc.verifyLogin(mockRequest, user, next, mockResponse)
     expect(next).not.toBeCalledWith({})
@@ -521,8 +521,8 @@ test('keepAliveHandler session but not authenticated', async () => {
 })
 
 test('keepAliveHandler session and isAuthenticated', async () => {
-    oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (authObject, isVerify) => {
-        expect(isVerify).toBeFalsy()
+    oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (req) => {
+        expect(req.isRefresh).toBeFalsy()
     })
     const mockRequest = {
         body: {},
@@ -566,13 +566,6 @@ test('keepAliveHandler session and isAuthenticated', async () => {
     expect(spyOnRefresh).toBeCalled()
     expect(spyConvertTokenSet).toBeCalled()
     expect(mockRequest.session.passport.user.tokenset).toEqual(convertedTokenSet)
-    expect(spyAuthSuccEmit).toHaveBeenCalledWith(
-        AUTH.EVENT.AUTHENTICATE_SUCCESS,
-        oidc,
-        true,
-        mockRequest,
-        mockResponse,
-        next,
-    )
+    expect(spyAuthSuccEmit).toHaveBeenCalledWith(AUTH.EVENT.AUTHENTICATE_SUCCESS, mockRequest, mockResponse, next)
     oidc.removeAllListeners()
 })
