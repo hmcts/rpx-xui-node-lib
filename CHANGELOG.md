@@ -1,3 +1,10 @@
+## [2.22.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.22.0...v2.22.1) (2020-07-06)
+
+
+### Bug Fixes
+
+* **tidy up:** auth event success callback ([#89](https://github.com/hmcts/rpx-xui-node-lib/issues/89)) ([fc84583](https://github.com/hmcts/rpx-xui-node-lib/commit/fc84583ae7a4c6bead6aa6c73e16dbf9e7133a0d))
+
 # [2.22.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.21.0...v2.22.0) (2020-07-03)
 
 
