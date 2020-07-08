@@ -81,6 +81,12 @@ export const anyRolesMatch = (roles: string[], pattern: string): boolean => {
  */
 export const sortUserRoles = (roles: string[]) => roles.sort()
 
+export interface RoleGroupSessionTimeout {
+    idleModalDisplayTime: number
+    pattern: string
+    totalIdleTime: number
+}
+
 /**
  * Get User Session Timeout
  *
@@ -116,7 +122,7 @@ export const sortUserRoles = (roles: string[]) => roles.sort()
  * @param sessionTimeouts - @see unit tests
  * @returns
  */
-export const getUserSessionTimeout = (userRoles, sessionTimeouts) => {
+export const getUserSessionTimeout = (userRoles: string[], sessionTimeouts: RoleGroupSessionTimeout[]) => {
 
   const sortedUserRoles = sortUserRoles(userRoles)
 

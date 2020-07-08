@@ -1,29 +1,31 @@
-import {expect} from 'chai'
-import {anyRolesMatch, DEFAULT_SESSION_TIMEOUT, getUserSessionTimeout, isRoleMatch, sortUserRoles} from './userTimeout'
+import {
+    anyRolesMatch, DEFAULT_SESSION_TIMEOUT, getUserSessionTimeout, isRoleMatch, RoleGroupSessionTimeout,
+    sortUserRoles
+} from './userTimeout'
 
 describe('userTimeout', () => {
 
   /**
    * Note that I deceided to use a Regular Expression matcher here so that we can set the default session timeout via configuration ie. '.',
-   * as we require a different default timeout per application, and require this to be easily configurable.
+   * as we require a different default timeout per application, and require this.toBe( easily configurable.
    */
   describe('isRoleMatch()', () => {
 
     it('should return true if there is a match of the User\'s role to the Session Timeout regex pattern so' +
       'that the App knows that we need to have a specified Session Timeout for that user role.', () => {
-      expect(isRoleMatch('pui-case-manager', 'case-')).to.be.true
+      expect(isRoleMatch('pui-case-manager', 'case-')).toBeTruthy()
     })
 
     it('should return true if there is a partial match of the User\'s role to the Session Timeout regex pattern.', () => {
-      expect(isRoleMatch('pui-case-manager', 'pui')).to.be.true
+      expect(isRoleMatch('pui-case-manager', 'pui')).toBeTruthy()
     })
 
     it('should return false if there is no match of the User\'s role to the Session Timeout regex pattern.', () => {
-      expect(isRoleMatch('pui-case-manager', 'dwp-')).to.be.false
+      expect(isRoleMatch('pui-case-manager', 'dwp-')).toBeFalsy()
     })
 
     it('should return true for a wildcard regex pattern, note that this pattern acts as our configurable DEFAULT.', () => {
-      expect(isRoleMatch('pui', '.')).to.be.true
+      expect(isRoleMatch('pui', '.')).toBeTruthy()
     })
   })
 
@@ -39,7 +41,7 @@ describe('userTimeout', () => {
         'pui-finance-manager',
       ]
 
-      expect(anyRolesMatch(roles, 'user-manager')).to.be.true
+      expect(anyRolesMatch(roles, 'user-manager')).toBeTruthy()
     })
 
     it('should return true if any of a Users roles match a Regular Expression wildcard.', () => {
@@ -50,7 +52,7 @@ describe('userTimeout', () => {
         'pui-finance-manager',
       ]
 
-      expect(anyRolesMatch(roles, '.')).to.be.true
+      expect(anyRolesMatch(roles, '.')).toBeTruthy()
     })
 
     it('should return false if none of a Users roles match the regex pattern.', () => {
@@ -61,7 +63,7 @@ describe('userTimeout', () => {
         'pui-finance-manager',
       ]
 
-      expect(anyRolesMatch(roles, 'dwp')).to.be.false
+      expect(anyRolesMatch(roles, 'dwp')).toBeFalsy()
     })
   })
 
@@ -81,7 +83,7 @@ describe('userTimeout', () => {
         'pui-case-manager',
       ]
 
-      const roleGroupSessionTimeouts = [
+      const roleGroupSessionTimeouts: RoleGroupSessionTimeout[] = [
         {
           idleModalDisplayTime: 5,
           pattern: 'pui-',
@@ -96,7 +98,7 @@ describe('userTimeout', () => {
 
       const usersSessionTimeout = getUserSessionTimeout(roles, roleGroupSessionTimeouts);
 
-      expect(usersSessionTimeout).to.equal(roleGroupSessionTimeouts[0])
+      expect(usersSessionTimeout).toEqual(roleGroupSessionTimeouts[0])
     })
 
     it('should return the LAST MATCHING Session Timeout, if there are NO User Role\'s that match the previous reg ex patterns ie.', () => {
@@ -123,7 +125,7 @@ describe('userTimeout', () => {
         ...DEFAULT_SESSION_TIMEOUT,
       ]
 
-      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).to.equal(DEFAULT_SESSION_TIMEOUT[0])
+      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).toEqual(DEFAULT_SESSION_TIMEOUT[0])
     })
 
     it('should return the SECOND matching Session Timeout, if the Session Timeout reg ex pattern DOES NOT match' +
@@ -151,7 +153,7 @@ describe('userTimeout', () => {
         },
       ]
 
-      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).to.equal(roleGroupSessionTimeouts[1])
+      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).toEqual(roleGroupSessionTimeouts[1])
     })
 
     it('should return the DEFAULT_SESSION_TIMEOUT if the XUI team accidentally sets an incorrect default reg ex pattern.', () => {
@@ -166,7 +168,7 @@ describe('userTimeout', () => {
         totalIdleTime: 60,
       }]
 
-      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).to.equal(DEFAULT_SESSION_TIMEOUT)
+      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).toEqual(DEFAULT_SESSION_TIMEOUT)
     })
 
     it('should return the DEFAULT_SESSION_TIMEOUT if the XUI team accidentally does not set a DEFAULT Session Timeout via the' +
@@ -176,9 +178,9 @@ describe('userTimeout', () => {
         'pui-organisation-manager',
       ]
 
-      const roleGroupSessionTimeouts = []
+      const roleGroupSessionTimeouts: RoleGroupSessionTimeout[] = []
 
-      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).to.equal(DEFAULT_SESSION_TIMEOUT)
+      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).toEqual(DEFAULT_SESSION_TIMEOUT)
     })
 
     /**
@@ -186,7 +188,7 @@ describe('userTimeout', () => {
      */
     it('should return the DEFAULT_SESSION_TIMEOUT if there are no User Roles.', () => {
 
-      const roles = []
+      const roles: string[] = []
 
       const roleGroupSessionTimeouts = [
         {
@@ -196,7 +198,7 @@ describe('userTimeout', () => {
         },
       ]
 
-      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).to.equal(DEFAULT_SESSION_TIMEOUT)
+      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).toEqual(DEFAULT_SESSION_TIMEOUT)
     })
 
     it('should give preference to Session Timeout patterns in a PRIORITY ORDER. A pattern nearer to the top of the list is' +
@@ -227,7 +229,7 @@ describe('userTimeout', () => {
         },
       ]
 
-      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).to.equal(roleGroupSessionTimeouts[0])
+      expect(getUserSessionTimeout(roles, roleGroupSessionTimeouts)).toEqual(roleGroupSessionTimeouts[0])
     })
   })
 
@@ -235,7 +237,7 @@ describe('userTimeout', () => {
    * Should sort the User's Roles alphabetically. Why? So that a priority order can be given to the Session Timeout +
    * configuration list.
    *
-   * Example: If we want a PUI Session Timeout to be given preference over another Session Timeout it would be further
+   * Example: If we want a PUI Session Timeout.toBe( given preference over another Session Timeout it would be further
    * up the Session Timeout Configuration list.
    */
   describe('sortRolesAlphabetically()', () => {
@@ -258,7 +260,7 @@ describe('userTimeout', () => {
 
       const sortedRoles = roles.sort()
 
-      expect(sortUserRoles(roles)).to.equal(sortedRoles)
+      expect(sortUserRoles(roles)).toEqual(sortedRoles)
     })
   });
 })
