@@ -28,6 +28,14 @@ export const DEFAULT_SESSION_TIMEOUT = {
  * There will be a different default session timeout per application, and different session timeouts per user groups
  * hence setting it via configuration.
  *
+ * The following AC apply:
+ *
+ * should return true if there is a match of the User's role to the Session Timeout regex pattern so
+ * that the App knows that we need to have a specified Session Timeout for that user role.
+ * should return true if there is a partial match of the User's role to the Session Timeout regex pattern.
+ * should return false if there is no match of the User's role to the Session Timeout regex pattern.
+ * should return true for a wildcard regex pattern, note that this pattern acts as our configurable DEFAULT.
+ *
  * @param role - 'pui-case-manager'
  * @param pattern - 'case-manager' / 'pui-' / '.'
  * @returns {boolean}
@@ -40,6 +48,12 @@ export const isRoleMatch = (role: string, pattern: string): boolean => {
  * Any Roles Match
  *
  * Checks an array of roles for pattern matches.
+ *
+ * The following AC apply:
+ *
+ * should return true if any of a Users roles match a regex pattern.
+ * should return true if any of a Users roles match a Regular Expression wildcard.
+ * should return false if none of a Users roles match the regex pattern.
  *
  * @param roles - [
  *  'pui-case-manager',

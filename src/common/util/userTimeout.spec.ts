@@ -8,54 +8,6 @@ import {
 } from './userTimeout'
 
 describe('userTimeout', () => {
-    /**
-     * Note that I deceided to use a Regular Expression matcher here so that we can set the default session timeout via configuration ie. '.',
-     * as we require a different default timeout per application, and require this.toBe( easily configurable.
-     */
-    describe('isRoleMatch()', () => {
-        it(
-            "should return true if there is a match of the User's role to the Session Timeout regex pattern so" +
-                'that the App knows that we need to have a specified Session Timeout for that user role.',
-            () => {
-                expect(isRoleMatch('pui-case-manager', 'case-')).toBeTruthy()
-            },
-        )
-
-        it("should return true if there is a partial match of the User's role to the Session Timeout regex pattern.", () => {
-            expect(isRoleMatch('pui-case-manager', 'pui')).toBeTruthy()
-        })
-
-        it("should return false if there is no match of the User's role to the Session Timeout regex pattern.", () => {
-            expect(isRoleMatch('pui-case-manager', 'dwp-')).toBeFalsy()
-        })
-
-        it('should return true for a wildcard regex pattern, note that this pattern acts as our configurable DEFAULT.', () => {
-            expect(isRoleMatch('pui', '.')).toBeTruthy()
-        })
-    })
-
-    /**
-     * Same as isRoleMatch() but testing with multiply roles.
-     */
-    describe('anyRolesMatch()', () => {
-        it('should return true if any of a Users roles match the regex pattern.', () => {
-            const roles = ['pui-organisation-manager', 'pui-user-manager', 'pui-finance-manager']
-
-            expect(anyRolesMatch(roles, 'user-manager')).toBeTruthy()
-        })
-
-        it('should return true if any of a Users roles match a Regular Expression wildcard.', () => {
-            const roles = ['pui-organisation-manager', 'pui-user-manager', 'pui-finance-manager']
-
-            expect(anyRolesMatch(roles, '.')).toBeTruthy()
-        })
-
-        it('should return false if none of a Users roles match the regex pattern.', () => {
-            const roles = ['pui-organisation-manager', 'pui-user-manager', 'pui-finance-manager']
-
-            expect(anyRolesMatch(roles, 'dwp')).toBeFalsy()
-        })
-    })
 
     /**
      * The Session Timeouts array is in PRIORITY ORDER ie. The FIRST Session Timeout object will be used
