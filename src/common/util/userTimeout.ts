@@ -1,3 +1,6 @@
+import {arrayPatternMatch} from "./arrayPatternMatch";
+import {isStringPatternMatch} from "./stringPatternMatch";
+
 /**
  * Default Session Idle Time
  *
@@ -30,7 +33,7 @@ export const DEFAULT_SESSION_TIMEOUT = {
  */
 export const isRoleMatch = (role: string, pattern: string): boolean => {
 
-  return Boolean(role.match(new RegExp(pattern)))
+  return isStringPatternMatch(role, pattern);
 }
 
 /**
@@ -46,7 +49,7 @@ export const isRoleMatch = (role: string, pattern: string): boolean => {
  */
 export const anyRolesMatch = (roles: string[], pattern: string): boolean => {
 
-  return roles.filter(role => isRoleMatch(role, pattern)).length > 0
+  return arrayPatternMatch(roles, pattern);
 }
 
 /**
