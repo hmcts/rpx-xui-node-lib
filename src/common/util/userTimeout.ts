@@ -1,5 +1,5 @@
-import {arrayPatternMatch} from "./arrayPatternMatch";
-import {isStringPatternMatch} from "./stringPatternMatch";
+import { arrayPatternMatch } from './arrayPatternMatch'
+import { isStringPatternMatch } from './stringPatternMatch'
 
 /**
  * Default Session Idle Time
@@ -10,10 +10,11 @@ import {isStringPatternMatch} from "./stringPatternMatch";
  */
 
 export const DEFAULT_SESSION_TIMEOUT = {
-  idleModalDisplayTime: 10,
-  pattern: 'ERROR: NO-SESSION_TIMEOUT_SET. You need to set a DEFAULT Session Timeout for this application through' +
-  'the configuration file. ie. use the pattern ".", @see unit tests. The totalIdleTime will be set to a low value.',
-  totalIdleTime: 480,
+    idleModalDisplayTime: 10,
+    pattern:
+        'ERROR: NO-SESSION_TIMEOUT_SET. You need to set a DEFAULT Session Timeout for this application through' +
+        'the configuration file. ie. use the pattern ".", @see unit tests. The totalIdleTime will be set to a low value.',
+    totalIdleTime: 480,
 }
 
 /**
@@ -32,8 +33,7 @@ export const DEFAULT_SESSION_TIMEOUT = {
  * @returns {boolean}
  */
 export const isRoleMatch = (role: string, pattern: string): boolean => {
-
-  return isStringPatternMatch(role, pattern);
+    return isStringPatternMatch(role, pattern)
 }
 
 /**
@@ -48,8 +48,7 @@ export const isRoleMatch = (role: string, pattern: string): boolean => {
  * @param pattern - 'case-manager' / 'pui-' / '.'
  */
 export const anyRolesMatch = (roles: string[], pattern: string): boolean => {
-
-  return arrayPatternMatch(roles, pattern);
+    return arrayPatternMatch(roles, pattern)
 }
 
 /**
@@ -126,14 +125,13 @@ export interface RoleGroupSessionTimeout {
  * @returns
  */
 export const getUserSessionTimeout = (userRoles: string[], sessionTimeouts: RoleGroupSessionTimeout[]) => {
+    const sortedUserRoles = sortUserRoles(userRoles)
 
-  const sortedUserRoles = sortUserRoles(userRoles)
-
-  for (const sessionTimeout of sessionTimeouts) {
-    if (anyRolesMatch(sortedUserRoles, sessionTimeout.pattern)) {
-      return sessionTimeout
+    for (const sessionTimeout of sessionTimeouts) {
+        if (anyRolesMatch(sortedUserRoles, sessionTimeout.pattern)) {
+            return sessionTimeout
+        }
     }
-  }
 
-  return DEFAULT_SESSION_TIMEOUT
+    return DEFAULT_SESSION_TIMEOUT
 }
