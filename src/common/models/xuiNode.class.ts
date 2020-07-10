@@ -1,20 +1,20 @@
 import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
-import { hasKey, logger as debugLogger } from '../util'
+import { hasKey, getLogger, XuiLogger } from '../util'
 import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail (circular import somewhere)
 import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
 
 export class XuiNode extends EventEmitter {
     protected readonly router: Router
     protected readonly middlewares: Array<string>
-    protected readonly logger: typeof debugLogger
+    protected readonly logger: XuiLogger
     public authenticateMiddleware: any
     public constructor(
         router: Router = Router({ mergeParams: true }),
         // deliberately done it this way as we need session first
         middlewares: Array<string> = ['session', 'auth'],
-        logger: typeof debugLogger = debugLogger,
+        logger: XuiLogger = getLogger('common:XuiNode'),
     ) {
         super()
         this.router = router

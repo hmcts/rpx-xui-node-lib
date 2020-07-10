@@ -1,20 +1,32 @@
 import debug from 'debug'
-import { callerPath } from './callerPath'
-import * as path from 'path'
 
-const debugLogger = debug('xuiNode')
-
-export const logFn = (...args: any[]): void => {
-    const calledPath = callerPath()
-    const layers = calledPath.split(path.sep).slice(0, 2).join(':')
-    const loggerFn = debugLogger.extend(layers)
-    loggerFn(args)
+export interface XuiLogger {
+    log: (...args: any[]) => any
+    info: (...args: any[]) => any
+    warn: (...args: any[]) => any
+    error: (...args: any[]) => any
 }
 
-//TODO: see if we can control colours per method instead of a generic function
-export const logger = {
-    log: logFn,
-    error: logFn,
-    info: logFn,
-    warn: logFn,
+const cache: Map<string, debug.Debugger> = new Map<string, debug.Debugger>()
+
+let color = 1
+
+export const getLogger = (namespace: string, delimiter = ':'): XuiLogger => {
+    let logger: debug.Debugger = debug('xuiNode')
+    namespace.split(delimiter).map((newNamespace: string) => {
+        if (!cache.has(newNamespace)) {
+            const newLogger = logger.extend(newNamespace)
+            newLogger.color = String(color)
+            cache.set(newNamespace, newLogger)
+            color += 1
+        }
+        logger = cache.get(newNamespace) as debug.Debugger
+    })
+
+    return {
+        log: logger,
+        warn: logger,
+        error: logger,
+        info: logger,
+    }
 }

@@ -3,7 +3,7 @@ import * as events from 'events'
 import { SessionMetadata } from './sessionMetadata.interface'
 import session from 'express-session'
 import { SESSION } from '../session.constants'
-import { logger as debugLogger } from '../../common/util'
+import { getLogger, XuiLogger } from '../../common'
 
 // TODO : This is hard to mock and test as it doesn't have
 // an exported default, and when one is added the compiler
@@ -12,11 +12,11 @@ import { logger as debugLogger } from '../../common/util'
 // This needs to be refactored so that storeName is not passed
 // in via const?
 export abstract class SessionStore extends events.EventEmitter {
-    protected readonly logger: typeof debugLogger
+    protected readonly logger: XuiLogger
     protected readonly router: Router
     public readonly storeName: string
 
-    protected constructor(storeName: string, router: Router, logger: typeof debugLogger = debugLogger) {
+    protected constructor(storeName: string, router: Router, logger: XuiLogger = getLogger('session:store')) {
         super()
         this.storeName = storeName
         this.router = router
