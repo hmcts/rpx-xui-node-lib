@@ -4,10 +4,11 @@ import { SessionStore } from './sessionStore.class'
 import { FileSessionMetadata } from './sessionMetadata.interface'
 import { SESSION } from '../session.constants'
 import { Router } from 'express'
+import { getLogger, XuiLogger } from '../../common'
 
 export class FileSessionStore extends SessionStore {
-    constructor(router = Router({ mergeParams: true })) {
-        super(SESSION.FILE_STORE_NAME, router)
+    constructor(router = Router({ mergeParams: true }), logger: XuiLogger = getLogger('session:file')) {
+        super(SESSION.FILE_STORE_NAME, router, logger)
     }
 
     public getStore = (options: FileSessionMetadata): session.Store => {

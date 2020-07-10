@@ -3,18 +3,17 @@ import { NextFunction, Request, RequestHandler, Response, Router } from 'express
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import jwtDecode from 'jwt-decode'
-import { arrayPatternMatch, http } from '../../common'
+import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from '@hapi/joi'
 import * as URL from 'url'
-import { logger as debugLogger } from '../../common/util'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
 
     protected readonly router: Router
 
-    protected readonly logger: typeof debugLogger
+    protected readonly logger: XuiLogger
 
     protected options: AuthOptions = {
         authorizationURL: '',
@@ -34,7 +33,7 @@ export abstract class Strategy extends events.EventEmitter {
         allowRolesRegex: '.',
     }
 
-    protected constructor(strategyName: string, router: Router, logger: typeof debugLogger = debugLogger) {
+    protected constructor(strategyName: string, router: Router, logger: XuiLogger = getLogger('auth:strategy')) {
         super()
         this.strategyName = strategyName
         this.router = router
