@@ -1,3 +1,10 @@
+## [2.22.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.22.1...v2.22.2) (2020-07-10)
+
+
+### Bug Fixes
+
+* **debug logger:** fixed issue with compiled version of debug logger ([#94](https://github.com/hmcts/rpx-xui-node-lib/issues/94)) ([daba682](https://github.com/hmcts/rpx-xui-node-lib/commit/daba682303ee8be7608c992026accf66bf4234a4))
+
 ## [2.22.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.22.0...v2.22.1) (2020-07-06)
 
 
