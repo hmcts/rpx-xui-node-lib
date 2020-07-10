@@ -5,12 +5,13 @@ import { default as connectRedis } from 'connect-redis'
 import { default as redis } from 'redis'
 import { SessionStore } from './sessionStore.class'
 import { Router } from 'express'
+import { getLogger, XuiLogger } from '../../common'
 
 export class RedisSessionStore extends SessionStore {
     protected redisClient: redis.RedisClient | any
 
-    constructor(router = Router({ mergeParams: true })) {
-        super(SESSION.REDIS_STORE_NAME, router)
+    constructor(router = Router({ mergeParams: true }), logger: XuiLogger = getLogger('session:redis')) {
+        super(SESSION.REDIS_STORE_NAME, router, logger)
     }
 
     public getStore = (options: RedisSessionMetadata): connectRedis.RedisStore => {

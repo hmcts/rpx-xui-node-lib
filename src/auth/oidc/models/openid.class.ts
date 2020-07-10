@@ -7,13 +7,13 @@ import { AUTH } from '../../auth.constants'
 import { Strategy as AuthStrategy } from '../../models'
 import { AuthOptions } from '../../models'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
-import { logger as debugLogger } from '../../../common/util'
+import { getLogger, XuiLogger } from '../../../common'
 
 export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
 
-    constructor(router: Router = Router({ mergeParams: true }), logger: typeof debugLogger = debugLogger) {
+    constructor(router: Router = Router({ mergeParams: true }), logger: XuiLogger = getLogger('auth:oidc')) {
         super(OIDC.STRATEGY_NAME, router, logger)
     }
 

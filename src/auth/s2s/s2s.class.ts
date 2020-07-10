@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import jwtDecode from 'jwt-decode'
 import { authenticator } from 'otplib'
-import { http, logger as debugLogger } from '../../common'
+import { http, getLogger, XuiLogger } from '../../common'
 import { DecodedJWT } from './decodedJwt.interface'
 import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
@@ -20,10 +20,9 @@ export class S2SAuth extends EventEmitter {
     // Cache of S2S tokens, indexed by microservice name
     protected store: { [key: string]: S2SToken } = {}
 
-    // Replace with a proper logging library
-    protected logger: typeof debugLogger
+    protected logger: XuiLogger
 
-    constructor(logger: typeof debugLogger = debugLogger) {
+    constructor(logger: XuiLogger = getLogger('auth:s2s')) {
         super()
         this.logger = logger
     }
