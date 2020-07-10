@@ -13,7 +13,7 @@ let color = 1
 
 export const getLogger = (namespace: string, delimiter = ':'): XuiLogger => {
     let logger: debug.Debugger = debug('xuiNode')
-    namespace.split(delimiter).map((newNamespace: string) => {
+    namespace.split(delimiter).forEach((newNamespace: string) => {
         if (!cache.has(newNamespace)) {
             const newLogger = logger.extend(newNamespace)
             newLogger.color = String(color)
