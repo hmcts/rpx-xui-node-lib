@@ -8,7 +8,6 @@ import { isStringPatternMatch } from './stringPatternMatch'
  * User shouldn't reach this point if they have no roles associated with them ) the
  * default session idle time will be used.
  */
-
 export const DEFAULT_SESSION_TIMEOUT = {
     idleModalDisplayTime: 10,
     pattern:

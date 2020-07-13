@@ -8,7 +8,6 @@ import {
 } from './userTimeout'
 
 describe('userTimeout', () => {
-
     /**
      * The Session Timeouts array is in PRIORITY ORDER ie. The FIRST Session Timeout object will be used
      * if the FIRST Session Timeout regex pattern matches a User's role.
