@@ -1,3 +1,10 @@
+# [2.23.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.22.2...v2.23.0) (2020-07-13)
+
+
+### Features
+
+* **oidc:** session timeout finder logic ([3f59af4](https://github.com/hmcts/rpx-xui-node-lib/commit/3f59af42ebf873ec895628f3908766a1ae7b7477))
+
 ## [2.22.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.22.1...v2.22.2) (2020-07-10)
 
 
