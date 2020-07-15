@@ -113,6 +113,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public setCallbackURL = (req: Request, res: Response, next: NextFunction): void => {
+        /* istanbul ignore else */
         if (req.session && !req.session.callbackURL) {
             req.app.set('trust proxy', true)
             req.session.callbackURL = URL.format({
