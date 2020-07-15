@@ -7,6 +7,7 @@ import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from '@hapi/joi'
 import * as URL from 'url'
+import { generators } from 'openid-client'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -75,11 +76,39 @@ export abstract class Strategy extends events.EventEmitter {
         this.options = options
     }
 
-    public loginHandler = (req: Request, res: Response, next: NextFunction): RequestHandler => {
-        this.logger.log('loginHandler Hit')
+    /**
+     * The login route handler, will attempt to setup security state param and redirect user if not authenticated
+     * @param req Request
+     * @param res Response
+     * @param next NextFunction
+     */
+    public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
+        this.logger.log('Base loginHandler Hit')
+
+        // we are using oidc generator but it's just a helper, rather than installing another library to provide this
+        const state = generators.state()
+
+        const promise = new Promise((resolve) => {
+            if (req.session && this.options?.sessionKey) {
+                req.session[this.options?.sessionKey] = { state }
+                req.session.save(() => {
+                    this.logger.log('resolved promise, state saved')
+                    resolve(true)
+                })
+            } else {
+                this.logger.warn('resolved promise, state not saved')
+                resolve(false)
+            }
+        })
+
+        await promise
+
+        this.logger.log('calling passport authenticate')
+
         return passport.authenticate(this.strategyName, {
             // eslint-disable-next-line @typescript-eslint/camelcase
             redirect_uri: req.session?.callbackURL,
+            state,
         } as any)(req, res, next)
     }
 
