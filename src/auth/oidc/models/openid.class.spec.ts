@@ -34,7 +34,7 @@ test('OIDC configure deserializeUser', () => {
     expect(spy).toBeCalled()
 })
 
-test('OIDC loginHandler', () => {
+test('OIDC loginHandler', async () => {
     const spy = jest.spyOn(passport, 'authenticate')
     const mockRequest = {
         body: {},
@@ -42,7 +42,7 @@ test('OIDC loginHandler', () => {
     const mockResponse = {} as Response
     const next = jest.fn()
 
-    oidc.loginHandler(mockRequest, mockResponse, next)
+    await oidc.loginHandler(mockRequest, mockResponse, next)
     expect(spy).toBeCalled()
 })
 
