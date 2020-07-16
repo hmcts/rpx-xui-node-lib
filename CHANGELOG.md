@@ -1,3 +1,10 @@
+## [2.23.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.1...v2.23.2) (2020-07-16)
+
+
+### Bug Fixes
+
+* **oidc:** increased timeouts and retry count ([#102](https://github.com/hmcts/rpx-xui-node-lib/issues/102)) ([2d58807](https://github.com/hmcts/rpx-xui-node-lib/commit/2d58807bd3f2522756320b3d3c30de97ba711e40))
+
 ## [2.23.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.0...v2.23.1) (2020-07-16)
 
 
