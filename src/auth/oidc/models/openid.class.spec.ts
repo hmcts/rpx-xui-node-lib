@@ -34,7 +34,7 @@ test('OIDC configure deserializeUser', () => {
     expect(spy).toBeCalled()
 })
 
-test('OIDC loginHandler', () => {
+test('OIDC loginHandler', async () => {
     const spy = jest.spyOn(passport, 'authenticate')
     const mockRequest = {
         body: {},
@@ -42,7 +42,36 @@ test('OIDC loginHandler', () => {
     const mockResponse = {} as Response
     const next = jest.fn()
 
-    oidc.loginHandler(mockRequest, mockResponse, next)
+    await oidc.loginHandler(mockRequest, mockResponse, next)
+    expect(spy).toBeCalled()
+})
+
+test('OIDC loginHandler with session', async () => {
+    const mockRouter = createMock<Router>()
+    const options = createMock<AuthOptions>()
+    options.sessionKey = 'test'
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
+    spyOn(openId, 'validateOptions')
+    spyOn(openId, 'serializeUser')
+    spyOn(openId, 'deserializeUser')
+    spyOn(openId, 'initializePassport')
+    spyOn(openId, 'initializeSession')
+    spyOn(openId, 'initialiseStrategy')
+    options.useRoutes = true
+    openId.configure(options)
+
+    const spy = jest.spyOn(passport, 'authenticate')
+    const mockRequest = ({
+        body: {},
+        session: {
+            save: (callback: any): void => callback(),
+        },
+    } as unknown) as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+
+    await openId.loginHandler(mockRequest, mockResponse, next)
     expect(spy).toBeCalled()
 })
 
@@ -448,6 +477,7 @@ test('configure with useRoutes', () => {
     const spyOnDeSer = spyOn(openId, 'deserializeUser')
     const spyOnPass = spyOn(openId, 'initializePassport')
     const spyOnSes = spyOn(openId, 'initializeSession')
+    spyOn(openId, 'initialiseStrategy')
     options.useRoutes = true
     openId.configure(options)
     expect(spyOnValidateOptions).toBeCalled()
@@ -468,6 +498,7 @@ test('configure without useRoutes', () => {
     const spyOnDeSer = spyOn(openId, 'deserializeUser')
     const spyOnPass = spyOn(openId, 'initializePassport')
     const spyOnSes = spyOn(openId, 'initializeSession')
+    spyOn(openId, 'initialiseStrategy')
 
     options.useRoutes = false
     openId.configure(options)

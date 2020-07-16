@@ -1,5 +1,14 @@
-import { NextFunction, Request, Response, Router } from 'express'
-import { Client, ClientAuthMethod, Issuer, ResponseType, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
+import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
+import {
+    Client,
+    ClientAuthMethod,
+    Issuer,
+    ResponseType,
+    Strategy,
+    TokenSet,
+    UserinfoResponse,
+    generators,
+} from 'openid-client'
 import passport from 'passport'
 import { OIDC } from '../oidc.constants'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
@@ -163,6 +172,43 @@ export class OpenID extends AuthStrategy {
 
     public getClient = (): Client | undefined => {
         return this.client
+    }
+
+    /**
+     * The login route handler, will attempt to setup security state and nonce param and redirect user if not authenticated
+     * @param req Request
+     * @param res Response
+     * @param next NextFunction
+     */
+    public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
+        this.logger.log('OIDC loginHandler Hit')
+
+        const nonce = generators.nonce()
+        const state = generators.state()
+
+        const promise = new Promise((resolve) => {
+            if (req.session && this.options?.sessionKey) {
+                req.session[this.options.sessionKey] = { nonce, state }
+                req.session.save(() => {
+                    this.logger.log('resolved promise, nonce & state saved')
+                    resolve(true)
+                })
+            } else {
+                this.logger.warn('resolved promise, nonce & state not saved!')
+                resolve(false)
+            }
+        })
+
+        await promise
+
+        this.logger.log('calling passport authenticate')
+
+        return passport.authenticate(this.strategyName, {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            redirect_uri: req.session?.callbackURL,
+            nonce,
+            state,
+        } as any)(req, res, next)
     }
 }
 
