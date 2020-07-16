@@ -1,3 +1,10 @@
+## [2.23.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.0...v2.23.1) (2020-07-16)
+
+
+### Bug Fixes
+
+* **auth:** login first time not working ([#101](https://github.com/hmcts/rpx-xui-node-lib/issues/101)) ([e7ce154](https://github.com/hmcts/rpx-xui-node-lib/commit/e7ce1542a25f515b2dc475b789cd461db1e47c60))
+
 # [2.23.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.22.2...v2.23.0) (2020-07-13)
 
 
