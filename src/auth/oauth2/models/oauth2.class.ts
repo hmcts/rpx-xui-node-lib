@@ -13,8 +13,19 @@ export class OAuth2 extends Strategy {
         super(OAUTH2.STRATEGY_NAME, router, logger)
     }
 
+    /**
+     * Retrieve transformed AuthOptions
+     * @param authOptions
+     * @return OAuth2Metadata
+     */
     public getOAuthOptions = (authOptions: AuthOptions): OAuth2Metadata => {
-        const options = { ...authOptions, ...{ logoutUrl: authOptions.logoutURL } }
+        const options = {
+            ...authOptions,
+            ...{
+                logoutUrl: authOptions.logoutURL,
+                state: '1', // this is required to have oauth strategy chose the right sessionStore
+            },
+        }
         delete options.logoutURL
         return options
     }
