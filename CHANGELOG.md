@@ -1,3 +1,10 @@
+## [2.23.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.3...v2.23.4) (2020-07-20)
+
+
+### Bug Fixes
+
+* **oidc:** adding reference to interface ([4505929](https://github.com/hmcts/rpx-xui-node-lib/commit/4505929a062461687405e7bb3650ad56fc7ea803))
+
 ## [2.23.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.2...v2.23.3) (2020-07-20)
 
 
