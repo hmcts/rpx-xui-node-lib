@@ -1,3 +1,10 @@
+## [2.23.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.2...v2.23.3) (2020-07-20)
+
+
+### Bug Fixes
+
+* **oidc:** adding getUserSessionTimeout reference to the common lib ([5142035](https://github.com/hmcts/rpx-xui-node-lib/commit/5142035b7fb61f9e01e140930a48c7605505806c))
+
 ## [2.23.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.1...v2.23.2) (2020-07-16)
 
 
