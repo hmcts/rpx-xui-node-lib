@@ -1,3 +1,31 @@
+## [2.23.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.3...v2.23.4) (2020-07-20)
+
+
+### Bug Fixes
+
+* **oidc:** adding reference to interface ([4505929](https://github.com/hmcts/rpx-xui-node-lib/commit/4505929a062461687405e7bb3650ad56fc7ea803))
+
+## [2.23.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.2...v2.23.3) (2020-07-20)
+
+
+### Bug Fixes
+
+* **oidc:** adding getUserSessionTimeout reference to the common lib ([5142035](https://github.com/hmcts/rpx-xui-node-lib/commit/5142035b7fb61f9e01e140930a48c7605505806c))
+
+## [2.23.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.1...v2.23.2) (2020-07-16)
+
+
+### Bug Fixes
+
+* **oidc:** increased timeouts and retry count ([#102](https://github.com/hmcts/rpx-xui-node-lib/issues/102)) ([2d58807](https://github.com/hmcts/rpx-xui-node-lib/commit/2d58807bd3f2522756320b3d3c30de97ba711e40))
+
+## [2.23.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.0...v2.23.1) (2020-07-16)
+
+
+### Bug Fixes
+
+* **auth:** login first time not working ([#101](https://github.com/hmcts/rpx-xui-node-lib/issues/101)) ([e7ce154](https://github.com/hmcts/rpx-xui-node-lib/commit/e7ce1542a25f515b2dc475b789cd461db1e47c60))
+
 # [2.23.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.22.2...v2.23.0) (2020-07-13)
 
 
