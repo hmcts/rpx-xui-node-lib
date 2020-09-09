@@ -8,6 +8,8 @@ import {
     TokenSet,
     UserinfoResponse,
     generators,
+    custom,
+    HttpOptions,
 } from 'openid-client'
 import passport from 'passport'
 import { OIDC } from '../oidc.constants'
@@ -22,8 +24,44 @@ export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
     protected client: Client | undefined
 
-    constructor(router: Router = Router({ mergeParams: true }), logger: XuiLogger = getLogger('auth:oidc')) {
+    constructor(
+        router: Router = Router({ mergeParams: true }),
+        logger: XuiLogger = getLogger('auth:oidc'),
+        options: HttpOptions = {},
+    ) {
         super(OIDC.STRATEGY_NAME, router, logger)
+        this.setHttpOptionsDefaults(options)
+    }
+
+    /**
+     * Helper function to customise GOT defaults and hooks to provide debug information
+     * @param options
+     */
+    public setHttpOptionsDefaults = (options: HttpOptions): void => {
+        const defaults = {
+            retry: 3,
+            timeout: 10000,
+            hooks: {
+                beforeRequest: [
+                    (options: any) => {
+                        this.logger.log('--> %s %s', options.method.toUpperCase(), options.href)
+                    },
+                ],
+                afterResponse: [
+                    (response: any) => {
+                        this.logger.log(
+                            '<-- %i FROM %s %s',
+                            response.statusCode,
+                            response.request.gotOptions.method.toUpperCase(),
+                            response.request.gotOptions.href,
+                        )
+                        return response
+                    },
+                ],
+            },
+        }
+        const httpOptions = { ...defaults, ...options } as HttpOptions
+        custom.setHttpOptionsDefaults(httpOptions)
     }
 
     public getOpenIDOptions = (authOptions: AuthOptions): OpenIDMetadata => {
