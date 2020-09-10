@@ -1,3 +1,10 @@
+## [2.23.5](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.4...v2.23.5) (2020-09-10)
+
+
+### Bug Fixes
+
+* **session:** destroy redis session store on logout ([#105](https://github.com/hmcts/rpx-xui-node-lib/issues/105)) ([f61cb3a](https://github.com/hmcts/rpx-xui-node-lib/commit/f61cb3a77759e7d45b0d3759b2eb1afbecd5ce57))
+
 ## [2.23.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.3...v2.23.4) (2020-07-20)
 
 
