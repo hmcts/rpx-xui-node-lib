@@ -145,6 +145,7 @@ export abstract class Strategy extends events.EventEmitter {
 
             //passport provides this method on request object
             req.logout()
+            await this.destroySession(req)
 
             if (req.query.noredirect) {
                 res.status(200).send({ message: 'You have been logged out!' })
@@ -156,6 +157,7 @@ export abstract class Strategy extends events.EventEmitter {
             // 401 is when no accessToken
             res.redirect(redirect as string)
         } catch (e) {
+            this.logger.error('error => ', e)
             res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
         }
         this.logger.log('logout end')
@@ -163,6 +165,18 @@ export abstract class Strategy extends events.EventEmitter {
 
     public authRouteHandler = (req: Request, res: Response): Response => {
         return res.send(req.isAuthenticated())
+    }
+
+    public destroySession = async (req: Request): Promise<any> => {
+        return new Promise((resolve, reject) => {
+            req.session?.destroy((err) => {
+                if (err) {
+                    reject(err)
+                }
+                this.logger.log('session destroyed')
+                resolve(true)
+            })
+        })
     }
 
     public keepAliveHandler = (req: Request, res: Response, next: NextFunction): void => {
