@@ -423,8 +423,10 @@ test('strategy logout', async () => {
     const mockResponse = {} as Response
     mockResponse.redirect = jest.fn()
     const spyhttp = jest.spyOn(http, 'delete').mockImplementation(() => Promise.resolve({} as any))
+    const spySessionDestroy = jest.spyOn(oidc, 'destroySession').mockImplementation(() => Promise.resolve({} as any))
     await oidc.logout(mockRequest, mockResponse)
     expect(spyhttp).toHaveBeenCalled()
+    expect(spySessionDestroy).toHaveBeenCalled()
 })
 
 test('urlFromToken ', () => {
