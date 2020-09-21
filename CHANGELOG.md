@@ -1,3 +1,10 @@
+# [2.24.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.5...v2.24.0) (2020-09-21)
+
+
+### Features
+
+* **csrf:** added functionality for cross site request forgery (csrf) ([#107](https://github.com/hmcts/rpx-xui-node-lib/issues/107)) ([1ad4697](https://github.com/hmcts/rpx-xui-node-lib/commit/1ad469735470ef3ed192869fdfb1f82da4cee2cb))
+
 ## [2.23.5](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.4...v2.23.5) (2020-09-10)
 
 
