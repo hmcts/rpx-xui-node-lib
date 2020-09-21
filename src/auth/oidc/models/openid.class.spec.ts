@@ -58,6 +58,7 @@ test('OIDC loginHandler with session', async () => {
     spyOn(openId, 'initializePassport')
     spyOn(openId, 'initializeSession')
     spyOn(openId, 'initialiseStrategy')
+    spyOn(openId, 'initialiseCSRF')
     options.useRoutes = true
     openId.configure(options)
 
@@ -175,11 +176,13 @@ test('OIDC verifyLogin happy Path with no subscription', () => {
     const mockRequest = {
         body: {},
     } as Request
+    mockRequest.csrfToken = jest.fn()
     mockRequest.logIn = (user: any, done: (err: any) => void) => {
         done(undefined)
     }
     const mockResponse = {} as Response
     const mockRedirect = jest.fn()
+    mockResponse.cookie = jest.fn()
     mockResponse.redirect = mockRedirect
     const next = jest.fn()
     const user = {
@@ -197,10 +200,12 @@ test('OIDC verifyLogin happy Path with subscription', () => {
     const mockRequest = {
         body: {},
     } as Request
+    mockRequest.csrfToken = jest.fn()
     mockRequest.logIn = (user: any, done: (err: any) => void) => {
         done(undefined)
     }
     const mockResponse = {} as Response
+    mockResponse.cookie = jest.fn()
     mockResponse.redirect = jest.fn()
     const next = jest.fn()
     const user = {

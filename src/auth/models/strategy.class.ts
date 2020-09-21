@@ -8,6 +8,7 @@ import { AuthOptions } from './authOptions.interface'
 import Joi from '@hapi/joi'
 import * as URL from 'url'
 import { generators } from 'openid-client'
+import csrf from 'csurf'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -32,6 +33,7 @@ export abstract class Strategy extends events.EventEmitter {
         responseTypes: [''],
         tokenEndpointAuthMethod: '',
         allowRolesRegex: '.',
+        useCSRF: true,
     }
 
     protected constructor(strategyName: string, router: Router, logger: XuiLogger = getLogger('auth:strategy')) {
@@ -64,6 +66,7 @@ export abstract class Strategy extends events.EventEmitter {
             state: Joi.any(),
             customHeaders: Joi.any(),
             allowRolesRegex: Joi.string(),
+            useCSRF: Joi.bool(),
         })
         const { error } = schema.validate(options)
         if (error) {
@@ -170,8 +173,9 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public configure = (options: AuthOptions): RequestHandler => {
-        this.validateOptions(options)
-        this.options = options
+        const configuredOptions = { ...this.options, ...options }
+        this.validateOptions(configuredOptions)
+        this.options = configuredOptions
 
         this.serializeUser()
         this.deserializeUser()
@@ -182,6 +186,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.initializePassport()
         this.initializeSession()
         this.initializeKeepAlive()
+        this.initialiseCSRF()
 
         if (options.useRoutes) {
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
@@ -257,6 +262,10 @@ export abstract class Strategy extends events.EventEmitter {
                 )
                 return this.logout(req, res)
             }
+            if (this.options.useCSRF) {
+                this.logger.log('setting csrf cookie token')
+                res.cookie('XSRF-TOKEN', req.csrfToken())
+            }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                 this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                 res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
@@ -277,6 +286,16 @@ export abstract class Strategy extends events.EventEmitter {
 
     public initializeKeepAlive = (): void => {
         this.router.use(this.keepAliveHandler)
+    }
+
+    /**
+     * helper method to store csrf token into session
+     */
+    public initialiseCSRF = (): void => {
+        if (this.options.useCSRF) {
+            this.logger.log('initialising CSRF middleware')
+            this.router.use(csrf())
+        }
     }
 
     public addHeaders = (): void => {
