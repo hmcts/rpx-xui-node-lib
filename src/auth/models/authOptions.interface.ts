@@ -14,4 +14,5 @@ export interface AuthOptions {
     responseTypes: string[]
     tokenEndpointAuthMethod: string
     allowRolesRegex?: string
+    useCSRF?: boolean
 }
