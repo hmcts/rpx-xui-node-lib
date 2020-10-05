@@ -1,3 +1,10 @@
+## [2.24.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.24.0...v2.24.1) (2020-10-05)
+
+
+### Bug Fixes
+
+* **csrf:** value not read from cookie ([#109](https://github.com/hmcts/rpx-xui-node-lib/issues/109)) ([b85298b](https://github.com/hmcts/rpx-xui-node-lib/commit/b85298b3475d027c8f131316d5bd24de9fbbe673))
+
 # [2.24.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.23.5...v2.24.0) (2020-09-21)
 
 
