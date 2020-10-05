@@ -308,8 +308,29 @@ export abstract class Strategy extends events.EventEmitter {
     public initialiseCSRF = (): void => {
         if (this.options.useCSRF) {
             this.logger.log('initialising CSRF middleware')
-            this.router.use(csrf())
+            this.router.use(
+                csrf({
+                    value: this.getCSRFValue,
+                }),
+            )
         }
+    }
+
+    /**
+     * retrieve the csrf token value, lastly from sent cookies
+     * @param req
+     * @return string
+     */
+    public getCSRFValue = (req: Request): string => {
+        return (
+            (req.body && req.body._csrf) ||
+            (req.query && req.query._csrf) ||
+            req.headers['csrf-token'] ||
+            req.headers['xsrf-token'] ||
+            req.headers['x-csrf-token'] ||
+            req.headers['x-xsrf-token'] ||
+            req.cookies['XSRF-TOKEN']
+        )
     }
 
     public addHeaders = (): void => {
