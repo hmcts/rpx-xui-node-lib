@@ -276,10 +276,6 @@ export abstract class Strategy extends events.EventEmitter {
                 )
                 return this.logout(req, res)
             }
-            if (this.options.useCSRF) {
-                this.logger.log('setting csrf cookie token')
-                res.cookie('XSRF-TOKEN', req.csrfToken())
-            }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                 this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                 res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
@@ -308,11 +304,15 @@ export abstract class Strategy extends events.EventEmitter {
     public initialiseCSRF = (): void => {
         if (this.options.useCSRF) {
             this.logger.log('initialising CSRF middleware')
-            this.router.use(
-                csrf({
-                    value: this.getCSRFValue,
-                }),
-            )
+
+            const csrfProtection = csrf({
+                value: this.getCSRFValue,
+            })
+
+            this.router.use(csrfProtection, (req, res, next) => {
+                res.cookie('XSRF-TOKEN', req.csrfToken())
+                next()
+            })
         }
     }
 
