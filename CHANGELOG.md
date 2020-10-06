@@ -1,3 +1,10 @@
+## [2.24.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.24.1...v2.24.2) (2020-10-06)
+
+
+### Bug Fixes
+
+* **csrf:** cookie only set on login ([#110](https://github.com/hmcts/rpx-xui-node-lib/issues/110)) ([4846832](https://github.com/hmcts/rpx-xui-node-lib/commit/4846832f398d772596dd5e821a4ee04c35fcaf38))
+
 ## [2.24.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.24.0...v2.24.1) (2020-10-05)
 
 
