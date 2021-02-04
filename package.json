@@ -87,7 +87,7 @@
     "caller-path": "^3.0.0",
     "connect-redis": "^4.0.4",
     "csurf": "^1.11.0",
-    "debug": "^4.1.1",
+    "debug": "^4.3.2",
     "deepmerge": "^4.2.2",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
