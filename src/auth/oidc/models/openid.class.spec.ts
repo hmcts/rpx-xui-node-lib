@@ -607,3 +607,35 @@ test('keepAliveHandler session and isAuthenticated', async () => {
     expect(spyAuthSuccEmit).toHaveBeenCalledWith(AUTH.EVENT.AUTHENTICATE_SUCCESS, mockRequest, mockResponse, next)
     oidc.removeAllListeners()
 })
+
+test('getUrlFromOptions', () => {
+    const mockRouter = createMock<Router>()
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: {
+            userName: 'username@email.com',
+            password: 'password123',
+            routes: ['route1'],
+            scope: 'scope1 scope2',
+        },
+    }
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
+    openId.configure(options)
+    const url = openId.getUrlFromOptions()
+    expect(url).toEqual(
+        'http://testUrl/o/token?grant_type=password&password=password123&username=username@email.com&scope=scope1 scope2&client_id=clientID12&client_secret=secret123',
+    )
+})
