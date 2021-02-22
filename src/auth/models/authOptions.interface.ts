@@ -15,4 +15,12 @@ export interface AuthOptions {
     tokenEndpointAuthMethod: string
     allowRolesRegex?: string
     useCSRF?: boolean
+    routeCredential?: RouteCredential
+}
+
+export interface RouteCredential {
+    userName: string
+    password: string
+    routes: string[]
+    scope: string
 }

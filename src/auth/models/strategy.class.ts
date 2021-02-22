@@ -34,6 +34,7 @@ export abstract class Strategy extends events.EventEmitter {
         tokenEndpointAuthMethod: '',
         allowRolesRegex: '.',
         useCSRF: true,
+        routeCredential: undefined,
     }
 
     protected constructor(strategyName: string, router: Router, logger: XuiLogger = getLogger('auth:strategy')) {
@@ -67,6 +68,7 @@ export abstract class Strategy extends events.EventEmitter {
             customHeaders: Joi.any(),
             allowRolesRegex: Joi.string(),
             useCSRF: Joi.bool(),
+            routeCredential: Joi.any(),
         })
         const { error } = schema.validate(options)
         if (error) {
@@ -256,12 +258,36 @@ export abstract class Strategy extends events.EventEmitter {
 
     public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
 
-    public setHeaders = (req: Request, res: Response, next: NextFunction): void => {
+    public setHeaders = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (req.session?.passport?.user) {
-            req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
-            req.headers.Authorization = this.makeAuthorization(req.session.passport)
+            if (
+                this.options.routeCredential &&
+                this.options.routeCredential.routes &&
+                this.options.routeCredential.routes.includes(req.url)
+            ) {
+                const routeCredentialToken = req.session.routeCredentialToken
+                    ? req.session.routeCredentialToken
+                    : await this.generateToken()
+                console.log('req.url this.options.routeCredentia', routeCredentialToken)
+                if (routeCredentialToken && routeCredentialToken.access_token) {
+                    req.headers.Authorization = `Bearer ${routeCredentialToken.access_token}`
+                }
+            } else {
+                req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
+                req.headers.Authorization = this.makeAuthorization(req.session.passport)
+            }
         }
         next()
+    }
+
+    public generateToken = async (): Promise<any | undefined> => {
+        const url = this.getUrlFromOptions()
+        try {
+            const response = await http.post(url)
+            return response.data
+        } catch (error) {
+            this.logger.error('error => ', error)
+        }
     }
 
     public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response): void => {
@@ -394,5 +420,15 @@ export abstract class Strategy extends events.EventEmitter {
         } else {
             this.emit(eventName, eventObject, done)
         }
+    }
+
+    public getUrlFromOptions = (): string => {
+        const userName = this.options.routeCredential?.userName
+        const userPassword = this.options.routeCredential?.password
+        const scope = this.options.routeCredential?.scope
+        const clientSecret = this.options.clientSecret
+        const idamClient = this.options.clientID
+        const url = `${this.options.logoutURL}/o/token?grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
+        return url
     }
 }
