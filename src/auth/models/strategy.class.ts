@@ -260,11 +260,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     public setHeaders = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (req.session?.passport?.user) {
-            if (
-                this.options.routeCredential &&
-                this.options.routeCredential.routes &&
-                this.options.routeCredential.routes.includes(req.url)
-            ) {
+            if (this.isRouteCredentialNeeded(req.url, this.options)) {
                 await this.setCredentialToken(req)
             } else {
                 req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
@@ -272,6 +268,10 @@ export abstract class Strategy extends events.EventEmitter {
             }
         }
         next()
+    }
+
+    public isRouteCredentialNeeded = (url: string, options: AuthOptions): boolean | undefined => {
+        return options.routeCredential && options.routeCredential.routes && options.routeCredential.routes.includes(url)
     }
 
     public setCredentialToken = async (req: Request) => {

@@ -695,3 +695,55 @@ test('setCredentialToken', async () => {
     await oidc.setCredentialToken(request)
     expect(request.headers.Authorization).toEqual('Bearer access_token')
 })
+
+test('isRouteCredentialNeeded true', () => {
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: {
+            userName: 'username@email.com',
+            password: 'password123',
+            routes: ['route1'],
+            scope: 'scope1 scope2',
+        },
+    }
+    const isRouteCredentialsNeeded = oidc.isRouteCredentialNeeded('route1', options)
+    expect(isRouteCredentialsNeeded).toBeTruthy()
+})
+
+test('isRouteCredentialNeeded false', () => {
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: {
+            userName: 'username@email.com',
+            password: 'password123',
+            routes: ['route2'],
+            scope: 'scope1 scope2',
+        },
+    }
+    const isRouteCredentialsNeeded = oidc.isRouteCredentialNeeded('route1', options)
+    expect(isRouteCredentialsNeeded).toBeFalsy()
+})
