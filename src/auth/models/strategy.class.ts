@@ -266,11 +266,11 @@ export abstract class Strategy extends events.EventEmitter {
                 this.options.routeCredential.routes.includes(req.url)
             ) {
                 let routeCredentialToken
-                if (req.session.routeCredentialToken) {
-                    routeCredentialToken = req.session.routeCredentialToken
+                if (req.app.get('routeCredentialToken')) {
+                    routeCredentialToken = req.app.get('routeCredentialToken')
                 } else {
                     routeCredentialToken = await this.generateToken()
-                    req.session.routeCredentialToken = routeCredentialToken
+                    req.app.set('routeCredentialToken', routeCredentialToken)
                 }
                 if (routeCredentialToken && routeCredentialToken.access_token) {
                     req.headers.Authorization = `Bearer ${routeCredentialToken.access_token}`
