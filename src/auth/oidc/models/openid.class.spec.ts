@@ -2,7 +2,7 @@
 
 import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
-import { Request, Response, Router } from 'express'
+import { Request, response, Response, Router } from 'express'
 import { AUTH } from '../../auth.constants'
 import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import { createMock } from 'ts-auto-mock'
@@ -644,7 +644,47 @@ test('generateToken', async () => {
     const spyOnGetUrlFromOptions = jest.spyOn(oidc, 'getUrlFromOptions')
     spyOnGetUrlFromOptions.mockReturnValue('someUrl')
     const spyHttp = jest.spyOn(http, 'post').mockImplementation(async () => await Promise.resolve({} as any))
-    const result = oidc.generateToken()
+    oidc.generateToken()
     expect(spyOnGetUrlFromOptions).toBeCalled()
     expect(spyHttp).toBeCalledWith('someUrl')
+})
+
+test('setHeaders should use currently signed in user when no routeCredentialToken', () => {
+    const mockRouter = createMock<Router>()
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: undefined,
+    }
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
+    const request = createMock<Request>()
+    const next = jest.fn()
+    const session = createMock<Express.Session>()
+    session.passport = {
+        user: {
+            tokenset: {
+                accessToken: 'token-access',
+            },
+            userinfo: {
+                roles: ['role1', 'role2'],
+            },
+        },
+    }
+    request.session = session
+    openId.setHeaders(request, response, next)
+
+    expect(request.headers['user-roles']).toEqual('role1,role2')
+    expect(request.headers.Authorization).toEqual('Bearer token-access')
 })
