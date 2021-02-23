@@ -633,8 +633,7 @@ test('getUrlFromOptions', () => {
     }
     const logger = createMock<typeof console>()
     const openId = new OpenID(mockRouter, logger)
-    openId.configure(options)
-    const url = openId.getUrlFromOptions()
+    const url = openId.getUrlFromOptions(options)
     expect(url).toEqual(
         'http://testUrl/o/token?grant_type=password&password=password123&username=username@email.com&scope=scope1 scope2&client_id=clientID12&client_secret=secret123',
     )

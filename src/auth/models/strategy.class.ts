@@ -288,7 +288,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public generateToken = async (): Promise<any | undefined> => {
-        const url = this.getUrlFromOptions()
+        const url = this.getUrlFromOptions(this.options)
         try {
             const response = await http.post(url)
             return response.data
@@ -429,13 +429,13 @@ export abstract class Strategy extends events.EventEmitter {
         }
     }
 
-    public getUrlFromOptions = (): string => {
-        const userName = this.options.routeCredential?.userName
-        const userPassword = this.options.routeCredential?.password
-        const scope = this.options.routeCredential?.scope
-        const clientSecret = this.options.clientSecret
-        const idamClient = this.options.clientID
-        const url = `${this.options.logoutURL}/o/token?grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
+    public getUrlFromOptions = (options: AuthOptions): string => {
+        const userName = options.routeCredential?.userName
+        const userPassword = options.routeCredential?.password
+        const scope = options.routeCredential?.scope
+        const clientSecret = options.clientSecret
+        const idamClient = options.clientID
+        const url = `${options.logoutURL}/o/token?grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
         return url
     }
 }
