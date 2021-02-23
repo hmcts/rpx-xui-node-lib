@@ -265,22 +265,26 @@ export abstract class Strategy extends events.EventEmitter {
                 this.options.routeCredential.routes &&
                 this.options.routeCredential.routes.includes(req.url)
             ) {
-                let routeCredentialToken
-                if (req.app.get('routeCredentialToken')) {
-                    routeCredentialToken = req.app.get('routeCredentialToken')
-                } else {
-                    routeCredentialToken = await this.generateToken()
-                    req.app.set('routeCredentialToken', routeCredentialToken)
-                }
-                if (routeCredentialToken && routeCredentialToken.access_token) {
-                    req.headers.Authorization = `Bearer ${routeCredentialToken.access_token}`
-                }
+                await this.setCredentialToken(req)
             } else {
                 req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
                 req.headers.Authorization = this.makeAuthorization(req.session.passport)
             }
         }
         next()
+    }
+
+    public setCredentialToken = async (req: Request) => {
+        let routeCredentialToken
+        if (req.app.get('routeCredentialToken')) {
+            routeCredentialToken = req.app.get('routeCredentialToken')
+        } else {
+            routeCredentialToken = await this.generateToken()
+            req.app.set('routeCredentialToken', routeCredentialToken)
+        }
+        if (routeCredentialToken && routeCredentialToken.access_token) {
+            req.headers.Authorization = `Bearer ${routeCredentialToken.access_token}`
+        }
     }
 
     public generateToken = async (): Promise<any | undefined> => {

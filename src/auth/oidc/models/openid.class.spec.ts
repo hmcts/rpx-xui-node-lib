@@ -688,3 +688,11 @@ test('setHeaders should use currently signed in user when no routeCredentialToke
     expect(request.headers['user-roles']).toEqual('role1,role2')
     expect(request.headers.Authorization).toEqual('Bearer token-access')
 })
+
+test('setCredentialToken', async () => {
+    const request = createMock<Request>()
+    const spyOnGenerateToken = jest.spyOn(oidc, 'generateToken')
+    spyOnGenerateToken.mockReturnValue(Promise.resolve({ access_token: 'access_token' }))
+    await oidc.setCredentialToken(request)
+    expect(request.headers.Authorization).toEqual('Bearer access_token')
+})
