@@ -639,3 +639,12 @@ test('getUrlFromOptions', () => {
         'http://testUrl/o/token?grant_type=password&password=password123&username=username@email.com&scope=scope1 scope2&client_id=clientID12&client_secret=secret123',
     )
 })
+
+test('generateToken', async () => {
+    const spyOnGetUrlFromOptions = jest.spyOn(oidc, 'getUrlFromOptions')
+    spyOnGetUrlFromOptions.mockReturnValue('someUrl')
+    const spyHttp = jest.spyOn(http, 'post').mockImplementation(async () => await Promise.resolve({} as any))
+    const result = oidc.generateToken()
+    expect(spyOnGetUrlFromOptions).toBeCalled()
+    expect(spyHttp).toBeCalledWith('someUrl')
+})
