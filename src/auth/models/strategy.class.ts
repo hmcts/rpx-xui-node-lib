@@ -228,11 +228,9 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.error(error)
                 if (error) {
                     this.logger.error(error)
-                    // return next(error);
                 }
                 if (info) {
                     this.logger.info(info)
-                    // return next(info);
                 }
                 if (!user) {
                     this.logger.info('No user found, redirecting')
