@@ -276,7 +276,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     public setCredentialToken = async (req: Request) => {
         let routeCredentialToken
-        if (req.app.get('routeCredentialToken')) {
+        if (req.app.get('routeCredentialToken') && !this.jwTokenExpired(req.app.get('routeCredentialToken'))) {
             routeCredentialToken = req.app.get('routeCredentialToken')
         } else {
             routeCredentialToken = await this.generateToken()
