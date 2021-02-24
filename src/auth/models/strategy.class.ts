@@ -271,7 +271,11 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public isRouteCredentialNeeded = (url: string, options: AuthOptions): boolean | undefined => {
-        return options.routeCredential && options.routeCredential.routes && options.routeCredential.routes.includes(url)
+        return (
+            options.routeCredential &&
+            options.routeCredential.routes &&
+            options.routeCredential.routes.includes(url.split('?')[0])
+        )
     }
 
     public setCredentialToken = async (req: Request) => {
@@ -435,7 +439,6 @@ export abstract class Strategy extends events.EventEmitter {
         const scope = options.routeCredential?.scope
         const clientSecret = options.clientSecret
         const idamClient = options.clientID
-        const url = `${options.logoutURL}/o/token?grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
-        return url
+        return `${options.logoutURL}/o/token?grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
     }
 }

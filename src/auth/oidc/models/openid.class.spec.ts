@@ -718,7 +718,9 @@ test('isRouteCredentialNeeded true', () => {
             scope: 'scope1 scope2',
         },
     }
-    const isRouteCredentialsNeeded = oidc.isRouteCredentialNeeded('route1', options)
+    let isRouteCredentialsNeeded = oidc.isRouteCredentialNeeded('route1?queryParam1=1&queryParam2=2', options)
+    expect(isRouteCredentialsNeeded).toBeTruthy()
+    isRouteCredentialsNeeded = oidc.isRouteCredentialNeeded('route1', options)
     expect(isRouteCredentialsNeeded).toBeTruthy()
 })
 
