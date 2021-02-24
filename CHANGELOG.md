@@ -1,3 +1,10 @@
+# [2.25.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.24.4...v2.25.0) (2021-02-24)
+
+
+### Features
+
+* **strategy.ts:** client app now add credentials per route ([#123](https://github.com/hmcts/rpx-xui-node-lib/issues/123)) ([c6d18b0](https://github.com/hmcts/rpx-xui-node-lib/commit/c6d18b032564dab05aa982f9bc1b50acb68b78fd))
+
 ## [2.24.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.24.3...v2.24.4) (2021-01-22)
 
 
