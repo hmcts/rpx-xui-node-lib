@@ -34,6 +34,7 @@ export abstract class Strategy extends events.EventEmitter {
         tokenEndpointAuthMethod: '',
         allowRolesRegex: '.',
         useCSRF: true,
+        routeCredential: undefined,
     }
 
     protected constructor(strategyName: string, router: Router, logger: XuiLogger = getLogger('auth:strategy')) {
@@ -67,6 +68,7 @@ export abstract class Strategy extends events.EventEmitter {
             customHeaders: Joi.any(),
             allowRolesRegex: Joi.string(),
             useCSRF: Joi.bool(),
+            routeCredential: Joi.any(),
         })
         const { error } = schema.validate(options)
         if (error) {
@@ -226,11 +228,9 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.error(error)
                 if (error) {
                     this.logger.error(error)
-                    // return next(error);
                 }
                 if (info) {
                     this.logger.info(info)
-                    // return next(info);
                 }
                 if (!user) {
                     this.logger.info('No user found, redirecting')
@@ -256,12 +256,43 @@ export abstract class Strategy extends events.EventEmitter {
 
     public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
 
-    public setHeaders = (req: Request, res: Response, next: NextFunction): void => {
+    public setHeaders = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (req.session?.passport?.user) {
-            req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
-            req.headers.Authorization = this.makeAuthorization(req.session.passport)
+            if (this.isRouteCredentialNeeded(req.path, this.options)) {
+                await this.setCredentialToken(req)
+            } else {
+                req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
+                req.headers.Authorization = this.makeAuthorization(req.session.passport)
+            }
         }
         next()
+    }
+
+    public isRouteCredentialNeeded = (url: string, options: AuthOptions): boolean | undefined => {
+        return options.routeCredential && options.routeCredential.routes && options.routeCredential.routes.includes(url)
+    }
+
+    public setCredentialToken = async (req: Request) => {
+        let routeCredentialToken
+        if (req.app.get('routeCredentialToken') && !this.jwTokenExpired(req.app.get('routeCredentialToken'))) {
+            routeCredentialToken = req.app.get('routeCredentialToken')
+        } else {
+            routeCredentialToken = await this.generateToken()
+            req.app.set('routeCredentialToken', routeCredentialToken)
+        }
+        if (routeCredentialToken && routeCredentialToken.access_token) {
+            req.headers.Authorization = `Bearer ${routeCredentialToken.access_token}`
+        }
+    }
+
+    public generateToken = async (): Promise<any | undefined> => {
+        const url = this.getUrlFromOptions(this.options)
+        try {
+            const response = await http.post(url)
+            return response.data
+        } catch (error) {
+            this.logger.error('error generating authentication token => ', error)
+        }
     }
 
     public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response): void => {
@@ -394,5 +425,14 @@ export abstract class Strategy extends events.EventEmitter {
         } else {
             this.emit(eventName, eventObject, done)
         }
+    }
+
+    public getUrlFromOptions = (options: AuthOptions): string => {
+        const userName = options.routeCredential?.userName
+        const userPassword = options.routeCredential?.password
+        const scope = options.routeCredential?.scope
+        const clientSecret = options.clientSecret
+        const idamClient = options.clientID
+        return `${options.logoutURL}/o/token?grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
     }
 }
