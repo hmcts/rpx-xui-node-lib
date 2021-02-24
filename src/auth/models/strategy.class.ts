@@ -293,7 +293,7 @@ export abstract class Strategy extends events.EventEmitter {
             const response = await http.post(url)
             return response.data
         } catch (error) {
-            this.logger.error('error => ', error)
+            this.logger.error('error generating authentication token => ', error)
         }
     }
 
