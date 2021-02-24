@@ -2,7 +2,7 @@
 
 import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
-import { Request, Response, Router } from 'express'
+import { Request, response, Response, Router } from 'express'
 import { AUTH } from '../../auth.constants'
 import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import { createMock } from 'ts-auto-mock'
@@ -606,4 +606,144 @@ test('keepAliveHandler session and isAuthenticated', async () => {
     expect(mockRequest.session.passport.user.tokenset).toEqual(convertedTokenSet)
     expect(spyAuthSuccEmit).toHaveBeenCalledWith(AUTH.EVENT.AUTHENTICATE_SUCCESS, mockRequest, mockResponse, next)
     oidc.removeAllListeners()
+})
+
+test('getUrlFromOptions', () => {
+    const mockRouter = createMock<Router>()
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: {
+            userName: 'username@email.com',
+            password: 'password123',
+            routes: ['route1'],
+            scope: 'scope1 scope2',
+        },
+    }
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
+    const url = openId.getUrlFromOptions(options)
+    expect(url).toEqual(
+        'http://testUrl/o/token?grant_type=password&password=password123&username=username@email.com&scope=scope1 scope2&client_id=clientID12&client_secret=secret123',
+    )
+})
+
+test('generateToken', async () => {
+    const spyOnGetUrlFromOptions = jest.spyOn(oidc, 'getUrlFromOptions')
+    spyOnGetUrlFromOptions.mockReturnValue('someUrl')
+    const spyHttp = jest.spyOn(http, 'post').mockImplementation(async () => await Promise.resolve({} as any))
+    oidc.generateToken()
+    expect(spyOnGetUrlFromOptions).toBeCalled()
+    expect(spyHttp).toBeCalledWith('someUrl')
+})
+
+test('setHeaders should use currently signed in user when no routeCredentialToken', () => {
+    const mockRouter = createMock<Router>()
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: undefined,
+    }
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
+    const request = createMock<Request>()
+    const next = jest.fn()
+    const session = createMock<Express.Session>()
+    session.passport = {
+        user: {
+            tokenset: {
+                accessToken: 'token-access',
+            },
+            userinfo: {
+                roles: ['role1', 'role2'],
+            },
+        },
+    }
+    request.session = session
+    openId.setHeaders(request, response, next)
+
+    expect(request.headers['user-roles']).toEqual('role1,role2')
+    expect(request.headers.Authorization).toEqual('Bearer token-access')
+})
+
+test('setCredentialToken', async () => {
+    const request = createMock<Request>()
+    const spyOnGenerateToken = jest.spyOn(oidc, 'generateToken')
+    spyOnGenerateToken.mockReturnValue(Promise.resolve({ access_token: 'access_token' }))
+    await oidc.setCredentialToken(request)
+    expect(request.headers.Authorization).toEqual('Bearer access_token')
+})
+
+test('isRouteCredentialNeeded true', () => {
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: {
+            userName: 'username@email.com',
+            password: 'password123',
+            routes: ['route1'],
+            scope: 'scope1 scope2',
+        },
+    }
+    const isRouteCredentialsNeeded = oidc.isRouteCredentialNeeded('route1', options)
+    expect(isRouteCredentialsNeeded).toBeTruthy()
+})
+
+test('isRouteCredentialNeeded false', () => {
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: {
+            userName: 'username@email.com',
+            password: 'password123',
+            routes: ['route2'],
+            scope: 'scope1 scope2',
+        },
+    }
+    const isRouteCredentialsNeeded = oidc.isRouteCredentialNeeded('route1', options)
+    expect(isRouteCredentialsNeeded).toBeFalsy()
 })
