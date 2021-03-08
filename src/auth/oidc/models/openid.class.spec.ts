@@ -3,6 +3,7 @@
 import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
 import { Request, response, Response, Router } from 'express'
+import express from 'express'
 import { AUTH } from '../../auth.constants'
 import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import { createMock } from 'ts-auto-mock'
@@ -688,11 +689,25 @@ test('setHeaders should use currently signed in user when no routeCredentialToke
     expect(request.headers.Authorization).toEqual('Bearer token-access')
 })
 
-test('setCredentialToken', async () => {
+test('setCredentialToken not cached', async () => {
     const request = createMock<Request>()
     const spyOnGenerateToken = jest.spyOn(oidc, 'generateToken')
+    const spyOnIsTokenExpired = jest.spyOn(oidc, 'isTokenExpired')
+    spyOnIsTokenExpired.mockReturnValue(true)
     spyOnGenerateToken.mockReturnValue(Promise.resolve({ access_token: 'access_token' }))
     await oidc.setCredentialToken(request)
+    expect(request.headers.Authorization).toEqual('Bearer access_token')
+})
+
+test('setCredentialToken cached', async () => {
+    const request = createMock<Request>()
+    const spyOnIsTokenExpired = jest.spyOn(oidc, 'isTokenExpired')
+    spyOnIsTokenExpired.mockReturnValue(false)
+    const app = express()
+    app.set('routeCredentialToken', { access_token: 'access_token' })
+    request.app = app
+    await oidc.setCredentialToken(request)
+    expect(spyOnIsTokenExpired).toBeCalled()
     expect(request.headers.Authorization).toEqual('Bearer access_token')
 })
 
