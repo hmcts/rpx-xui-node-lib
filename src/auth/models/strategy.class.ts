@@ -276,9 +276,11 @@ export abstract class Strategy extends events.EventEmitter {
         let routeCredentialToken
         const cachedToken = req.app.get('routeCredentialToken')
         if (cachedToken && cachedToken.access_token && !this.isTokenExpired(cachedToken.access_token)) {
+            this.logger.info('using cached routeCredentialToken')
             routeCredentialToken = cachedToken
         } else {
             routeCredentialToken = await this.generateToken()
+            this.logger.info('using new routeCredentialToken')
             req.app.set('routeCredentialToken', routeCredentialToken)
         }
         if (routeCredentialToken && routeCredentialToken.access_token) {
