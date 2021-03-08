@@ -1,3 +1,10 @@
+## [2.25.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.0...v2.25.1) (2021-03-08)
+
+
+### Bug Fixes
+
+* **strategy.class.ts:** routeCredentialToken expiry fix ([#124](https://github.com/hmcts/rpx-xui-node-lib/issues/124)) ([e895178](https://github.com/hmcts/rpx-xui-node-lib/commit/e895178110df8a7f22619932ea217a3d9d1fbe3d))
+
 # [2.25.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.24.4...v2.25.0) (2021-02-24)
 
 
