@@ -1,3 +1,10 @@
+## [2.25.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.1...v2.25.2) (2021-03-09)
+
+
+### Bug Fixes
+
+* **strategy.class.ts:** add extra logging ([#127](https://github.com/hmcts/rpx-xui-node-lib/issues/127)) ([06384d8](https://github.com/hmcts/rpx-xui-node-lib/commit/06384d8ea243b85e7693971b4d71fcb59035cf78))
+
 ## [2.25.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.0...v2.25.1) (2021-03-08)
 
 
