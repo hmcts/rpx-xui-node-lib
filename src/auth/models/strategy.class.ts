@@ -224,7 +224,7 @@ export abstract class Strategy extends events.EventEmitter {
                 redirect_uri: req.session?.callbackURL,
             } as any,
             (error, user, info) => {
-                this.logger.info('inside passport authenticate')
+                this.logger.log('inside passport authenticate')
                 this.logger.error(error)
                 if (error) {
                     this.logger.error(error)
@@ -233,7 +233,7 @@ export abstract class Strategy extends events.EventEmitter {
                     this.logger.info(info)
                 }
                 if (!user) {
-                    this.logger.info('No user found, redirecting')
+                    this.logger.log('No user found, redirecting')
                     return res.redirect(AUTH.ROUTE.LOGIN)
                 }
                 this.verifyLogin(req, user, next, res)
