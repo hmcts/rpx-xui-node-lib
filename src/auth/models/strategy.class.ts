@@ -291,7 +291,10 @@ export abstract class Strategy extends events.EventEmitter {
     public generateToken = async (): Promise<any | undefined> => {
         const url = this.getUrlFromOptions(this.options)
         try {
-            const response = await http.post(url)
+            const axiosConfig = {
+                headers: { 'content-type': 'application/x-www-form-urlencoded' },
+            }
+            const response = await http.post(url, null, axiosConfig)
             return response.data
         } catch (error) {
             this.logger.error('error generating authentication token => ', error)
@@ -431,11 +434,14 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public getUrlFromOptions = (options: AuthOptions): string => {
-        const userName = options.routeCredential?.userName
-        const userPassword = options.routeCredential?.password
-        const scope = options.routeCredential?.scope
-        const clientSecret = options.clientSecret
-        const idamClient = options.clientID
-        return `${options.logoutURL}/o/token?grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
+        if (options.routeCredential) {
+            const userName = options.routeCredential.userName
+            const userPassword = encodeURIComponent(options.routeCredential.password)
+            const scope = options.routeCredential?.scope
+            const clientSecret = options.clientSecret
+            const idamClient = options.clientID
+            return `${options.logoutURL}/o/token?grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
+        }
+        throw new Error('missing routeCredential in options')
     }
 }

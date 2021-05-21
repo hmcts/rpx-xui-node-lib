@@ -646,7 +646,10 @@ test('generateToken', async () => {
     const spyHttp = jest.spyOn(http, 'post').mockImplementation(async () => await Promise.resolve({} as any))
     oidc.generateToken()
     expect(spyOnGetUrlFromOptions).toBeCalled()
-    expect(spyHttp).toBeCalledWith('someUrl')
+    const axiosConfig = {
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    }
+    expect(spyHttp).toBeCalledWith('someUrl', null, axiosConfig)
 })
 
 test('setHeaders should use currently signed in user when no routeCredentialToken', () => {
