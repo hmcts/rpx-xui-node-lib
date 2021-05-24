@@ -635,21 +635,52 @@ test('getUrlFromOptions', () => {
     const logger = createMock<typeof console>()
     const openId = new OpenID(mockRouter, logger)
     const url = openId.getUrlFromOptions(options)
-    expect(url).toEqual(
-        'http://testUrl/o/token?grant_type=password&password=password123&username=username@email.com&scope=scope1 scope2&client_id=clientID12&client_secret=secret123',
+    expect(url).toEqual('http://testUrl/o/token')
+})
+
+test('getRequestBody', () => {
+    const mockRouter = createMock<Router>()
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+        routeCredential: {
+            userName: 'username@email.com',
+            password: 'password123',
+            routes: ['route1'],
+            scope: 'scope1 scope2',
+        },
+    }
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
+    const reqBody = openId.getRequestBody(options)
+    expect(reqBody).toEqual(
+        'grant_type=password&password=password123&username=username@email.com&scope=scope1 scope2&client_id=clientID12&client_secret=secret123',
     )
 })
 
 test('generateToken', async () => {
     const spyOnGetUrlFromOptions = jest.spyOn(oidc, 'getUrlFromOptions')
+    const spyOnGetRequestBody = jest.spyOn(oidc, 'getRequestBody')
     spyOnGetUrlFromOptions.mockReturnValue('someUrl')
+    spyOnGetRequestBody.mockReturnValue('somebody')
     const spyHttp = jest.spyOn(http, 'post').mockImplementation(async () => await Promise.resolve({} as any))
     oidc.generateToken()
     expect(spyOnGetUrlFromOptions).toBeCalled()
     const axiosConfig = {
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
     }
-    expect(spyHttp).toBeCalledWith('someUrl', null, axiosConfig)
+    expect(spyHttp).toBeCalledWith('someUrl', 'somebody', axiosConfig)
 })
 
 test('setHeaders should use currently signed in user when no routeCredentialToken', () => {
