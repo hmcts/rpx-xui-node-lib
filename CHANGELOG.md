@@ -1,3 +1,10 @@
+## [2.25.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.2...v2.25.3) (2021-05-24)
+
+
+### Bug Fixes
+
+* **strategy.class.ts:** password is URL encoded now ([#134](https://github.com/hmcts/rpx-xui-node-lib/issues/134)) ([d556c84](https://github.com/hmcts/rpx-xui-node-lib/commit/d556c84a5e5dd23aa3c28df740fc6221fd0d88c4))
+
 ## [2.25.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.1...v2.25.2) (2021-03-09)
 
 
