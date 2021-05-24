@@ -669,6 +669,22 @@ test('getRequestBody', () => {
     )
 })
 
+test('getUrlFromOptions without routeCredential', () => {
+    const mockRouter = createMock<Router>()
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
+
+    expect(() => openId.getUrlFromOptions({} as AuthOptions)).toThrowError('missing routeCredential in options')
+})
+
+test('getRequestBody without routeCredential', () => {
+    const mockRouter = createMock<Router>()
+    const logger = createMock<typeof console>()
+    const openId = new OpenID(mockRouter, logger)
+
+    expect(() => openId.getRequestBody({} as AuthOptions)).toThrowError('options.routeCredential missing values')
+})
+
 test('generateToken', async () => {
     const spyOnGetUrlFromOptions = jest.spyOn(oidc, 'getUrlFromOptions')
     const spyOnGetRequestBody = jest.spyOn(oidc, 'getRequestBody')
