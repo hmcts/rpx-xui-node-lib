@@ -11,7 +11,7 @@ Please use proper naming conventions for your feature/bug branches. Also,
 when committing please use conventional commits (@see this [guide](https://medium.com/jobtome-engineering/how-to-generate-changelog-using-conventional-commits-10be40f5826c)). This style
 is now enforced using git commit hooks and there are a number of ways to commit.
 
-## Commitizen
+## Commitizen 
 This is the preferred way of generating a commit against this library as it ensures the commit is formatted correctly and also
 allows you to interactively build your commit. To do so, you can either type ```yarn commit``` or ```git cz```
 
