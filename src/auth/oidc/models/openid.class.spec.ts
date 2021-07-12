@@ -238,20 +238,6 @@ test('OIDC discover', () => {
     expect(spy).toBeCalled()
 })
 
-test('OIDC authenticate when not authenticated', async () => {
-    const mockRequest = {
-        body: {},
-    } as Request
-    mockRequest.isUnauthenticated = () => true
-    const mockResponse = {} as Response
-    const mockRedirect = jest.fn()
-    mockResponse.redirect = mockRedirect
-
-    const next = jest.fn()
-    await oidc.authenticate(mockRequest, mockResponse, next)
-    expect(mockRedirect).toBeCalledWith(AUTH.ROUTE.LOGIN)
-})
-
 xtest('OIDC authenticate when authenticated but session and client not initialised', () => {
     const mockRequest = {
         body: {},
