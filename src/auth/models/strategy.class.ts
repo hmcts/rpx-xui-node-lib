@@ -249,7 +249,6 @@ export abstract class Strategy extends events.EventEmitter {
     public authenticate = (req: Request, res: Response, next: NextFunction): void => {
         if (req.isUnauthenticated()) {
             this.logger.log('unauthenticated, redirecting')
-            return res.redirect(AUTH.ROUTE.LOGIN)
         }
         next()
     }
