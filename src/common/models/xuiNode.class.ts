@@ -37,8 +37,7 @@ export class XuiNode extends EventEmitter {
      */
     public authenticateDefault = (req: Request, res: Response, next: NextFunction): void => {
         if (req.isUnauthenticated()) {
-            this.logger.log('unauthenticated, redirecting')
-            return res.redirect(AUTH.ROUTE.LOGIN)
+            this.logger.log('unauthenticated')
         }
         next()
     }
