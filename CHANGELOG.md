@@ -1,3 +1,10 @@
+## [2.25.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.3...v2.25.4) (2021-07-14)
+
+
+### Bug Fixes
+
+* **strategy.class.ts:** remove node redirect ([#140](https://github.com/hmcts/rpx-xui-node-lib/issues/140)) ([fcea809](https://github.com/hmcts/rpx-xui-node-lib/commit/fcea809b66940ad349e535520c859bbd9d136957))
+
 ## [2.25.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.2...v2.25.3) (2021-05-24)
 
 
