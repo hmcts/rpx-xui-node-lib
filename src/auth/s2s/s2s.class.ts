@@ -111,7 +111,7 @@ export class S2SAuth extends EventEmitter {
             oneTimePassword,
         })
 
-        return request.data
+        return request.data + ''
     }
 
     public serviceTokenGenerator = async (): Promise<string> => {
