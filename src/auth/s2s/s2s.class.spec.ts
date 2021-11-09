@@ -161,8 +161,8 @@ describe('S2SAuth', () => {
 
         const result = await promise
         // There should not be any S2S token in the request headers
-        expect(req.headers).toEqual({})
-        expect(next).not.toHaveBeenCalled()
+        expect(req.headers).toEqual({ ServiceAuthorization: 'Bearer null' })
+        expect(next).toHaveBeenCalled()
         expect(result).toBeUndefined()
     })
 })
