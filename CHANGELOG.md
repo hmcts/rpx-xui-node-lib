@@ -1,3 +1,10 @@
+## [2.25.5](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.4...v2.25.5) (2022-03-08)
+
+
+### Bug Fixes
+
+* made sure that state failures are emitted to the consuming app ([#152](https://github.com/hmcts/rpx-xui-node-lib/issues/152)) ([5c2e2d2](https://github.com/hmcts/rpx-xui-node-lib/commit/5c2e2d22dea62414af18b46bad82bc58794867ba))
+
 ## [2.25.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.3...v2.25.4) (2021-07-14)
 
 
