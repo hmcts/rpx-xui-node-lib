@@ -217,6 +217,8 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
+        const INVALID_STATE_ERROR = 'Invalid authorization request state.'
+
         passport.authenticate(
             this.strategyName,
             {
@@ -230,6 +232,11 @@ export abstract class Strategy extends events.EventEmitter {
                     this.logger.error(error)
                 }
                 if (info) {
+                    if (info.message === INVALID_STATE_ERROR) {
+                        res.locals.message = INVALID_STATE_ERROR
+                        this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
+                    }
+
                     this.logger.info(info)
                 }
                 if (!user) {
