@@ -17,7 +17,7 @@ allows you to interactively build your commit. To do so, you can either type ```
 
 ## Alternative
 You can still use ```git commit``` however in doing so you have to manually enforce the commit standard and type (please be aware
-that your commit will still get linted and may fail otherwise).
+that your commit will still get linted and may fail otherwise). 
 
 ## Get User Session Timeout
 
