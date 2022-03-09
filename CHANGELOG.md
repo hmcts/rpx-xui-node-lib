@@ -1,3 +1,10 @@
+## [2.25.6](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.5...v2.25.6) (2022-03-09)
+
+
+### Bug Fixes
+
+* workflow test ([#156](https://github.com/hmcts/rpx-xui-node-lib/issues/156)) ([9307fe6](https://github.com/hmcts/rpx-xui-node-lib/commit/9307fe6e6813f3ccb127cda67502fcee0c1dea8d))
+
 ## [2.25.5](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.4...v2.25.5) (2022-03-08)
 
 
