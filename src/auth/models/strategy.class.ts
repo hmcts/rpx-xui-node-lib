@@ -229,7 +229,9 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.log('inside passport authenticate')
                 this.logger.error(error)
                 if (error) {
+                    res.locals.message = error
                     this.logger.error(error)
+                    this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
                 }
                 if (info) {
                     if (info.message === INVALID_STATE_ERROR) {
