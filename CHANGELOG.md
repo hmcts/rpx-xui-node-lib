@@ -1,3 +1,10 @@
+## [2.25.8](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.7...v2.25.8) (2022-03-16)
+
+
+### Bug Fixes
+
+* Feature/e UI 4584 invalid state pw ([#158](https://github.com/hmcts/rpx-xui-node-lib/issues/158)) ([d16a8ef](https://github.com/hmcts/rpx-xui-node-lib/commit/d16a8efd54a9622c83a73999b6b2d79eda5150a9))
+
 ## [2.25.7](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.6...v2.25.7) (2022-03-09)
 
 
