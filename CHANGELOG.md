@@ -1,3 +1,10 @@
+## [2.25.9](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.8...v2.25.9) (2022-03-21)
+
+
+### Bug Fixes
+
+* Emit invalid state in all cases ([#160](https://github.com/hmcts/rpx-xui-node-lib/issues/160)) ([a1a9cbe](https://github.com/hmcts/rpx-xui-node-lib/commit/a1a9cbe7ee3b0f3aacde093693b9870ce8dde2d4))
+
 ## [2.25.8](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.7...v2.25.8) (2022-03-16)
 
 
