@@ -242,7 +242,11 @@ export abstract class Strategy extends events.EventEmitter {
                     this.logger.info(info)
                 }
                 if (!user) {
-                    this.logger.log('No user found, redirecting')
+                    const message = 'No user found, redirecting'
+                    res.locals.message = message
+                    this.logger.log(message)
+                    this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
+
                     return res.redirect(AUTH.ROUTE.LOGIN)
                 }
                 this.verifyLogin(req, user, next, res)
