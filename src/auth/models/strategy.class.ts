@@ -163,7 +163,7 @@ export abstract class Strategy extends events.EventEmitter {
             res.redirect(redirect as string)
         } catch (e) {
             this.logger.error('error => ', e)
-            res.redirect(401, AUTH.ROUTE.DEFAULT_REDIRECT)
+            res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
         }
         this.logger.log('logout end')
     }
