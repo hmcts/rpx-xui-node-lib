@@ -117,7 +117,7 @@ export abstract class Strategy extends events.EventEmitter {
         } as any)(req, res, next)
     }
 
-    public setCallbackURL = (req: Request, res: Response, next: NextFunction): void => {
+    public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         /* istanbul ignore else */
         if (req.session && !req.session.callbackURL) {
             req.app.set('trust proxy', true)
@@ -184,7 +184,7 @@ export abstract class Strategy extends events.EventEmitter {
         })
     }
 
-    public keepAliveHandler = (req: Request, res: Response, next: NextFunction): void => {
+    public keepAliveHandler = (_req: Request, _res: Response, next: NextFunction): void => {
         next()
     }
 
@@ -259,7 +259,7 @@ export abstract class Strategy extends events.EventEmitter {
         return this.jwTokenExpired(jwtData)
     }
 
-    public authenticate = (req: Request, res: Response, next: NextFunction): void => {
+    public authenticate = (req: Request, _res: Response, next: NextFunction): void => {
         if (req.isUnauthenticated()) {
             this.logger.log('unauthenticated')
         }
@@ -268,7 +268,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
 
-    public setHeaders = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public setHeaders = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
         if (req.session?.passport?.user) {
             if (this.isRouteCredentialNeeded(req.path, this.options)) {
                 await this.setCredentialToken(req)
