@@ -1,3 +1,10 @@
+## [2.25.11](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.10...v2.25.11) (2022-05-23)
+
+
+### Bug Fixes
+
+* reverted version number as it is done automatically ([50cd12f](https://github.com/hmcts/rpx-xui-node-lib/commit/50cd12fb9b01b49ab9b8d51a0005bc365280a132))
+
 ## [2.25.9](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.8...v2.25.9) (2022-03-21)
 
 
