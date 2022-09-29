@@ -38,6 +38,7 @@ export class RedisSessionStore extends SessionStore {
         redisClient.on('ready', () => {
             this.emitEvent(SESSION.EVENT.REDIS_CLIENT_READY, redisClient)
             this.logger.info('redis client connected successfully')
+            this.logger.info('redisClient is ', redisClient)
         })
     }
 

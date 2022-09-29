@@ -1,3 +1,5 @@
+## [2.25.12](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.11...v2.25.12) (2022-06-09)
+
 ## [2.25.11](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.10...v2.25.11) (2022-05-23)
 
 
