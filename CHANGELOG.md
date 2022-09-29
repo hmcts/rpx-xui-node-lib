@@ -1,3 +1,11 @@
+## [2.25.13](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.12...v2.25.13) (2022-09-29)
+
+
+### Bug Fixes
+
+* **openid.class.ts:** increased OIDC timeout ([cd1de56](https://github.com/hmcts/rpx-xui-node-lib/commit/cd1de56771cfce53338b79c84820f3991c121828))
+* **reverted version:** reverted the version increase ([9dd208f](https://github.com/hmcts/rpx-xui-node-lib/commit/9dd208ffb70efdba3346f8caf9799e6022ff9e16))
+
 ## [2.25.12](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.11...v2.25.12) (2022-06-09)
 
 ## [2.25.11](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.10...v2.25.11) (2022-05-23)
