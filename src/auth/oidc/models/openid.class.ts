@@ -40,7 +40,7 @@ export class OpenID extends AuthStrategy {
     public setHttpOptionsDefaults = (options: HttpOptions): void => {
         const defaults = {
             retry: 3,
-            timeout: 10000,
+            timeout: 15000,
             hooks: {
                 beforeRequest: [
                     (options: any) => {
