@@ -226,29 +226,35 @@ export abstract class Strategy extends events.EventEmitter {
                 redirect_uri: req.session?.callbackURL,
             } as any,
             (error, user, info) => {
+                const errorMessages: string[] = []
                 this.logger.log('inside passport authenticate')
-                this.logger.error(error)
+
                 if (error) {
-                    res.locals.message = error
+                    errorMessages.push(error)
                     this.logger.error(error)
-                    this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
                 }
+
                 if (info) {
                     if (info.message === INVALID_STATE_ERROR) {
-                        res.locals.message = INVALID_STATE_ERROR
-                        this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
+                        errorMessages.push(INVALID_STATE_ERROR)
                     }
 
                     this.logger.info(info)
                 }
+
                 if (!user) {
-                    const message = 'No user found, redirecting'
-                    res.locals.message = message
+                    const message = 'No user details returned by the authentication service'
+                    errorMessages.push(message)
                     this.logger.log(message)
-                    this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
 
                     return res.redirect(AUTH.ROUTE.LOGIN)
                 }
+
+                if (errorMessages.length) {
+                    res.locals.message = errorMessages.join('\n')
+                    this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
+                }
+
                 this.verifyLogin(req, user, next, res)
             },
         )(req, res, next)
