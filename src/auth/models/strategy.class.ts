@@ -243,7 +243,7 @@ export abstract class Strategy extends events.EventEmitter {
                 }
 
                 if (!user) {
-                    const message = 'Authentication failed to yield user details'
+                    const message = 'No user details returned by the authentication service'
                     errorMessages.push(message)
                     this.logger.log(message)
 
