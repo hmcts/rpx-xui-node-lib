@@ -1,3 +1,10 @@
+## [2.26.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.0...v2.26.1) (2022-09-30)
+
+
+### Bug Fixes
+
+* **strategy.class.ts:** refactored the failure emit ([0510dbb](https://github.com/hmcts/rpx-xui-node-lib/commit/0510dbb7327fb494519e6b5d26193fec47bbe3e0))
+
 # [2.26.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.13...v2.26.0) (2022-09-30)
 
 
