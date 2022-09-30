@@ -219,6 +219,13 @@ export abstract class Strategy extends events.EventEmitter {
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
 
+        const emitAuthenticationFailure = (logMessages: string[]): void => {
+            if (!logMessages.length) return
+
+            res.locals.message = logMessages.join('\n')
+            this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
+        }
+
         passport.authenticate(
             this.strategyName,
             {
@@ -243,18 +250,15 @@ export abstract class Strategy extends events.EventEmitter {
                 }
 
                 if (!user) {
-                    const message = 'No user details returned by the authentication service'
+                    const message = 'No user details returned by the authentication service, redirecting to login'
                     errorMessages.push(message)
                     this.logger.log(message)
 
+                    emitAuthenticationFailure(errorMessages)
                     return res.redirect(AUTH.ROUTE.LOGIN)
                 }
 
-                if (errorMessages.length) {
-                    res.locals.message = errorMessages.join('\n')
-                    this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
-                }
-
+                emitAuthenticationFailure(errorMessages)
                 this.verifyLogin(req, user, next, res)
             },
         )(req, res, next)
