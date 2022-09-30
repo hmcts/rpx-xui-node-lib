@@ -1,3 +1,10 @@
+# [2.26.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.13...v2.26.0) (2022-09-30)
+
+
+### Features
+
+* **strategy.class.ts:** improved the auth emit logs ([9b709f3](https://github.com/hmcts/rpx-xui-node-lib/commit/9b709f3eb9f6cc41a587afdfcdcc0e4ca006c6c7))
+
 ## [2.25.13](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.25.12...v2.25.13) (2022-09-29)
 
 
