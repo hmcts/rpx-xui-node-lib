@@ -237,7 +237,7 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.log('inside passport authenticate')
 
                 if (error) {
-                    errorMessages.push(error)
+                    errorMessages.push(JSON.stringify(error))
                     this.logger.error(error)
                 }
 
