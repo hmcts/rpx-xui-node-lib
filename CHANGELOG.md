@@ -1,3 +1,11 @@
+## [2.26.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.1...v2.26.2) (2022-10-05)
+
+
+### Bug Fixes
+
+* added shorter timeout ([b9d6f2a](https://github.com/hmcts/rpx-xui-node-lib/commit/b9d6f2a421af100c117942af1dab6633cc0ba3eb))
+* enhance the logs ([b0b1eb9](https://github.com/hmcts/rpx-xui-node-lib/commit/b0b1eb910a8296789777fac8221073d65d4a8c76))
+
 ## [2.26.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.0...v2.26.1) (2022-09-30)
 
 
