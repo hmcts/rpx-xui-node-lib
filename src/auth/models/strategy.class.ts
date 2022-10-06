@@ -237,8 +237,18 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.log('inside passport authenticate')
 
                 if (error) {
-                    errorMessages.push(JSON.stringify(error))
-                    this.logger.error(error)
+                    switch (error.name) {
+                        case 'TimeoutError':
+                            const timeoutErrorMessage = `${error.name}: timeout awaiting ${error.url} for ${error.gotOptions.gotTimeout.request}ms`
+                            errorMessages.push(timeoutErrorMessage)
+                            this.logger.error(error)
+                            break
+
+                        default:
+                            errorMessages.push(error)
+                            this.logger.error(error)
+                            break
+                    }
                 }
 
                 if (info) {
