@@ -1,3 +1,10 @@
+## [2.26.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.2...v2.26.3) (2022-10-06)
+
+
+### Bug Fixes
+
+* fixed the app insight log ([eb7db94](https://github.com/hmcts/rpx-xui-node-lib/commit/eb7db9466cb044e675efaffa1eb548ce77038da5))
+
 ## [2.26.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.1...v2.26.2) (2022-10-05)
 
 
