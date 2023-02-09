@@ -88,33 +88,37 @@ export abstract class Strategy extends events.EventEmitter {
      * @param next NextFunction
      */
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
-        this.logger.log('Base loginHandler Hit')
+        try {
+            this.logger.log('Base loginHandler Hit')
 
-        // we are using oidc generator but it's just a helper, rather than installing another library to provide this
-        const state = generators.state()
+            // we are using oidc generator but it's just a helper, rather than installing another library to provide this
+            const state = generators.state()
 
-        const promise = new Promise((resolve) => {
-            if (req.session && this.options?.sessionKey) {
-                req.session[this.options?.sessionKey] = { state }
-                req.session.save(() => {
-                    this.logger.log('resolved promise, state saved')
-                    resolve(true)
-                })
-            } else {
-                this.logger.warn('resolved promise, state not saved')
-                resolve(false)
-            }
-        })
+            const promise = new Promise((resolve) => {
+                if (req.session && this.options?.sessionKey) {
+                    req.session[this.options?.sessionKey] = { state }
+                    req.session.save(() => {
+                        this.logger.log('resolved promise, state saved111')
+                        resolve(true)
+                    })
+                } else {
+                    this.logger.warn('resolved promise, state not saved')
+                    resolve(false)
+                }
+            })
 
-        await promise
+            await promise
 
-        this.logger.log('calling passport authenticate')
+            this.logger.log('calling passport authenticate')
 
-        return passport.authenticate(this.strategyName, {
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            redirect_uri: req.session?.callbackURL,
-            state,
-        } as any)(req, res, next)
+            return passport.authenticate(this.strategyName, {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                redirect_uri: req.session?.callbackURL,
+                state,
+            } as any)(req, res, next)
+        } catch (error) {
+            this.logger.error('error => ', JSON.stringify(error))
+        }
     }
 
     public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
