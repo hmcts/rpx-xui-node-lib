@@ -235,18 +235,26 @@ export class OpenID extends AuthStrategy {
                 this.logger.warn('resolved promise, nonce & state not saved!')
                 resolve(false)
             }
+        }).catch((error) => {
+            this.logger.error('error => ', JSON.stringify(error))
         })
 
         await promise
 
         this.logger.log('calling passport authenticate')
 
-        return passport.authenticate(this.strategyName, {
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            redirect_uri: req.session?.callbackURL,
-            nonce,
-            state,
-        } as any)(req, res, next)
+        return passport.authenticate(
+            this.strategyName,
+            {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                redirect_uri: req.session?.callbackURL,
+                nonce,
+                state,
+            } as any,
+            (error) => {
+                this.logger.error('error => ', JSON.stringify(error))
+            },
+        )(req, res, next)
     }
 }
 
