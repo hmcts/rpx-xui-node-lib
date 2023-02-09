@@ -1,3 +1,10 @@
+## [2.26.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.3...v2.26.4) (2023-02-09)
+
+
+### Bug Fixes
+
+* EUI 7753 enhance log ([#179](https://github.com/hmcts/rpx-xui-node-lib/issues/179)) ([a55f737](https://github.com/hmcts/rpx-xui-node-lib/commit/a55f73771849f3826dd6d0ddea1fdd6c7353e7a0))
+
 ## [2.26.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.2...v2.26.3) (2022-10-06)
 
 
