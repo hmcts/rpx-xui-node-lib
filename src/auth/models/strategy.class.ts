@@ -104,17 +104,25 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.warn('resolved promise, state not saved')
                 resolve(false)
             }
+        }).catch((error) => {
+            this.logger.error('error => ', JSON.stringify(error))
         })
 
         await promise
 
         this.logger.log('calling passport authenticate')
 
-        return passport.authenticate(this.strategyName, {
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            redirect_uri: req.session?.callbackURL,
-            state,
-        } as any)(req, res, next)
+        return passport.authenticate(
+            this.strategyName,
+            {
+                // eslint-disable-next-line @typescript-eslint/camelcase
+                redirect_uri: req.session?.callbackURL,
+                state,
+            } as any,
+            (error) => {
+                this.logger.error('error => ', JSON.stringify(error))
+            },
+        )(req, res, next)
     }
 
     public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
