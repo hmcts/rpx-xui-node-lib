@@ -97,7 +97,7 @@ export abstract class Strategy extends events.EventEmitter {
             if (req.session && this.options?.sessionKey) {
                 req.session[this.options?.sessionKey] = { state }
                 req.session.save(() => {
-                    this.logger.log('resolved promise, state saved111')
+                    this.logger.log('resolved promise, state saved')
                     resolve(true)
                 })
             } else {
