@@ -575,8 +575,9 @@ test('keepAliveHandler session and isAuthenticated', async () => {
 
     const tokenSet = createMock<TokenSet>()
     const spyOnRefresh = jest.fn().mockReturnValue(tokenSet)
-    client.refresh = spyOnRefresh
-
+    if (client) {
+        client.refresh = spyOnRefresh
+    }
     const spyConvertTokenSet = jest.spyOn(oidc, 'convertTokenSet')
     const convertedTokenSet = createMock<TokenSet>()
     spyConvertTokenSet.mockReturnValue(convertedTokenSet)
