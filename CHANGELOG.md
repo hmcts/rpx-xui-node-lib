@@ -1,3 +1,10 @@
+## [2.26.5](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.4...v2.26.5) (2023-02-15)
+
+
+### Bug Fixes
+
+* EUI 7753 OIDC upgrade ([#181](https://github.com/hmcts/rpx-xui-node-lib/issues/181)) ([0246f11](https://github.com/hmcts/rpx-xui-node-lib/commit/0246f111fdc9ce0232f5c77b5fafba647a278147))
+
 ## [2.26.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.3...v2.26.4) (2023-02-09)
 
 
