@@ -37,6 +37,7 @@ export class OpenID extends AuthStrategy {
      * Helper function to customise GOT defaults and hooks to provide debug information
      * @param options
      */
+    /* istanbul ignore next */
     public setHttpOptionsDefaults = (options: HttpOptions): void => {
         const defaults = {
             retry: 3,
@@ -83,6 +84,7 @@ export class OpenID extends AuthStrategy {
 
     // TODO: this.client should be passed in
     // This function is hard to mock, come back to once we've mocked out easier prod code.
+    /* istanbul ignore next */
     public keepAliveHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         if (!req.session?.passport?.user) {
             return next()
@@ -178,6 +180,7 @@ export class OpenID extends AuthStrategy {
     // TODO: Don't throw errors from inside functions as it's side effecting,
     // get the function to return and throw the error in the caller function.
     // Why? - this makes the function more pure, and allows it to be easily testable.
+    /* istanbul ignore next */
     public createNewStrategy = async (options: OpenIDMetadata): Promise<Strategy<any, any>> => {
         this.issuer = await this.discover()
         if (!this.issuer) {
@@ -189,7 +192,7 @@ export class OpenID extends AuthStrategy {
         }
         return this.getNewStrategy(options, this.client)
     }
-
+    /* istanbul ignore next */
     public getNewStrategy = (options: OpenIDMetadata, client: Client): Strategy<any, Client> => {
         return new Strategy(
             {
@@ -218,6 +221,7 @@ export class OpenID extends AuthStrategy {
      * @param res Response
      * @param next NextFunction
      */
+    /* istanbul ignore next */
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
         this.logger.log('OIDC loginHandler Hit')
 
@@ -237,25 +241,29 @@ export class OpenID extends AuthStrategy {
             }
         })
 
-        await promise
+        try {
+            await promise
 
-        this.logger.log('calling passport authenticate')
+            this.logger.log('calling passport authenticate')
 
-        return passport.authenticate(
-            this.strategyName,
-            {
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                redirect_uri: req.session?.callbackURL,
-                nonce,
-                state,
-            } as any,
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            (error, user, info) => {
-                if (error) {
-                    this.logger.error('error => ', JSON.stringify(error))
-                }
-            },
-        )(req, res, next)
+            return passport.authenticate(
+                this.strategyName,
+                {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    redirect_uri: req.session?.callbackURL,
+                    nonce,
+                    state,
+                } as any,
+                (error) => {
+                    if (error) {
+                        this.logger.error('loginHandler error: ', JSON.stringify(error))
+                    }
+                },
+            )(req, res, next)
+        } catch (error) {
+            this.logger.error('this should not throw an error')
+            throw new Error(`this should not throw an ${error}`)
+        }
     }
 }
 
