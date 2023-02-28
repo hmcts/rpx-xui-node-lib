@@ -1,3 +1,10 @@
+## [2.26.7](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.6...v2.26.7) (2023-02-28)
+
+
+### Bug Fixes
+
+* e UI 7753 ([#186](https://github.com/hmcts/rpx-xui-node-lib/issues/186)) ([4da854e](https://github.com/hmcts/rpx-xui-node-lib/commit/4da854ed15d5cd4c5bdf1e026c4d2cea9a8be133))
+
 ## [2.26.6](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.5...v2.26.6) (2023-02-28)
 
 
