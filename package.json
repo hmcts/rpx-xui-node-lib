@@ -8,6 +8,7 @@
     "test": "jest --env node",
     "test:coverage": "jest --env node --coverage",
     "build": "tsc --declarationMap --sourceMap",
+    "build:watch": "tsc --declarationMap --sourceMap --watch",
     "lint": "eslint \"*/**/*.{js,ts}\" --quiet --fix",
     "commit": "git cz",
     "ci:lint": "eslint \"*/**/*.{js,ts}\" --quiet",
