@@ -235,8 +235,6 @@ export class OpenID extends AuthStrategy {
                 this.logger.warn('resolved promise, nonce & state not saved!')
                 resolve(false)
             }
-        }).catch((error) => {
-            this.logger.error('error => ', JSON.stringify(error))
         })
 
         await promise
@@ -251,8 +249,11 @@ export class OpenID extends AuthStrategy {
                 nonce,
                 state,
             } as any,
-            (error) => {
-                this.logger.error('error => ', JSON.stringify(error))
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            (error, user, info) => {
+                if (error) {
+                    this.logger.error('error => ', JSON.stringify(error))
+                }
             },
         )(req, res, next)
     }
