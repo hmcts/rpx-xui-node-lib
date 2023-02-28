@@ -1,3 +1,10 @@
+## [2.26.6](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.5...v2.26.6) (2023-02-28)
+
+
+### Bug Fixes
+
+* eUI-7753 Fixed the promises on login handler ([#185](https://github.com/hmcts/rpx-xui-node-lib/issues/185)) ([2b1afff](https://github.com/hmcts/rpx-xui-node-lib/commit/2b1afff738a5c548a1d1725f5fcd19713da2494d))
+
 ## [2.26.5](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.4...v2.26.5) (2023-02-15)
 
 
