@@ -104,8 +104,6 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.warn('resolved promise, state not saved')
                 resolve(false)
             }
-        }).catch((error) => {
-            this.logger.error('error => ', JSON.stringify(error))
         })
 
         await promise
@@ -119,8 +117,11 @@ export abstract class Strategy extends events.EventEmitter {
                 redirect_uri: req.session?.callbackURL,
                 state,
             } as any,
-            (error) => {
-                this.logger.error('error => ', JSON.stringify(error))
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            (error, user, info) => {
+                if (error) {
+                    this.logger.error('error => ', JSON.stringify(error))
+                }
             },
         )(req, res, next)
     }
@@ -145,12 +146,12 @@ export abstract class Strategy extends events.EventEmitter {
 
             const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
 
-            await http.delete(this.urlFromToken(this.options.logoutURL, accessToken), {
+            await http.delete(this.urlFromToken(this.options.logoutURL!, accessToken), {
                 headers: {
                     Authorization: auth,
                 },
             })
-            await http.delete(this.urlFromToken(this.options.logoutURL, refreshToken), {
+            await http.delete(this.urlFromToken(this.options.logoutURL!, refreshToken), {
                 headers: {
                     Authorization: auth,
                 },
