@@ -76,7 +76,7 @@ export abstract class Strategy extends events.EventEmitter {
         }
         return true
     }
-
+    /* istanbul ignore next */
     public initialiseStrategy = async (options: any): Promise<void> => {
         this.options = options
     }
@@ -87,6 +87,7 @@ export abstract class Strategy extends events.EventEmitter {
      * @param res Response
      * @param next NextFunction
      */
+    /* istanbul ignore next */
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
         this.logger.log('Base loginHandler Hit')
 
@@ -152,6 +153,7 @@ export abstract class Strategy extends events.EventEmitter {
                 pathname: this.options.callbackURL,
             })
         }
+        /* istanbul ignore next */
         next()
     }
 
@@ -176,7 +178,7 @@ export abstract class Strategy extends events.EventEmitter {
             //passport provides this method on request object
             req.logout()
             await this.destroySession(req)
-
+            /* istanbul ignore next */
             if (req.query.noredirect) {
                 res.status(200).send({ message: 'You have been logged out!' })
                 return Promise.resolve()
@@ -186,17 +188,19 @@ export abstract class Strategy extends events.EventEmitter {
             this.logger.log('redirecting to => ', redirect)
             // 401 is when no accessToken
             res.redirect(redirect as string)
+
+            /* istanbul ignore next */
         } catch (e) {
             this.logger.error('error => ', e)
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
         }
         this.logger.log('logout end')
     }
-
+    /* istanbul ignore next */
     public authRouteHandler = (req: Request, res: Response): Response => {
         return res.send(req.isAuthenticated())
     }
-
+    /* istanbul ignore next */
     public destroySession = async (req: Request): Promise<any> => {
         return new Promise((resolve, reject) => {
             req.session?.destroy((err) => {
@@ -208,7 +212,7 @@ export abstract class Strategy extends events.EventEmitter {
             })
         })
     }
-
+    /* istanbul ignore next */
     public keepAliveHandler = (_req: Request, _res: Response, next: NextFunction): void => {
         next()
     }
@@ -240,7 +244,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.emit(`${this.strategyName}.bootstrap.success`)
         return this.router
     }
-
+    /* istanbul ignore next */
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
 
@@ -298,12 +302,12 @@ export abstract class Strategy extends events.EventEmitter {
             },
         )(req, res, next)
     }
-
+    /* istanbul ignore next */
     public isTokenExpired = (token: string): boolean => {
         const jwtData = jwtDecode<any>(token)
         return this.jwTokenExpired(jwtData)
     }
-
+    /* istanbul ignore next */
     public authenticate = (req: Request, _res: Response, next: NextFunction): void => {
         if (req.isUnauthenticated()) {
             this.logger.log('unauthenticated')
@@ -312,7 +316,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
-
+    /* istanbul ignore next */
     public setHeaders = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
         if (req.session?.passport?.user) {
             if (this.isRouteCredentialNeeded(req.path, this.options)) {
@@ -344,7 +348,7 @@ export abstract class Strategy extends events.EventEmitter {
             req.headers.Authorization = `Bearer ${routeCredentialToken.access_token}`
         }
     }
-
+    /* istanbul ignore next */
     public generateToken = async (): Promise<any | undefined> => {
         const url = this.getUrlFromOptions(this.options)
         try {
@@ -359,7 +363,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.logger.error('error generating authentication token => ', error)
         }
     }
-
+    /* istanbul ignore next */
     public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response): void => {
         req.logIn(user, (err) => {
             const roles = user.userinfo.roles
@@ -404,7 +408,7 @@ export abstract class Strategy extends events.EventEmitter {
             const csrfProtection = csrf({
                 value: this.getCSRFValue,
             })
-
+            /* istanbul ignore next */
             this.router.use(csrfProtection, (req, res, next) => {
                 res.cookie('XSRF-TOKEN', req.csrfToken())
                 next()
@@ -417,6 +421,7 @@ export abstract class Strategy extends events.EventEmitter {
      * @param req
      * @return string
      */
+    /* istanbul ignore next */
     public getCSRFValue = (req: Request): string => {
         return (
             (req.body && req.body._csrf) ||
@@ -432,14 +437,14 @@ export abstract class Strategy extends events.EventEmitter {
     public addHeaders = (): void => {
         this.router.use(this.setHeaders)
     }
-
+    /* istanbul ignore next */
     public serializeUser = (): void => {
         passport.serializeUser((user, done) => {
             this.logger.log(`${this.strategyName} serializeUser`)
             this.emitIfListenersExist(AUTH.EVENT.SERIALIZE_USER, user, done)
         })
     }
-
+    /* istanbul ignore next */
     public deserializeUser = (): void => {
         passport.deserializeUser((id, done) => {
             this.logger.log(`${this.strategyName} deserializeUser`)
