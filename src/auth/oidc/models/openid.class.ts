@@ -237,25 +237,38 @@ export class OpenID extends AuthStrategy {
             }
         })
 
-        await promise
+        try {
+            await promise
 
-        this.logger.log('calling passport authenticate')
+            this.logger.log('calling passport authenticate')
 
-        return passport.authenticate(
-            this.strategyName,
-            {
-                // eslint-disable-next-line @typescript-eslint/camelcase
-                redirect_uri: req.session?.callbackURL,
-                nonce,
-                state,
-            } as any,
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            (error, user, info) => {
-                if (error) {
-                    this.logger.error('error => ', JSON.stringify(error))
-                }
-            },
-        )(req, res, next)
+            return passport.authenticate(
+                this.strategyName,
+                {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    redirect_uri: req.session?.callbackURL,
+                    nonce,
+                    state,
+                } as any,
+                (error, user, info) => {
+                    if (error) {
+                        this.logger.error('error => ', JSON.stringify(error))
+                    }
+
+                    if (info) {
+                        this.logger.info(info)
+                    }
+
+                    if (!user) {
+                        const message = 'No user details returned by the authentication service, redirecting to login'
+                        this.logger.log(message)
+                    }
+                },
+            )(req, res, next)
+        } catch (error) {
+            this.logger.error(error)
+            throw new Error(`${error}`)
+        }
     }
 }
 
