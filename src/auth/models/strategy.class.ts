@@ -146,12 +146,12 @@ export abstract class Strategy extends events.EventEmitter {
 
             const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
 
-            await http.delete(this.urlFromToken(this.options.logoutURL!, accessToken), {
+            await http.delete(this.urlFromToken(this.options.logoutURL, accessToken), {
                 headers: {
                     Authorization: auth,
                 },
             })
-            await http.delete(this.urlFromToken(this.options.logoutURL!, refreshToken), {
+            await http.delete(this.urlFromToken(this.options.logoutURL, refreshToken), {
                 headers: {
                     Authorization: auth,
                 },
