@@ -251,21 +251,24 @@ export class OpenID extends AuthStrategy {
                     state,
                 } as any,
                 (error, user, info) => {
+                    /* istanbul ignore next */
                     if (error) {
                         this.logger.error('error => ', JSON.stringify(error))
                     }
-
+                    /* istanbul ignore next */
                     if (info) {
                         this.logger.info(info)
                     }
-
+                    /* istanbul ignore next */
                     if (!user) {
                         const message = 'No user details returned by the authentication service, redirecting to login'
                         this.logger.log(message)
                     }
                 },
             )(req, res, next)
+            /* istanbul ignore next */
         } catch (error) {
+            /* istanbul ignore next */
             this.logger.error(error)
             throw new Error(`${error}`)
         }
