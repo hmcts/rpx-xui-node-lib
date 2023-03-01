@@ -241,16 +241,29 @@ export class OpenID extends AuthStrategy {
             }
         })
 
-        await promise
+        try {
+            await promise
 
-        this.logger.log('calling passport authenticate')
+            this.logger.log('calling passport authenticate')
 
-        return passport.authenticate(this.strategyName, {
-            // eslint-disable-next-line @typescript-eslint/camelcase
-            redirect_uri: req.session?.callbackURL,
-            nonce,
-            state,
-        } as any)(req, res, next)
+            return passport.authenticate(
+                this.strategyName,
+                {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    redirect_uri: req.session?.callbackURL,
+                    nonce,
+                    state,
+                } as any,
+                (error) => {
+                    if (error) {
+                        this.logger.error('loginHandler error: ', JSON.stringify(error))
+                    }
+                },
+            )(req, res, next)
+        } catch (error) {
+            this.logger.error('this should not throw an error')
+            throw new Error(`this should not throw an ${error}`)
+        }
     }
 }
 
