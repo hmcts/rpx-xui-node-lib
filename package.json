@@ -95,7 +95,7 @@
     "jest-mock-axios": "^4.2.0",
     "jest-ts-auto-mock": "^1.0.11",
     "jwt-decode": "^2.2.0",
-    "openid-client": "4.0.0",
+    "openid-client": "^3.10.0",
     "otplib": "^12.0.1",
     "passport": "^0.4.1",
     "passport-oauth2": "^1.5.0",
