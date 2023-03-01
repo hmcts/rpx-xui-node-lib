@@ -8,7 +8,7 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "declaration": true,
-    "outDir": "./dist",
+    "outDir": "../rpx-xui-webapp/node_modules/@hmcts/rpx-xui-node-lib/dist",
     "strict": true,
     "typeRoots": ["node_modules/@types"],
     "plugins": [
