@@ -1,3 +1,10 @@
+## [2.26.10](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.9...v2.26.10) (2023-03-01)
+
+
+### Bug Fixes
+
+* eUI 7753 reverted codeback ([#190](https://github.com/hmcts/rpx-xui-node-lib/issues/190)) ([601434d](https://github.com/hmcts/rpx-xui-node-lib/commit/601434df27cb56b781987f8575956b657378ba06))
+
 ## [2.26.9](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.8...v2.26.9) (2023-03-01)
 
 
