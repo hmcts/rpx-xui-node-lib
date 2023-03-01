@@ -93,7 +93,6 @@ export abstract class Strategy extends events.EventEmitter {
 
         // we are using oidc generator but it's just a helper, rather than installing another library to provide this
         const state = generators.state()
-        /* istanbul ignore next */
         const promise = new Promise((resolve) => {
             if (req.session && this.options?.sessionKey) {
                 req.session[this.options?.sessionKey] = { state }
@@ -107,40 +106,15 @@ export abstract class Strategy extends events.EventEmitter {
             }
         })
 
-        try {
-            /* istanbul ignore next */
-            await promise
-            /* istanbul ignore next */
-            this.logger.log('calling passport authenticate')
-            /* istanbul ignore next */
-            return passport.authenticate(
-                this.strategyName,
-                {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    redirect_uri: req.session?.callbackURL,
-                    state,
-                } as any,
-                (error, user, info) => {
-                    /* istanbul ignore next */
-                    if (error) {
-                        this.logger.error('error => ', JSON.stringify(error))
-                    }
-                    /* istanbul ignore next */
-                    if (info) {
-                        this.logger.info(info)
-                    }
-                    /* istanbul ignore next */
-                    if (!user) {
-                        const message = 'No user details returned by the authentication service, redirecting to login'
-                        this.logger.log(message)
-                    }
-                },
-            )(req, res, next)
-            /* istanbul ignore next */
-        } catch (error) {
-            this.logger.error(error)
-            throw new Error(`${error}`)
-        }
+        await promise
+
+        this.logger.log('calling passport authenticate')
+
+        return passport.authenticate(this.strategyName, {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            redirect_uri: req.session?.callbackURL,
+            state,
+        } as any)(req, res, next)
     }
 
     public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
