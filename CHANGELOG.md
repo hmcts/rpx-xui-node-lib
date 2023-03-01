@@ -1,3 +1,10 @@
+## [2.26.11](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.10...v2.26.11) (2023-03-01)
+
+
+### Bug Fixes
+
+* Added loginHandler logs ([#191](https://github.com/hmcts/rpx-xui-node-lib/issues/191)) ([ed83652](https://github.com/hmcts/rpx-xui-node-lib/commit/ed836527a6430a44c2200a25f7c4d219a64bd61c))
+
 ## [2.26.10](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.9...v2.26.10) (2023-03-01)
 
 
