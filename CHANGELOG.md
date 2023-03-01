@@ -1,3 +1,31 @@
+## [2.26.10](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.9...v2.26.10) (2023-03-01)
+
+
+### Bug Fixes
+
+* eUI 7753 reverted codeback ([#190](https://github.com/hmcts/rpx-xui-node-lib/issues/190)) ([601434d](https://github.com/hmcts/rpx-xui-node-lib/commit/601434df27cb56b781987f8575956b657378ba06))
+
+## [2.26.9](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.8...v2.26.9) (2023-03-01)
+
+
+### Bug Fixes
+
+* eUI 7753 reverted codeback ([#189](https://github.com/hmcts/rpx-xui-node-lib/issues/189)) ([73a9e5d](https://github.com/hmcts/rpx-xui-node-lib/commit/73a9e5d79076660aa0fca1566b647c984a453097))
+
+## [2.26.8](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.7...v2.26.8) (2023-02-28)
+
+
+### Bug Fixes
+
+* reverted back to a previously working and compiling state ([#187](https://github.com/hmcts/rpx-xui-node-lib/issues/187)) ([6e690d2](https://github.com/hmcts/rpx-xui-node-lib/commit/6e690d2ea9e84b557f9271077223228e8ee32f7e))
+
+## [2.26.7](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.6...v2.26.7) (2023-02-28)
+
+
+### Bug Fixes
+
+* e UI 7753 ([#186](https://github.com/hmcts/rpx-xui-node-lib/issues/186)) ([4da854e](https://github.com/hmcts/rpx-xui-node-lib/commit/4da854ed15d5cd4c5bdf1e026c4d2cea9a8be133))
+
 ## [2.26.6](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.5...v2.26.6) (2023-02-28)
 
 
