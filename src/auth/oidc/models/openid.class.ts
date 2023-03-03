@@ -254,9 +254,24 @@ export class OpenID extends AuthStrategy {
                     nonce,
                     state,
                 } as any,
-                (error) => {
+                (error, user, info) => {
+                    this.logger.log('passport authenticate')
+
                     if (error) {
                         this.logger.error('loginHandler error: ', JSON.stringify(error))
+                    }
+                    /* istanbul ignore next */
+                    if (info) {
+                        this.logger.info(info)
+                    }
+                    /* istanbul ignore next */
+                    if (user) {
+                        const message = 'loginHandler User details returned by passport authenticate'
+                        this.logger.log(message)
+                    }
+                    if (!user) {
+                        const message = 'loginHandler no User details returned by passport authenticate'
+                        this.logger.log(message)
                     }
                 },
             )(req, res, next)
