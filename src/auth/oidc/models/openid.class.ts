@@ -244,7 +244,7 @@ export class OpenID extends AuthStrategy {
         try {
             await promise
 
-            this.logger.log('calling passport authenticate') ///
+            this.logger.log('calling passport authenticate')
 
             return passport.authenticate(
                 this.strategyName,
