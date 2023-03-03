@@ -269,7 +269,6 @@ export class OpenID extends AuthStrategy {
                         const message = 'loginHandler User details returned by passport authenticate'
                         this.logger.log(message)
                     }
-
                     if (!user) {
                         const message = 'loginHandler no User details returned by passport authenticate'
                         this.logger.log(message)
