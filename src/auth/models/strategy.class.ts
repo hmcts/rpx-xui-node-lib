@@ -246,10 +246,15 @@ export abstract class Strategy extends events.EventEmitter {
     }
     /* istanbul ignore next */
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
+        this.logger.log('inside callbackHandler')
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
 
         const emitAuthenticationFailure = (logMessages: string[]): void => {
+            this.logger.log('inside emitAuthenticationFailure')
+
             if (!logMessages.length) return
+
+            this.logger.log(`emitAuthenticationFailure logMessages ${logMessages}`)
 
             res.locals.message = logMessages.join('\n')
             this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
