@@ -1,3 +1,10 @@
+## [2.26.13](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.12...v2.26.13) (2023-03-08)
+
+
+### Reverts
+
+* Revert "test: test Yarn upgrade (#194)" (#195) ([1ceed75](https://github.com/hmcts/rpx-xui-node-lib/commit/1ceed75a016b155737bdd9ec9e52e285faccd78e)), closes [#194](https://github.com/hmcts/rpx-xui-node-lib/issues/194) [#195](https://github.com/hmcts/rpx-xui-node-lib/issues/195)
+
 ## [2.26.12](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.11...v2.26.12) (2023-03-03)
 
 
