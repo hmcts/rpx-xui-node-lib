@@ -116,7 +116,6 @@ export abstract class Strategy extends events.EventEmitter {
             return passport.authenticate(
                 this.strategyName,
                 {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
                     redirect_uri: req.session?.callbackURL,
                     state,
                 } as any,
@@ -263,7 +262,6 @@ export abstract class Strategy extends events.EventEmitter {
         passport.authenticate(
             this.strategyName,
             {
-                // eslint-disable-next-line @typescript-eslint/camelcase
                 redirect_uri: req.session?.callbackURL,
             } as any,
             (error, user, info) => {
@@ -467,7 +465,7 @@ export abstract class Strategy extends events.EventEmitter {
      * Get session URL
      * @return {string}
      */
-    public urlFromToken = (url: string, token: any): string => {
+    public urlFromToken = (url: string | undefined, token: any): string => {
         return `${url}/session/${token}`
     }
 
