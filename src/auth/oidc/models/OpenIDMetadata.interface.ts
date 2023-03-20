@@ -6,6 +6,6 @@ export interface OpenIDMetadata extends ClientMetadata {
     prompt?: 'login'
     scope: string
     sessionKey?: string
-    logout_url: string
+    logout_url?: string
     useRoutes?: boolean
 }
