@@ -9,7 +9,7 @@ import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-cli
 import { createMock } from 'ts-auto-mock'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
-import { http } from '../../../common'
+import { http, XuiLogger } from '../../../common'
 import { AuthOptions } from '../../models'
 
 const mockRequestRequired = {
@@ -18,6 +18,28 @@ const mockRequestRequired = {
     clientID: '',
     clientSecret: '',
     callbackURL: '',
+}
+
+const options = {
+    authorizationURL: 'someAuthorizationURL',
+    tokenURL: '1234',
+    clientID: 'clientID12',
+    clientSecret: 'secret123',
+    discoveryEndpoint: 'someEndpoint',
+    issuerURL: 'issuer_url',
+    logoutURL: 'http://testUrl',
+    callbackURL: 'http://localhost/callback',
+    responseTypes: ['none'],
+    scope: 'some scope',
+    sessionKey: 'key',
+    tokenEndpointAuthMethod: 'client_secret_basic',
+    useRoutes: true,
+    routeCredential: {
+        userName: 'username@email.com',
+        password: 'password123',
+        routes: ['route1'],
+        scope: 'scope1 scope2',
+    },
 }
 
 test('OIDC Auth', () => {
@@ -56,36 +78,39 @@ test('OIDC loginHandler', async () => {
     expect(spy).toBeCalled()
 })
 
-// test('OIDC loginHandler with session', async () => {
-//     const mockRouter = createMock<Router>()
-//     const options = createMock<AuthOptions>()
-//     options.sessionKey = 'test'
-//     const logger = createMock<typeof console>()
-//     const openId = new OpenID(mockRouter, logger)
-//     jest.spyOn(openId, 'validateOptions')
-//     jest.spyOn(openId, 'serializeUser')
-//     jest.spyOn(openId, 'deserializeUser')
-//     jest.spyOn(openId, 'initializePassport')
-//     jest.spyOn(openId, 'initializeSession')
-//     jest.spyOn(openId, 'initialiseStrategy')
-//     jest.spyOn(openId, 'initialiseCSRF')
-//     options.useRoutes = true
-//     openId.configure(options)
+test('OIDC loginHandler with session', async () => {
+    const mockRouter = createMock<Router>()
+    options.sessionKey = 'test'
+    const logger = ({
+        log: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+    } as unknown) as XuiLogger
+    const openId = new OpenID(mockRouter, logger)
+    jest.spyOn(openId, 'validateOptions')
+    jest.spyOn(openId, 'serializeUser')
+    jest.spyOn(openId, 'deserializeUser')
+    jest.spyOn(openId, 'initializePassport')
+    jest.spyOn(openId, 'initializeSession')
+    jest.spyOn(openId, 'initialiseStrategy')
+    jest.spyOn(openId, 'initialiseCSRF')
+    options.useRoutes = true
+    openId.configure(options)
 
-//     const spy = jest.spyOn(passport, 'authenticate')
-//     const mockRequest = ({
-//         ...mockRequestRequired,
-//         body: {},
-//         session: {
-//             save: (callback: any): void => callback(),
-//         },
-//     } as unknown) as Request
-//     const mockResponse = {} as Response
-//     const next = jest.fn()
+    const spy = jest.spyOn(passport, 'authenticate')
+    const mockRequest = ({
+        ...mockRequestRequired,
+        body: {},
+        session: {
+            save: (callback: any): void => callback(),
+        },
+    } as unknown) as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
 
-//     await openId.loginHandler(mockRequest, mockResponse, next)
-//     expect(spy).toBeCalled()
-// })
+    await openId.loginHandler(mockRequest, mockResponse, next)
+    expect(spy).toBeCalled()
+})
 
 test('OIDC jwTokenExpired', () => {
     let jwtData = { exp: new Date('Jun 04, 2020').getTime() / 1000 }
@@ -478,48 +503,54 @@ test('emitIfListenersExist with listeners', () => {
     expect(spyEmit).toBeCalledWith('eventName', 'id', done)
 })
 
-// test('configure with useRoutes', () => {
-//     const mockRouter = createMock<Router>()
-//     const options = createMock<AuthOptions>()
-//     const logger = createMock<typeof console>()
-//     const openId = new OpenID(mockRouter, logger)
-//     const spyOnValidateOptions = jest.spyOn(openId, 'validateOptions')
-//     const spyOnSer = jest.spyOn(openId, 'serializeUser')
-//     const spyOnDeSer = jest.spyOn(openId, 'deserializeUser')
-//     const spyOnPass = jest.spyOn(openId, 'initializePassport')
-//     const spyOnSes = jest.spyOn(openId, 'initializeSession')
-//     jest.spyOn(openId, 'initialiseStrategy')
-//     options.useRoutes = true
-//     openId.configure(options)
-//     expect(spyOnValidateOptions).toBeCalled()
-//     expect(spyOnSer).toBeCalled()
-//     expect(spyOnDeSer).toBeCalled()
-//     expect(spyOnPass).toBeCalled()
-//     expect(spyOnSes).toBeCalled()
-//     expect(mockRouter.get).toBeCalledTimes(5)
-// })
+test('configure with useRoutes', () => {
+    const mockRouter = createMock<Router>()
+    const logger = ({
+        log: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+    } as unknown) as XuiLogger
+    const openId = new OpenID(mockRouter, logger)
+    const spyOnValidateOptions = jest.spyOn(openId, 'validateOptions')
+    const spyOnSer = jest.spyOn(openId, 'serializeUser')
+    const spyOnDeSer = jest.spyOn(openId, 'deserializeUser')
+    const spyOnPass = jest.spyOn(openId, 'initializePassport')
+    const spyOnSes = jest.spyOn(openId, 'initializeSession')
+    jest.spyOn(openId, 'initialiseStrategy')
+    options.useRoutes = true
+    openId.configure(options)
+    expect(spyOnValidateOptions).toBeCalled()
+    expect(spyOnSer).toBeCalled()
+    expect(spyOnDeSer).toBeCalled()
+    expect(spyOnPass).toBeCalled()
+    expect(spyOnSes).toBeCalled()
+    expect(mockRouter.get).toBeCalledTimes(5)
+})
 
-// test('configure without useRoutes', () => {
-//     const mockRouter = createMock<Router>()
-//     const options = createMock<AuthOptions>()
-//     const logger = createMock<typeof console>()
-//     const openId = new OpenID(mockRouter, logger)
-//     const spyOnValidateOptions = jest.spyOn(openId, 'validateOptions')
-//     const spyOnSer = jest.spyOn(openId, 'serializeUser')
-//     const spyOnDeSer = jest.spyOn(openId, 'deserializeUser')
-//     const spyOnPass = jest.spyOn(openId, 'initializePassport')
-//     const spyOnSes = jest.spyOn(openId, 'initializeSession')
-//     jest.spyOn(openId, 'initialiseStrategy')
+test('configure without useRoutes', () => {
+    const mockRouter = createMock<Router>()
+    const logger = ({
+        log: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+    } as unknown) as XuiLogger
+    const openId = new OpenID(mockRouter, logger)
+    const spyOnValidateOptions = jest.spyOn(openId, 'validateOptions')
+    const spyOnSer = jest.spyOn(openId, 'serializeUser')
+    const spyOnDeSer = jest.spyOn(openId, 'deserializeUser')
+    const spyOnPass = jest.spyOn(openId, 'initializePassport')
+    const spyOnSes = jest.spyOn(openId, 'initializeSession')
+    jest.spyOn(openId, 'initialiseStrategy')
 
-//     options.useRoutes = false
-//     openId.configure(options)
-//     expect(spyOnValidateOptions).toBeCalled()
-//     expect(spyOnSer).toBeCalled()
-//     expect(spyOnDeSer).toBeCalled()
-//     expect(spyOnPass).toBeCalled()
-//     expect(spyOnSes).toBeCalled()
-//     expect(mockRouter.get).not.toBeCalled()
-// })
+    options.useRoutes = false
+    openId.configure(options)
+    expect(spyOnValidateOptions).toBeCalled()
+    expect(spyOnSer).toBeCalled()
+    expect(spyOnDeSer).toBeCalled()
+    expect(spyOnPass).toBeCalled()
+    expect(spyOnSes).toBeCalled()
+    expect(mockRouter.get).not.toBeCalled()
+})
 
 test('getClient', () => {
     const client = oidc.getClient()
