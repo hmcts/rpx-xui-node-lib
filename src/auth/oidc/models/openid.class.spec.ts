@@ -329,7 +329,6 @@ xtest('OIDC authenticate when authenticated but session and client initialised',
 })
 
 test('OIDC initialiseStrategy', async () => {
-    const issuer = {}
     const spyGetOptions = jest.spyOn(oidc, 'getOpenIDOptions')
     const spyGetNewStrategy = jest
         .spyOn(oidc, 'createNewStrategy')
