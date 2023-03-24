@@ -5,7 +5,7 @@ export interface AuthOptions {
     clientSecret: string
     callbackURL: string
     scope: string
-    logoutURL: string
+    logoutURL?: string
     useRoutes?: boolean
     sessionKey?: string
     //openID options

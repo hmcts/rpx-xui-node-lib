@@ -3,8 +3,39 @@ import passport from 'passport'
 import { createMock } from 'ts-auto-mock'
 import { Request, Response, Router } from 'express'
 import { AuthOptions } from '../../models'
+import { XuiLogger } from '../../../common'
 
 describe('OAUTH2 Auth', () => {
+    const mockRequestRequired = {
+        authorizationURL: '',
+        tokenURL: '',
+        clientID: '',
+        clientSecret: '',
+        callbackURL: '',
+    }
+
+    const options = {
+        authorizationURL: 'someAuthorizationURL',
+        tokenURL: '1234',
+        clientID: 'clientID12',
+        clientSecret: 'secret123',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'http://testUrl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: true,
+        routeCredential: {
+            userName: 'username@email.com',
+            password: 'password123',
+            routes: ['route1'],
+            scope: 'scope1 scope2',
+        },
+    }
+
     test('it should be defined', () => {
         expect(oauth2).toBeDefined()
     })
@@ -32,20 +63,27 @@ describe('OAUTH2 Auth', () => {
     test('loginHandler with session and sessionKey', async () => {
         const mockRouter = createMock<Router>()
         const options = createMock<AuthOptions>()
-        const logger = createMock<typeof console>()
+        const logger = ({
+            log: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+        } as unknown) as XuiLogger
         options.sessionKey = 'test'
         const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => () => true)
         const oAuth2 = new OAuth2(mockRouter, logger)
-        spyOn(oAuth2, 'validateOptions')
-        spyOn(oAuth2, 'serializeUser')
-        spyOn(oAuth2, 'deserializeUser')
-        spyOn(oAuth2, 'initializePassport')
-        spyOn(oAuth2, 'initializeSession')
-        spyOn(oAuth2, 'initialiseStrategy')
+        jest.spyOn(oAuth2, 'validateOptions')
+        jest.spyOn(oAuth2, 'serializeUser')
+        jest.spyOn(oAuth2, 'deserializeUser')
+        jest.spyOn(oAuth2, 'initializePassport')
+        jest.spyOn(oAuth2, 'initializeSession')
+        jest.spyOn(oAuth2, 'initialiseStrategy')
         options.useRoutes = true
+        jest.spyOn(oAuth2, 'validateOptions').mockReturnValue(true)
+        jest.spyOn(oAuth2, 'initialiseCSRF')
         oAuth2.configure(options)
 
         const mockRequest = ({
+            ...mockRequestRequired,
             body: {},
             session: {
                 save: (callback: any): void => callback(),
@@ -60,20 +98,23 @@ describe('OAUTH2 Auth', () => {
 
     test('loginHandler with session and no sessionKey', async () => {
         const mockRouter = createMock<Router>()
-        const options = createMock<AuthOptions>()
-        const logger = createMock<typeof console>()
+        const logger = ({
+            log: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+        } as unknown) as XuiLogger
         const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => () => true)
         const oAuth2 = new OAuth2(mockRouter, logger)
-        spyOn(oAuth2, 'validateOptions')
-        spyOn(oAuth2, 'serializeUser')
-        spyOn(oAuth2, 'deserializeUser')
-        spyOn(oAuth2, 'initializePassport')
-        spyOn(oAuth2, 'initializeSession')
-        spyOn(oAuth2, 'initialiseStrategy')
-        options.useRoutes = true
+        jest.spyOn(oAuth2, 'validateOptions')
+        jest.spyOn(oAuth2, 'serializeUser')
+        jest.spyOn(oAuth2, 'deserializeUser')
+        jest.spyOn(oAuth2, 'initializePassport')
+        jest.spyOn(oAuth2, 'initializeSession')
+        jest.spyOn(oAuth2, 'initialiseStrategy')
         oAuth2.configure(options)
 
         const mockRequest = ({
+            ...mockRequestRequired,
             body: {},
             session: {
                 save: (callback: any): void => callback(),
@@ -88,6 +129,7 @@ describe('OAUTH2 Auth', () => {
 
     test('setCallbackURL', () => {
         const mockRequest = ({
+            ...mockRequestRequired,
             body: {},
             session: {},
             app: {
@@ -109,6 +151,7 @@ describe('OAUTH2 Auth', () => {
         const roles = ['test', 'test1']
         const authToken = 'Bearer abc123'
         const mockRequest = ({
+            ...mockRequestRequired,
             body: {},
             session: {
                 passport: {
