@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.26.14-updated-packages-versions",
+  "version": "2.26.13",
   "description": "Common Nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -57,8 +57,8 @@
     "@types/passport": "^1.0.2",
     "@types/passport-oauth2": "^1.4.9",
     "@types/session-file-store": "^1.2.1",
-    "@typescript-eslint/eslint-plugin": "^4.1.1",
-    "@typescript-eslint/parser": "^4.1.1",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
     "commitizen": "^4.0.3",
     "commitlint-config-cz": "^0.13.1",
     "cz-conventional-changelog": "^3.0.2",
