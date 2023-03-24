@@ -67,7 +67,6 @@ export class OpenID extends AuthStrategy {
 
     public getOpenIDOptions = (authOptions: AuthOptions): OpenIDMetadata => {
         return {
-            /* eslint-disable @typescript-eslint/camelcase */
             client_id: authOptions.clientID,
             client_secret: authOptions.clientSecret,
             discovery_endpoint: authOptions.discoveryEndpoint,
@@ -78,7 +77,6 @@ export class OpenID extends AuthStrategy {
             sessionKey: authOptions.sessionKey,
             token_endpoint_auth_method: authOptions.tokenEndpointAuthMethod as ClientAuthMethod,
             useRoutes: authOptions.useRoutes,
-            /* eslint-enable @typescript-eslint/camelcase */
         }
     }
 
@@ -249,7 +247,6 @@ export class OpenID extends AuthStrategy {
             return passport.authenticate(
                 this.strategyName,
                 {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
                     redirect_uri: req.session?.callbackURL,
                     nonce,
                     state,
