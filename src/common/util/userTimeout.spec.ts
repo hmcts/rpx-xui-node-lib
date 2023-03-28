@@ -1,11 +1,4 @@
-import {
-    anyRolesMatch,
-    DEFAULT_SESSION_TIMEOUT,
-    getUserSessionTimeout,
-    isRoleMatch,
-    RoleGroupSessionTimeout,
-    sortUserRoles,
-} from './userTimeout'
+import { DEFAULT_SESSION_TIMEOUT, getUserSessionTimeout, RoleGroupSessionTimeout, sortUserRoles } from './userTimeout'
 
 describe('userTimeout', () => {
     /**
