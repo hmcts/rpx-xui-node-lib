@@ -27,7 +27,7 @@ export class OAuth2 extends Strategy {
             },
         }
         delete options.logoutURL
-        return options
+        return options as OAuth2Metadata
     }
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
