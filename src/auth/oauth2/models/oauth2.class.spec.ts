@@ -19,7 +19,7 @@ describe('OAUTH2 Auth', () => {
         tokenURL: '1234',
         clientID: 'clientID12',
         clientSecret: 'secret123',
-        discoveryEndpoint: 'someEndpoint',
+        discoveryEndpoint: 'http://localhost/someEndpoint',
         issuerURL: 'issuer_url',
         logoutURL: 'http://testUrl',
         callbackURL: 'http://localhost/callback',
@@ -51,7 +51,7 @@ describe('OAUTH2 Auth', () => {
             sessionKey: 'node-lib',
             useRoutes: false,
             logoutURL: 'logoutUrl',
-            discoveryEndpoint: 'string',
+            discoveryEndpoint: 'http://localhost/someEndpoint',
             issuerURL: 'string',
             responseTypes: [''],
             tokenEndpointAuthMethod: 'string',
@@ -69,6 +69,7 @@ describe('OAUTH2 Auth', () => {
             info: jest.fn(),
         } as unknown) as XuiLogger
         options.sessionKey = 'test'
+        options.discoveryEndpoint = 'http://localhost/someEndpoint'
         const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => () => true)
         const oAuth2 = new OAuth2(mockRouter, logger)
         jest.spyOn(oAuth2, 'validateOptions')
