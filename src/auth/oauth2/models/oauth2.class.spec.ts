@@ -51,6 +51,7 @@ describe('OAUTH2 Auth', () => {
                 save: (callback: any): void => callback(),
             },
         } as unknown) as Request
+
         const mockResponse = {} as Response
         const next = jest.fn()
 
