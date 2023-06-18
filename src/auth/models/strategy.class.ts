@@ -137,8 +137,9 @@ export abstract class Strategy extends events.EventEmitter {
             )(req, res, next)
             /* istanbul ignore next */
         } catch (error) {
-            this.logger.error(error)
-            throw new Error(`${error}`)
+            this.logger.error(error, this.strategyName)
+            next(error)
+            return Promise.reject(error)
         }
     }
 
