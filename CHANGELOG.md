@@ -1,3 +1,20 @@
+# [2.27.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.13...v2.27.0) (2023-06-19)
+
+
+### Bug Fixes
+
+* **strategy.class.ts:** error handling ([#204](https://github.com/hmcts/rpx-xui-node-lib/issues/204)) ([a6ff50d](https://github.com/hmcts/rpx-xui-node-lib/commit/a6ff50d5d0980f81bbdab7b39607e5e185c8f4bd))
+* added engine version to package.json ([#201](https://github.com/hmcts/rpx-xui-node-lib/issues/201)) ([1658a2b](https://github.com/hmcts/rpx-xui-node-lib/commit/1658a2b25314dc0407c8951d304604c0663ac5bf))
+* change for sonar ([#202](https://github.com/hmcts/rpx-xui-node-lib/issues/202)) ([1482d9c](https://github.com/hmcts/rpx-xui-node-lib/commit/1482d9ceb8fb00e045b2ba22a25e8cc9a7092833))
+* removed unused variable ([#199](https://github.com/hmcts/rpx-xui-node-lib/issues/199)) ([e4930ae](https://github.com/hmcts/rpx-xui-node-lib/commit/e4930ae37d2abef24c41c06691559119dcae4658))
+* sonar fix ([#203](https://github.com/hmcts/rpx-xui-node-lib/issues/203)) ([4407649](https://github.com/hmcts/rpx-xui-node-lib/commit/44076498e4d452dbd1ec99a5deffb47ba610bf9d))
+* updated nvmrc ([#200](https://github.com/hmcts/rpx-xui-node-lib/issues/200)) ([c8ee89d](https://github.com/hmcts/rpx-xui-node-lib/commit/c8ee89d04e33669a6564c4f80ec9ff611e1b4e5f))
+
+
+### Features
+
+* eUI-7844 Update packages ([#196](https://github.com/hmcts/rpx-xui-node-lib/issues/196)) ([b420253](https://github.com/hmcts/rpx-xui-node-lib/commit/b4202532126c2e7179df42f207413a6033cafc74))
+
 ## [2.26.13](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.12...v2.26.13) (2023-03-08)
 
 
