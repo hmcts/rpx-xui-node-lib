@@ -21,7 +21,7 @@
     "url": "git+https://github.com/hmcts/rpx-xui-node-lib.git"
   },
   "publishConfig": {
-    "access": "public",
+    "access": "public"
   },
   "keywords": [
     "XUI",
