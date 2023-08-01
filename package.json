@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "3.0.0-rc10",
+  "version": "3.0.0-rc11",
   "description": "Common Nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -10,6 +10,7 @@
     "test:coverage": "jest --env node --coverage",
     "build": "tsc --declarationMap --sourceMap",
     "build:watch": "tsc --declarationMap --sourceMap --watch",
+    "publish": "npm publish",
     "lint": "eslint \"*/**/*.{js,ts}\" --quiet --fix",
     "commit": "git cz",
     "ci:lint": "eslint \"*/**/*.{js,ts}\" --quiet",
@@ -77,7 +78,7 @@
     "ts-node": "^10.8.1",
     "tslint": "^6.1.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "4.9.3"
+    "typescript": "4.8.2"
   },
   "config": {
     "commitizen": {
