@@ -75,7 +75,7 @@ test('sessionStore getClassStore error', () => {
     const mockRouter = createMock<Router>()
     const sessionStore = new RedisSessionStore(mockRouter)
     expect(() => {
-        sessionStore.getClassStore((null as unknown) as SessionMetadata)
+        sessionStore.getClassStore(null as unknown as SessionMetadata)
     }).toThrowError('Store Options are missing')
 })
 

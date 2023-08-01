@@ -67,10 +67,10 @@ test('OIDC configure deserializeUser', () => {
 
 test('OIDC loginHandler', async () => {
     const spy = jest.spyOn(passport, 'authenticate')
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     const mockResponse = {} as Response
     const next = jest.fn()
 
@@ -81,11 +81,11 @@ test('OIDC loginHandler', async () => {
 test('OIDC loginHandler with session', async () => {
     const mockRouter = createMock<Router>()
     options.sessionKey = 'test'
-    const logger = ({
+    const logger = {
         log: jest.fn(),
         error: jest.fn(),
         info: jest.fn(),
-    } as unknown) as XuiLogger
+    } as unknown as XuiLogger
     const openId = new OpenID(mockRouter, logger)
     jest.spyOn(openId, 'validateOptions')
     jest.spyOn(openId, 'serializeUser')
@@ -98,13 +98,13 @@ test('OIDC loginHandler with session', async () => {
     openId.configure(options)
 
     const spy = jest.spyOn(passport, 'authenticate')
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
         session: {
             save: (callback: any): void => callback(),
         },
-    } as unknown) as Request
+    } as unknown as Request
     const mockResponse = {} as Response
     const next = jest.fn()
 
@@ -190,10 +190,10 @@ test('test validateOptions', () => {
     expect(isValid).toBeTruthy()
 })
 test('OIDC verifyLogin error Path', () => {
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     mockRequest.logIn = (user: any, done: (err: any) => void) => {
         done({})
     }
@@ -210,10 +210,10 @@ test('OIDC verifyLogin error Path', () => {
 })
 
 test('OIDC verifyLogin happy Path with no subscription', () => {
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     mockRequest.csrfToken = jest.fn()
     mockRequest.logIn = (user: any, done: (err: any) => void) => {
         done(undefined)
@@ -235,10 +235,10 @@ test('OIDC verifyLogin happy Path with no subscription', () => {
 })
 
 test('OIDC verifyLogin happy Path with subscription', () => {
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     mockRequest.csrfToken = jest.fn()
     mockRequest.logIn = (user: any, done: (err: any) => void) => {
         done(undefined)
@@ -277,10 +277,10 @@ test('OIDC discover', () => {
 })
 
 xtest('OIDC authenticate when authenticated but session and client not initialised', () => {
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     mockRequest.isUnauthenticated = () => false
     const mockResponse = {} as Response
     const mockRedirect = jest.fn()
@@ -292,10 +292,10 @@ xtest('OIDC authenticate when authenticated but session and client not initialis
 })
 
 xtest('OIDC authenticate when authenticated but session and client initialised', async () => {
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     mockRequest.isUnauthenticated = () => false
     const mockResponse = {} as Response
     const mockRedirect = jest.fn()
@@ -449,11 +449,11 @@ test('strategy logout', async () => {
         },
     }
     mockRequest.session = session
-    const mockResponse = ({
-        status: () => ({
-            redirect: jest.fn(),
-        }),
-    } as unknown) as Response
+    const mockResponse = {
+        status: () => {
+            redirect: jest.fn()
+        },
+    } as unknown as Response
     mockResponse.redirect = jest.fn()
     const spyhttp = jest.spyOn(http, 'delete').mockImplementation(() => Promise.resolve({} as any))
     const spySessionDestroy = jest.spyOn(oidc, 'destroySession').mockImplementation(() => Promise.resolve({} as any))
@@ -504,11 +504,11 @@ test('emitIfListenersExist with listeners', () => {
 
 test('configure with useRoutes', () => {
     const mockRouter = createMock<Router>()
-    const logger = ({
+    const logger = {
         log: jest.fn(),
         error: jest.fn(),
         info: jest.fn(),
-    } as unknown) as XuiLogger
+    } as unknown as XuiLogger
     const openId = new OpenID(mockRouter, logger)
     const spyOnValidateOptions = jest.spyOn(openId, 'validateOptions')
     const spyOnSer = jest.spyOn(openId, 'serializeUser')
@@ -528,11 +528,11 @@ test('configure with useRoutes', () => {
 
 test('configure without useRoutes', () => {
     const mockRouter = createMock<Router>()
-    const logger = ({
+    const logger = {
         log: jest.fn(),
         error: jest.fn(),
         info: jest.fn(),
-    } as unknown) as XuiLogger
+    } as unknown as XuiLogger
     const openId = new OpenID(mockRouter, logger)
     const spyOnValidateOptions = jest.spyOn(openId, 'validateOptions')
     const spyOnSer = jest.spyOn(openId, 'serializeUser')
@@ -557,10 +557,10 @@ test('getClient', () => {
 })
 
 test('keepAliveHandler no session', async () => {
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     const mockResponse = {} as Response
     const next = jest.fn()
     await oidc.keepAliveHandler(mockRequest, mockResponse, next)
@@ -568,10 +568,10 @@ test('keepAliveHandler no session', async () => {
 })
 
 test('keepAliveHandler session but not authenticated', async () => {
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     const mockResponse = {} as Response
     const next = jest.fn()
     const session = createMock<Express.Session>()
@@ -598,10 +598,10 @@ test('keepAliveHandler session and isAuthenticated', async () => {
     oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (req) => {
         expect(req.isRefresh).toBeFalsy()
     })
-    const mockRequest = ({
+    const mockRequest = {
         ...mockRequestRequired,
         body: {},
-    } as unknown) as Request
+    } as unknown as Request
     const mockResponse = {} as Response
     const next = jest.fn()
     const session = createMock<Express.Session>()

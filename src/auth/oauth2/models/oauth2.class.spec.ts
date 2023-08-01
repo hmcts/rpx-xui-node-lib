@@ -63,11 +63,11 @@ describe('OAUTH2 Auth', () => {
     test('loginHandler with session and sessionKey', async () => {
         const mockRouter = createMock<Router>()
         const options = createMock<AuthOptions>()
-        const logger = ({
+        const logger = {
             log: jest.fn(),
             error: jest.fn(),
             info: jest.fn(),
-        } as unknown) as XuiLogger
+        } as unknown as XuiLogger
         options.sessionKey = 'test'
         options.discoveryEndpoint = 'http://localhost/someEndpoint'
         const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => () => true)
@@ -83,13 +83,13 @@ describe('OAUTH2 Auth', () => {
         jest.spyOn(oAuth2, 'initialiseCSRF')
         oAuth2.configure(options)
 
-        const mockRequest = ({
+        const mockRequest = {
             ...mockRequestRequired,
             body: {},
             session: {
                 save: (callback: any): void => callback(),
             },
-        } as unknown) as Request
+        } as unknown as Request
         const mockResponse = {} as Response
         const next = jest.fn()
 
@@ -99,11 +99,11 @@ describe('OAUTH2 Auth', () => {
 
     test('loginHandler with session and no sessionKey', async () => {
         const mockRouter = createMock<Router>()
-        const logger = ({
+        const logger = {
             log: jest.fn(),
             error: jest.fn(),
             info: jest.fn(),
-        } as unknown) as XuiLogger
+        } as unknown as XuiLogger
         const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => () => true)
         const oAuth2 = new OAuth2(mockRouter, logger)
         jest.spyOn(oAuth2, 'validateOptions')
@@ -114,13 +114,13 @@ describe('OAUTH2 Auth', () => {
         jest.spyOn(oAuth2, 'initialiseStrategy')
         oAuth2.configure(options)
 
-        const mockRequest = ({
+        const mockRequest = {
             ...mockRequestRequired,
             body: {},
             session: {
                 save: (callback: any): void => callback(),
             },
-        } as unknown) as Request
+        } as unknown as Request
         const mockResponse = {} as Response
         const next = jest.fn()
 
@@ -129,7 +129,7 @@ describe('OAUTH2 Auth', () => {
     })
 
     test('setCallbackURL', () => {
-        const mockRequest = ({
+        const mockRequest = {
             ...mockRequestRequired,
             body: {},
             session: {},
@@ -138,7 +138,7 @@ describe('OAUTH2 Auth', () => {
             },
             protocol: 'http',
             get: jest.fn().mockImplementation(() => 'localhost'),
-        } as unknown) as Request
+        } as unknown as Request
         const mockResponse = {} as Response
         const next = jest.fn()
         oauth2.setCallbackURL(mockRequest, mockResponse, next)
@@ -151,7 +151,7 @@ describe('OAUTH2 Auth', () => {
     test('setHeaders should set auth headers', () => {
         const roles = ['test', 'test1']
         const authToken = 'Bearer abc123'
-        const mockRequest = ({
+        const mockRequest = {
             ...mockRequestRequired,
             body: {},
             session: {
@@ -164,7 +164,7 @@ describe('OAUTH2 Auth', () => {
                 },
             },
             headers: {},
-        } as unknown) as Request
+        } as unknown as Request
         const mockResponse = {} as Response
         const next = jest.fn()
         jest.spyOn(oauth2, 'makeAuthorization').mockImplementation(() => authToken)
