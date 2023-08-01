@@ -10,7 +10,6 @@
     "test:coverage": "jest --env node --coverage",
     "build": "tsc --declarationMap --sourceMap",
     "build:watch": "tsc --declarationMap --sourceMap --watch",
-    "publish": "npm publish",
     "lint": "eslint \"*/**/*.{js,ts}\" --quiet --fix",
     "commit": "git cz",
     "ci:lint": "eslint \"*/**/*.{js,ts}\" --quiet",
