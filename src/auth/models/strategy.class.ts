@@ -176,7 +176,9 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout((err:any) => {})
+            req.logout((err: any) => {
+                this.logger.log('Logout')
+            })
             await this.destroySession(req)
             /* istanbul ignore next */
             if (req.query.noredirect) {
@@ -474,7 +476,7 @@ export abstract class Strategy extends events.EventEmitter {
      * Get authorization from ClientID and secret
      * @return {string}
      */
-    public getAuthorization = (clientID: string, clientSecret: string, encoding:BufferEncoding = 'base64'): string => {
+    public getAuthorization = (clientID: string, clientSecret: string, encoding: BufferEncoding = 'base64'): string => {
         return `Basic ${Buffer.from(`${clientID}:${clientSecret}`).toString(encoding)}`
     }
 
