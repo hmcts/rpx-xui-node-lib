@@ -329,6 +329,8 @@ export abstract class Strategy extends events.EventEmitter {
                 req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
                 req.headers.Authorization = this.makeAuthorization(req.session.passport)
             }
+        } else if (this.isRouteCredentialNeeded(req.path, this.options)) {
+            await this.setCredentialToken(req)
         }
         next()
     }
@@ -341,11 +343,9 @@ export abstract class Strategy extends events.EventEmitter {
         let routeCredentialToken
         const cachedToken = req.app.get('routeCredentialToken')
         if (cachedToken && cachedToken.access_token && !this.isTokenExpired(cachedToken.access_token)) {
-            this.logger.log('using cached routeCredentialToken')
             routeCredentialToken = cachedToken
         } else {
             routeCredentialToken = await this.generateToken()
-            this.logger.log('using new routeCredentialToken')
             req.app.set('routeCredentialToken', routeCredentialToken)
         }
         if (routeCredentialToken && routeCredentialToken.access_token) {
