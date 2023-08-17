@@ -1,3 +1,10 @@
+## [2.27.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.27.0...v2.27.1) (2023-08-15)
+
+
+### Bug Fixes
+
+* **strategy.class.ts:** routeCredential for anonymous user ([#209](https://github.com/hmcts/rpx-xui-node-lib/issues/209)) ([63b2474](https://github.com/hmcts/rpx-xui-node-lib/commit/63b247451f7841d10884df5dc99afc83dd1a35ea))
+
 # [2.27.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.26.13...v2.27.0) (2023-06-19)
 
 
