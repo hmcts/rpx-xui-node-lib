@@ -179,6 +179,7 @@ export abstract class Strategy extends events.EventEmitter {
             req.logout((err: any) => {
                 this.logger.log('Logout')
             })
+
             await this.destroySession(req)
             /* istanbul ignore next */
             if (req.query.noredirect) {
@@ -452,9 +453,14 @@ export abstract class Strategy extends events.EventEmitter {
     }
     /* istanbul ignore next */
     public deserializeUser = (): void => {
-        passport.deserializeUser((id, done) => {
+        passport.deserializeUser((id, done: (err: any, user?: Express.User | false | null) => void) => {
             this.logger.log(`${this.strategyName} deserializeUser`)
-            // this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, done)
+            this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, (err, id) => {
+                console.debug(`Done deserializeUser |${id}|`)
+                if (err) {
+                    console.error(err)
+                }
+            })
         })
     }
 
