@@ -71,7 +71,7 @@
     "lint-staged": "^10.2.2",
     "prettier": "^2.0.5",
     "semantic-release": "^17.0.8",
-    "standard-version": "^7.0.1",
+    "standard-version": "^8.0.0",
     "supports-color": "^7.1.0",
     "ts-jest": "^27.1.5",
     "ts-node": "^10.8.1",
