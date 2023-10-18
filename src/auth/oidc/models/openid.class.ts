@@ -44,11 +44,13 @@ export class OpenID extends AuthStrategy {
             timeout: 15000,
             hooks: {
                 beforeRequest: [
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (options: any) => {
                         this.logger.log('--> %s %s', options.method.toUpperCase(), options.href)
                     },
                 ],
                 afterResponse: [
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (response: any) => {
                         this.logger.log(
                             '<-- %i FROM %s %s',
@@ -84,12 +86,12 @@ export class OpenID extends AuthStrategy {
     // This function is hard to mock, come back to once we've mocked out easier prod code.
     /* istanbul ignore next */
     public keepAliveHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        if (!req.session?.passport?.user) {
+        if (!req.session?.['passport']?.user) {
             return next()
         }
 
         if (req.isAuthenticated() && this.getClient()) {
-            const userDetails = req.session.passport.user
+            const userDetails = req.session['passport'].user
             const currentAccessToken = userDetails.tokenset.accessToken
 
             if (currentAccessToken) {
@@ -99,10 +101,10 @@ export class OpenID extends AuthStrategy {
                         this.logger.log('token expired')
 
                         const tokenSet: TokenSet | undefined = await this.getClient()?.refresh(
-                            req.session.passport.user.tokenset.refreshToken,
+                            req.session['passport'].user.tokenset.refreshToken,
                         )
 
-                        req.session.passport.user.tokenset = this.convertTokenSet(tokenSet)
+                        req.session['passport'].user.tokenset = this.convertTokenSet(tokenSet)
 
                         if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                             this.logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
@@ -140,6 +142,7 @@ export class OpenID extends AuthStrategy {
         this.useStrategy(this.strategyName, strategy)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public convertTokenSet = (tokenset: TokenSet | undefined): any => {
         return {
             accessToken: tokenset?.access_token,
@@ -151,6 +154,7 @@ export class OpenID extends AuthStrategy {
     public verify = (
         tokenset: TokenSet,
         userinfo: UserinfoResponse,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         done: (err: any, user?: any, message?: any) => void,
     ): void => {
         if (!userinfo?.roles) {
@@ -162,15 +166,18 @@ export class OpenID extends AuthStrategy {
         return done(null, { tokenset: this.convertTokenSet(tokenset), userinfo })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public discoverIssuer = async (): Promise<any> => {
         return await Issuer.discover(`${this.options.discoveryEndpoint}`)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public newIssuer = (metadata: any): Issuer<Client> => {
         this.logger.log('newIssuer')
         return new Issuer(metadata)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public useStrategy = (strategyName: string, strategy: Strategy<any, any>): void => {
         passport.use(strategyName, strategy)
     }
@@ -179,6 +186,7 @@ export class OpenID extends AuthStrategy {
     // get the function to return and throw the error in the caller function.
     // Why? - this makes the function more pure, and allows it to be easily testable.
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public createNewStrategy = async (options: OpenIDMetadata): Promise<Strategy<any, any>> => {
         this.issuer = await this.discover()
         if (!this.issuer) {
@@ -191,6 +199,7 @@ export class OpenID extends AuthStrategy {
         return this.getNewStrategy(options, this.client)
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public getNewStrategy = (options: OpenIDMetadata, client: Client): Strategy<any, Client> => {
         return new Strategy(
             {
@@ -247,9 +256,10 @@ export class OpenID extends AuthStrategy {
             return passport.authenticate(
                 this.strategyName,
                 {
-                    redirect_uri: req.session?.callbackURL,
+                    redirect_uri: req.session?.['callbackURL'],
                     nonce,
                     state,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
                 (error, user, info) => {
                     this.logger.log('passport authenticate')
