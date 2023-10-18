@@ -1,9 +1,13 @@
 import debug from 'debug'
 
 export interface XuiLogger {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     log: (...args: any[]) => any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     info: (...args: any[]) => any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     warn: (...args: any[]) => any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error: (...args: any[]) => any
 }
 

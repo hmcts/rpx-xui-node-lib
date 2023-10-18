@@ -39,6 +39,7 @@ export abstract class SessionStore extends events.EventEmitter {
         throw new Error('Store Options are missing')
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public mapSessionOptions = (options: SessionMetadata, store: session.Store): any => {
         return {
             cookie: options.cookie,
