@@ -271,7 +271,6 @@ export abstract class Strategy extends events.EventEmitter {
             this.strategyName,
             {
                 redirect_uri: req.session?.['callbackURL'],
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
             (error, user, info) => {
                 const errorMessages: string[] = []

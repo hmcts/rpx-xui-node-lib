@@ -106,5 +106,8 @@
     "ts-auto-mock": "^3.5.0",
     "ttypescript": "^1.5.13"
   },
+  "resolutions": {
+    "@types/express-session": "1.15.16"
+  },
   "packageManager": "yarn@3.6.4"
 }
