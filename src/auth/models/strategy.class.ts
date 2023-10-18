@@ -44,6 +44,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger = logger
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public validateOptions(options: any): boolean {
         const schema = Joi.object({
             authorizationURL: Joi.string().required(),
@@ -77,6 +78,7 @@ export abstract class Strategy extends events.EventEmitter {
         return true
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     public initialiseStrategy = async (options: any): Promise<void> => {
         this.options = options
     }
@@ -118,6 +120,7 @@ export abstract class Strategy extends events.EventEmitter {
                 {
                     redirect_uri: req.session?.['callbackURL'],
                     state,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
                 (error, user, info) => {
                     /* istanbul ignore next */
@@ -176,7 +179,7 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout((err: any) => {
+            req.logout(() => {
                 this.logger.log('Logout')
             })
 
@@ -204,6 +207,7 @@ export abstract class Strategy extends events.EventEmitter {
         return res.send(req.isAuthenticated())
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public destroySession = async (req: Request): Promise<any> => {
         return new Promise((resolve, reject) => {
             req.session?.destroy((err) => {
@@ -267,6 +271,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.strategyName,
             {
                 redirect_uri: req.session?.['callbackURL'],
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
             (error, user, info) => {
                 const errorMessages: string[] = []
@@ -311,6 +316,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
     /* istanbul ignore next */
     public isTokenExpired = (token: string): boolean => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const jwtData = jwtDecode<any>(token)
         return this.jwTokenExpired(jwtData)
     }
@@ -322,6 +328,7 @@ export abstract class Strategy extends events.EventEmitter {
         next()
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
     /* istanbul ignore next */
     public setHeaders = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
@@ -356,6 +363,7 @@ export abstract class Strategy extends events.EventEmitter {
         }
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public generateToken = async (): Promise<any | undefined> => {
         const url = this.getUrlFromOptions(this.options)
         try {
@@ -371,6 +379,7 @@ export abstract class Strategy extends events.EventEmitter {
         }
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response): void => {
         req.logIn(user, (err) => {
             const roles = user.userinfo.roles
@@ -453,6 +462,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
     /* istanbul ignore next */
     public deserializeUser = (): void => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
         passport.deserializeUser((id, done: (err: any, user?: Express.User | false | null) => void) => {
             this.logger.log(`${this.strategyName} deserializeUser`)
             this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, (err, id) => {
@@ -464,6 +474,7 @@ export abstract class Strategy extends events.EventEmitter {
         })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     public jwTokenExpired = (jwtData: any): boolean => {
         const expires = new Date(jwtData.exp * 1000).getTime()
         const now = new Date().getTime()
@@ -474,6 +485,7 @@ export abstract class Strategy extends events.EventEmitter {
      * Get session URL
      * @return {string}
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     public urlFromToken = (url: string | undefined, token: any): string => {
         return `${url}/session/${token}`
     }
@@ -500,6 +512,7 @@ export abstract class Strategy extends events.EventEmitter {
     public emitIfListenersExist = (
         eventName: string,
         eventObject: unknown,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         done: (err: any, id?: unknown) => void,
     ): void => {
         if (!this.listenerCount(eventName)) {
