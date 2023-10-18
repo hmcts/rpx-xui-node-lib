@@ -84,6 +84,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
+    "@types/ioredis": "4.28.10",
     "axios": "^0.21.1",
     "caller-path": "^3.0.0",
     "connect-redis": "^4.0.4",
@@ -92,6 +93,7 @@
     "deepmerge": "^4.2.2",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
+    "ioredis": "4.28.5",
     "jest-mock-axios": "^4.6.2",
     "jest-ts-auto-mock": "^2.0.0",
     "jwt-decode": "^2.2.0",
@@ -104,7 +106,5 @@
     "ts-auto-mock": "^3.5.0",
     "ttypescript": "^1.5.13"
   },
-  "resolutions": {
-    "@types/express-session": "1.15.16"
-  }
+  "packageManager": "yarn@3.6.4"
 }
