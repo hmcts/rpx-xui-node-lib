@@ -116,7 +116,7 @@ export abstract class Strategy extends events.EventEmitter {
             return passport.authenticate(
                 this.strategyName,
                 {
-                    redirect_uri: req.session?.callbackURL,
+                    redirect_uri: req.session?.['callbackURL'],
                     state,
                 } as any,
                 (error, user, info) => {
@@ -145,9 +145,9 @@ export abstract class Strategy extends events.EventEmitter {
 
     public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         /* istanbul ignore else */
-        if (req.session && !req.session.callbackURL) {
+        if (req.session && !req.session['callbackURL']) {
             req.app.set('trust proxy', true)
-            req.session.callbackURL = URL.format({
+            req.session['callbackURL'] = URL.format({
                 protocol: req.protocol,
                 host: req.get('host'),
                 pathname: this.options.callbackURL,
@@ -160,7 +160,7 @@ export abstract class Strategy extends events.EventEmitter {
     public logout = async (req: Request, res: Response): Promise<void> => {
         try {
             this.logger.log('logout start')
-            const { accessToken, refreshToken } = req.session?.passport.user.tokenset
+            const { accessToken, refreshToken } = req.session?.['passport'].user.tokenset
 
             const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
 
@@ -266,7 +266,7 @@ export abstract class Strategy extends events.EventEmitter {
         passport.authenticate(
             this.strategyName,
             {
-                redirect_uri: req.session?.callbackURL,
+                redirect_uri: req.session?.['callbackURL'],
             } as any,
             (error, user, info) => {
                 const errorMessages: string[] = []
@@ -325,12 +325,12 @@ export abstract class Strategy extends events.EventEmitter {
     public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
     /* istanbul ignore next */
     public setHeaders = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-        if (req.session?.passport?.user) {
+        if (req.session?.['passport']?.user) {
             if (this.isRouteCredentialNeeded(req.path, this.options)) {
                 await this.setCredentialToken(req)
             } else {
-                req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
-                req.headers.Authorization = this.makeAuthorization(req.session.passport)
+                req.headers['user-roles'] = req.session['passport'].user.userinfo.roles.join()
+                req.headers.Authorization = this.makeAuthorization(req.session['passport'])
             }
         } else if (this.isRouteCredentialNeeded(req.path, this.options)) {
             await this.setCredentialToken(req)
