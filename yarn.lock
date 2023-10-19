@@ -759,7 +759,7 @@ __metadata:
     husky: ">=4"
     jest: ^29.6.2
     jest-environment-jsdom: ^29.6.2
-    jest-mock-axios: ^4.6.2
+    jest-mock-axios: ^3.2.0
     jest-ts-auto-mock: ^2.0.0
     jwt-decode: ^2.2.0
     lint-staged: ^10.2.2
@@ -7268,14 +7268,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-mock-axios@npm:^4.6.2":
-  version: 4.7.3
-  resolution: "jest-mock-axios@npm:4.7.3"
+"jest-mock-axios@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "jest-mock-axios@npm:3.2.0"
   dependencies:
-    "@jest/globals": ^29.7.0
-    jest: ~29.7.0
-    synchronous-promise: ^2.0.17
-  checksum: 956f0242c56a20c5a981b7a24f32657bd5e20d0d7fc1c9babe69f667b4dc8b61d6cee8d26f84a98f1c30ec8d3752bca016fb05b14a957a58d1f5cb03fcf4e88e
+    synchronous-promise: ^2.0.10
+  checksum: 9188924146161180ef822a0e31c85cadcff7b02e38e9e671e9bb5880e8fa42e24a4d57d81e3eaaf66f4e41de2caf8693ce8d5c1d61ce3290ec54654121859c53
   languageName: node
   linkType: hard
 
@@ -7502,7 +7500,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest@npm:^29.6.2, jest@npm:~29.7.0":
+"jest@npm:^29.6.2":
   version: 29.7.0
   resolution: "jest@npm:29.7.0"
   dependencies:
@@ -11431,7 +11429,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"synchronous-promise@npm:^2.0.17":
+"synchronous-promise@npm:^2.0.10":
   version: 2.0.17
   resolution: "synchronous-promise@npm:2.0.17"
   checksum: 7b1342c93741f3f92ebde1edf5d6ce8dde2278de948d84e9bd85e232c16c0d77c90c4940f9975be3effcb20f047cfb0f16fa311c3b4e092c22f3bf2889fb0fb4
