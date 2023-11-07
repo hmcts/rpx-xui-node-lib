@@ -9,6 +9,7 @@ import Joi from '@hapi/joi'
 import * as URL from 'url'
 import { generators } from 'openid-client'
 import csrf from 'csurf'
+import { MySessionData } from './sessionData.interface'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -91,12 +92,14 @@ export abstract class Strategy extends events.EventEmitter {
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
         this.logger.log('Base loginHandler Hit')
 
+        const reqSession = req.session as MySessionData
+
         // we are using oidc generator but it's just a helper, rather than installing another library to provide this
         const state = generators.state()
         /* istanbul ignore next */
         const promise = new Promise((resolve) => {
             if (req.session && this.options?.sessionKey) {
-                req.session[this.options?.sessionKey] = { state }
+                reqSession[this.options?.sessionKey] = { state }
                 req.session.save(() => {
                     this.logger.log('resolved promise, state saved')
                     resolve(true)
@@ -116,10 +119,10 @@ export abstract class Strategy extends events.EventEmitter {
             return passport.authenticate(
                 this.strategyName,
                 {
-                    redirect_uri: req.session?.callbackURL,
+                    redirect_uri: reqSession?.callbackURL,
                     state,
                 } as any,
-                (error, user, info) => {
+                (error: any, user: any, info: any) => {
                     /* istanbul ignore next */
                     if (error) {
                         this.logger.error('error => ', JSON.stringify(error))
@@ -144,10 +147,12 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
+        const reqSession = req.session as MySessionData
+
         /* istanbul ignore else */
-        if (req.session && !req.session.callbackURL) {
+        if (req.session && !reqSession.callbackURL) {
             req.app.set('trust proxy', true)
-            req.session.callbackURL = URL.format({
+            reqSession.callbackURL = URL.format({
                 protocol: req.protocol,
                 host: req.get('host'),
                 pathname: this.options.callbackURL,
@@ -158,9 +163,11 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     public logout = async (req: Request, res: Response): Promise<void> => {
+        const reqSession = req.session as MySessionData
+
         try {
             this.logger.log('logout start')
-            const { accessToken, refreshToken } = req.session?.passport.user.tokenset
+            const { accessToken, refreshToken } = reqSession?.passport.user.tokenset
 
             const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
 
@@ -176,7 +183,9 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout()
+            req.logout((err) => {
+                console.error(err)
+            })
             await this.destroySession(req)
             /* istanbul ignore next */
             if (req.query.noredirect) {
@@ -248,6 +257,7 @@ export abstract class Strategy extends events.EventEmitter {
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
         this.logger.log('inside callbackHandler')
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
+        const reqSession = req.session as MySessionData
 
         const emitAuthenticationFailure = (logMessages: string[]): void => {
             this.logger.log('inside emitAuthenticationFailure')
@@ -263,9 +273,9 @@ export abstract class Strategy extends events.EventEmitter {
         passport.authenticate(
             this.strategyName,
             {
-                redirect_uri: req.session?.callbackURL,
+                redirect_uri: reqSession?.callbackURL,
             } as any,
-            (error, user, info) => {
+            (error: any, user: any, info: any) => {
                 const errorMessages: string[] = []
                 this.logger.log('inside passport authenticate')
 
@@ -322,12 +332,14 @@ export abstract class Strategy extends events.EventEmitter {
     public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
     /* istanbul ignore next */
     public setHeaders = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-        if (req.session?.passport?.user) {
+        const reqSession = req.session as MySessionData
+
+        if (reqSession?.passport?.user) {
             if (this.isRouteCredentialNeeded(req.path, this.options)) {
                 await this.setCredentialToken(req)
             } else {
-                req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
-                req.headers.Authorization = this.makeAuthorization(req.session.passport)
+                req.headers['user-roles'] = reqSession.passport.user.userinfo.roles.join()
+                req.headers.Authorization = this.makeAuthorization(reqSession.passport)
             }
         } else if (this.isRouteCredentialNeeded(req.path, this.options)) {
             await this.setCredentialToken(req)
@@ -474,7 +486,7 @@ export abstract class Strategy extends events.EventEmitter {
      * Get authorization from ClientID and secret
      * @return {string}
      */
-    public getAuthorization = (clientID: string, clientSecret: string, encoding = 'base64'): string => {
+    public getAuthorization = (clientID: string, clientSecret: string, encoding: BufferEncoding = 'base64'): string => {
         return `Basic ${Buffer.from(`${clientID}:${clientSecret}`).toString(encoding)}`
     }
 
@@ -492,7 +504,7 @@ export abstract class Strategy extends events.EventEmitter {
     public emitIfListenersExist = (
         eventName: string,
         eventObject: unknown,
-        done: (err: any, id?: unknown) => void,
+        done: (err: any, id?: any) => void,
     ): void => {
         if (!this.listenerCount(eventName)) {
             done(null, eventObject)
