@@ -19,6 +19,7 @@ import { Strategy as AuthStrategy } from '../../models'
 import { AuthOptions } from '../../models'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 import { getLogger, XuiLogger } from '../../../common'
+import { MySessionData } from '../../models/sessionData.interface'
 
 export class OpenID extends AuthStrategy {
     protected issuer: Issuer<Client> | undefined
@@ -84,12 +85,14 @@ export class OpenID extends AuthStrategy {
     // This function is hard to mock, come back to once we've mocked out easier prod code.
     /* istanbul ignore next */
     public keepAliveHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        if (!req.session?.passport?.user) {
+        const reqsession = req.session as MySessionData
+
+        if (!reqsession?.passport?.user) {
             return next()
         }
 
         if (req.isAuthenticated() && this.getClient()) {
-            const userDetails = req.session.passport.user
+            const userDetails = reqsession.passport.user
             const currentAccessToken = userDetails.tokenset.accessToken
 
             if (currentAccessToken) {
@@ -99,10 +102,10 @@ export class OpenID extends AuthStrategy {
                         this.logger.log('token expired')
 
                         const tokenSet: TokenSet | undefined = await this.getClient()?.refresh(
-                            req.session.passport.user.tokenset.refreshToken,
+                            reqsession.passport.user.tokenset.refreshToken,
                         )
 
-                        req.session.passport.user.tokenset = this.convertTokenSet(tokenSet)
+                        reqsession.passport.user.tokenset = this.convertTokenSet(tokenSet)
 
                         if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                             this.logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
@@ -225,10 +228,11 @@ export class OpenID extends AuthStrategy {
 
         const nonce = generators.nonce()
         const state = generators.state()
+        const reqsession = req.session as MySessionData
 
         const promise = new Promise((resolve) => {
             if (req.session && this.options?.sessionKey) {
-                req.session[this.options.sessionKey] = { nonce, state }
+                reqsession[this.options?.sessionKey] = { state }
                 req.session.save(() => {
                     this.logger.log('resolved promise, nonce & state saved')
                     resolve(true)
@@ -247,11 +251,11 @@ export class OpenID extends AuthStrategy {
             return passport.authenticate(
                 this.strategyName,
                 {
-                    redirect_uri: req.session?.callbackURL,
+                    redirect_uri: reqsession?.callbackURL,
                     nonce,
                     state,
                 } as any,
-                (error, user, info) => {
+                (error: any, user: any, info: any) => {
                     this.logger.log('passport authenticate')
 
                     if (error) {
