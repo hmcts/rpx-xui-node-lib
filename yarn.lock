@@ -2607,9 +2607,9 @@ caller-path@^2.0.0:
     caller-callsite "^2.0.0"
 
 caller-path@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/caller-path/-/caller-path-3.0.0.tgz#a13cbec75eea1b355e3f92dc0df4288b7eebdc5f"
-  integrity sha512-8nvMBmBgTmEfAXywJf27jbPZlURi5xUWLwkTXa3hZFcEZa5iRnMP4sF0p00CstWNHKBENVyYWDRSByNRdshdgQ==
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/caller-path/-/caller-path-3.0.1.tgz#bc932ecec3f943e10c2f8922146e23b132f932e4"
+  integrity sha512-fhmztL4wURO/BzwJUJ4aVRdnKEFskPBbrJ8fNgl7XdUiD1ygzzlt+nhPgUBSRq2ciEVubo6x+W8vJQzm55QLLQ==
   dependencies:
     caller-callsite "^4.1.0"
 
