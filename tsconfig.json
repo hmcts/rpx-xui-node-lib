@@ -7,10 +7,12 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "moduleResolution": "node",
+    "skipLibCheck": true,
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
-    "typeRoots": ["node_modules/@types"],
+    "typeRoots": ["./node_modules/@types"],
+    "noImplicitAny": false,
     "plugins": [
      {
          "transform": "ts-auto-mock/transformer",

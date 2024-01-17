@@ -2,13 +2,13 @@ import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import { hasKey, getLogger, XuiLogger } from '../util'
-import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail (circular import somewhere)
 import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
 
 export class XuiNode extends EventEmitter {
     protected readonly router: Router
     protected readonly middlewares: Array<string>
     protected readonly logger: XuiLogger
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public authenticateMiddleware: any
     public constructor(
         router: Router = Router({ mergeParams: true }),
@@ -72,6 +72,7 @@ export class XuiNode extends EventEmitter {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public applyMiddlewareLayer = (middlewareLayer: any, options: any): void => {
         for (const [key, value] of Object.entries(options)) {
             if (hasKey(middlewareLayer, key)) {
@@ -95,6 +96,7 @@ export class XuiNode extends EventEmitter {
         events.forEach((event: string) => {
             if (this.listenerCount(event)) {
                 this.logger.log('proxying event ', event)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 middleware.on(event, (...args: any) => this.emit(event, ...args))
             }
         })

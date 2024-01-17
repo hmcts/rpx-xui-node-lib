@@ -8,6 +8,7 @@ import { Router } from 'express'
 import { getLogger, XuiLogger } from '../../common'
 
 export class RedisSessionStore extends SessionStore {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected redisClient: redis.RedisClient | any
 
     constructor(router = Router({ mergeParams: true }), logger: XuiLogger = getLogger('session:redis')) {
@@ -43,6 +44,7 @@ export class RedisSessionStore extends SessionStore {
     }
 
     public redisClientErrorListener = (redisClient: redis.RedisClient) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         redisClient.on('error', (error: any) => {
             this.logger.error(error)
             this.logger.info('redisClient is ', redisClient)
@@ -50,6 +52,7 @@ export class RedisSessionStore extends SessionStore {
         })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public emitEvent = (eventName: string, eventObject: any) => {
         if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_READY)) {
             this.emit(eventName, eventObject)

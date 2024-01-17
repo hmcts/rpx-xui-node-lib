@@ -44,6 +44,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger = logger
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public validateOptions(options: any): boolean {
         const schema = Joi.object({
             authorizationURL: Joi.string().required(),
@@ -77,6 +78,7 @@ export abstract class Strategy extends events.EventEmitter {
         return true
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     public initialiseStrategy = async (options: any): Promise<void> => {
         this.options = options
     }
@@ -116,8 +118,9 @@ export abstract class Strategy extends events.EventEmitter {
             return passport.authenticate(
                 this.strategyName,
                 {
-                    redirect_uri: req.session?.callbackURL,
+                    redirect_uri: req.session?.['callbackURL'],
                     state,
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
                 (error, user, info) => {
                     /* istanbul ignore next */
@@ -145,9 +148,9 @@ export abstract class Strategy extends events.EventEmitter {
 
     public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         /* istanbul ignore else */
-        if (req.session && !req.session.callbackURL) {
+        if (req.session && !req.session['callbackURL']) {
             req.app.set('trust proxy', true)
-            req.session.callbackURL = URL.format({
+            req.session['callbackURL'] = URL.format({
                 protocol: req.protocol,
                 host: req.get('host'),
                 pathname: this.options.callbackURL,
@@ -160,7 +163,7 @@ export abstract class Strategy extends events.EventEmitter {
     public logout = async (req: Request, res: Response): Promise<void> => {
         try {
             this.logger.log('logout start')
-            const { accessToken, refreshToken } = req.session?.passport.user.tokenset
+            const { accessToken, refreshToken } = req.session?.['passport'].user.tokenset || null
 
             const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
 
@@ -176,7 +179,10 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout()
+            req.logout(() => {
+                this.logger.log('Logout')
+            })
+
             await this.destroySession(req)
             /* istanbul ignore next */
             if (req.query.noredirect) {
@@ -201,6 +207,7 @@ export abstract class Strategy extends events.EventEmitter {
         return res.send(req.isAuthenticated())
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public destroySession = async (req: Request): Promise<any> => {
         return new Promise((resolve, reject) => {
             req.session?.destroy((err) => {
@@ -263,7 +270,7 @@ export abstract class Strategy extends events.EventEmitter {
         passport.authenticate(
             this.strategyName,
             {
-                redirect_uri: req.session?.callbackURL,
+                redirect_uri: req.session?.['callbackURL'],
             } as any,
             (error, user, info) => {
                 const errorMessages: string[] = []
@@ -308,6 +315,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
     /* istanbul ignore next */
     public isTokenExpired = (token: string): boolean => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const jwtData = jwtDecode<any>(token)
         return this.jwTokenExpired(jwtData)
     }
@@ -319,15 +327,16 @@ export abstract class Strategy extends events.EventEmitter {
         next()
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public makeAuthorization = (passport: any) => `Bearer ${passport.user.tokenset.accessToken}`
     /* istanbul ignore next */
     public setHeaders = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
-        if (req.session?.passport?.user) {
+        if (req.session?.['passport']?.user) {
             if (this.isRouteCredentialNeeded(req.path, this.options)) {
                 await this.setCredentialToken(req)
             } else {
-                req.headers['user-roles'] = req.session.passport.user.userinfo.roles.join()
-                req.headers.Authorization = this.makeAuthorization(req.session.passport)
+                req.headers['user-roles'] = req.session['passport'].user.userinfo.roles.join()
+                req.headers.Authorization = this.makeAuthorization(req.session['passport'])
             }
         } else if (this.isRouteCredentialNeeded(req.path, this.options)) {
             await this.setCredentialToken(req)
@@ -353,6 +362,7 @@ export abstract class Strategy extends events.EventEmitter {
         }
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public generateToken = async (): Promise<any | undefined> => {
         const url = this.getUrlFromOptions(this.options)
         try {
@@ -368,6 +378,7 @@ export abstract class Strategy extends events.EventEmitter {
         }
     }
     /* istanbul ignore next */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response): void => {
         req.logIn(user, (err) => {
             const roles = user.userinfo.roles
@@ -450,12 +461,19 @@ export abstract class Strategy extends events.EventEmitter {
     }
     /* istanbul ignore next */
     public deserializeUser = (): void => {
-        passport.deserializeUser((id, done) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+        passport.deserializeUser((id, done: (err: any, user?: Express.User | false | null) => void) => {
             this.logger.log(`${this.strategyName} deserializeUser`)
-            this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, done)
+            this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, (err, id) => {
+                console.debug(`Done deserializeUser |${id}|`)
+                if (err) {
+                    console.error(err)
+                }
+            })
         })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     public jwTokenExpired = (jwtData: any): boolean => {
         const expires = new Date(jwtData.exp * 1000).getTime()
         const now = new Date().getTime()
@@ -466,6 +484,7 @@ export abstract class Strategy extends events.EventEmitter {
      * Get session URL
      * @return {string}
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     public urlFromToken = (url: string | undefined, token: any): string => {
         return `${url}/session/${token}`
     }
@@ -474,7 +493,7 @@ export abstract class Strategy extends events.EventEmitter {
      * Get authorization from ClientID and secret
      * @return {string}
      */
-    public getAuthorization = (clientID: string, clientSecret: string, encoding = 'base64'): string => {
+    public getAuthorization = (clientID: string, clientSecret: string, encoding: BufferEncoding = 'base64'): string => {
         return `Basic ${Buffer.from(`${clientID}:${clientSecret}`).toString(encoding)}`
     }
 
@@ -492,6 +511,7 @@ export abstract class Strategy extends events.EventEmitter {
     public emitIfListenersExist = (
         eventName: string,
         eventObject: unknown,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         done: (err: any, id?: unknown) => void,
     ): void => {
         if (!this.listenerCount(eventName)) {

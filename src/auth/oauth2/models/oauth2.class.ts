@@ -39,7 +39,9 @@ export class OAuth2 extends Strategy {
     public verify = (
         accessToken: string,
         refreshToken: string,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         results: any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
         profile: any,
         done: VerifyCallback,
     ): void => {

@@ -11,6 +11,7 @@ export class XUIOAuth2Strategy extends OAuth2Strategy {
         super(options, verify)
         this.options = options
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     userProfile = async (accessToken: string, done: (err?: Error | null, profile?: any) => void): Promise<void> => {
         const userDetails = await getUserDetails(accessToken, this.options.logoutUrl)
         done(null, userDetails.data)
