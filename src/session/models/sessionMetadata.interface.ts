@@ -1,7 +1,7 @@
 export interface SessionMetadata {
     cookie: {
         httpOnly: boolean
-        maxAge: number
+        maxAge?: number
         secure: boolean
     }
     name: string
