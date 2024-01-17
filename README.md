@@ -4,7 +4,7 @@ Common Nodejs library components for XUI
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 ![Semantic-Release](https://github.com/hmcts/rpx-xui-node-lib/workflows/Semantic-Release/badge.svg)
 
-# Committing to this library 
+# Committing to this library
 
 It should be noted that this library adheres to the gitflow convention. 
 Please use proper naming conventions for your feature/bug branches. Also,
