@@ -1,5 +1,5 @@
 # rpx-xui-node-lib
-Common Nodejs library components for XUI 
+Common Nodejs library components for XUI
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 ![Semantic-Release](https://github.com/hmcts/rpx-xui-node-lib/workflows/Semantic-Release/badge.svg)
