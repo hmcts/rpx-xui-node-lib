@@ -1,3 +1,10 @@
+# [2.28.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.27.2...v2.28.0) (2024-01-18)
+
+
+### Features
+
+* EXUI-382 session cookie ([#236](https://github.com/hmcts/rpx-xui-node-lib/issues/236)) ([f3a8d29](https://github.com/hmcts/rpx-xui-node-lib/commit/f3a8d29fc57084525b1171b8ca47d950137e13bf))
+
 ## [2.27.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.27.0...v2.27.1) (2023-08-15)
 
 
