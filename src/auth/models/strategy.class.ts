@@ -167,7 +167,7 @@ export abstract class Strategy extends events.EventEmitter {
 
         try {
             this.logger.log('logout start')
-            const { accessToken, refreshToken } = reqSession?.passport.user.tokenset
+            const { accessToken, refreshToken } = reqSession?.passport.user.tokenset || null
 
             const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
 
