@@ -19,5 +19,5 @@ test('getUserDetails() should call http.get', () => {
 
     getUserDetails(jwt, logoutUrl)
 
-    expect(mockAxios.get).toBeCalledWith(`${logoutUrl}/details`, httpGetOptions)
+    expect(mockAxios.get).toHaveBeenCalledWith(`${logoutUrl}/details`, httpGetOptions)
 })
