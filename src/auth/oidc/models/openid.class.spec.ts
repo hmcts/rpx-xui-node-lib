@@ -650,8 +650,6 @@ xtest('keepAliveHandler session and isAuthenticated', async () => {
 
     const spyAuthSuccEmit = jest.spyOn(oidc, 'emit').mockReturnValue(false)
 
-    console.log(convertedTokenSet)
-
     await oidc.keepAliveHandler(mockRequest, mockResponse, next)
     expect(spyOnClient).toHaveBeenCalledTimes(2)
     expect(spyOnRefresh).toHaveBeenCalled()
