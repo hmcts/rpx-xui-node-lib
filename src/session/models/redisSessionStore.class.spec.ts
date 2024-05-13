@@ -22,7 +22,7 @@ describe('getStore()', () => {
         const redisSessionStore = new RedisSessionStore(mockRouter)
         redisSessionStore.getStore(redisSessionMetadata)
 
-        expect(spyOnRedisCreateClient).toBeCalledWith(MOCK_REDIS_CLOUD_URL, { prefix: MOCK_REDIS_KEY_PREFIX })
+        expect(spyOnRedisCreateClient).toHaveBeenCalledWith(MOCK_REDIS_CLOUD_URL, { prefix: MOCK_REDIS_KEY_PREFIX })
     })
 
     describe('Redis client event listeners', () => {
@@ -44,7 +44,7 @@ describe('getStore()', () => {
             const redisSessionStore = new RedisSessionStore(mockRouter)
             redisSessionStore.redisClientReadyListener(redisClient)
 
-            expect(spyOnRedisClientOnEvent).toBeCalledWith(REDIS_CLIENT_READY_EVENT, expect.any(Function))
+            expect(spyOnRedisClientOnEvent).toHaveBeenCalledWith(REDIS_CLIENT_READY_EVENT, expect.any(Function))
         })
 
         it("should listen for redisClient on 'error' event.", () => {
@@ -53,7 +53,7 @@ describe('getStore()', () => {
             const redisSessionStore = new RedisSessionStore(mockRouter)
             redisSessionStore.redisClientErrorListener(redisClient)
 
-            expect(spyOnRedisClientOnEvent).toBeCalledWith(REDIS_CLIENT_ERROR_EVENT, expect.any(Function))
+            expect(spyOnRedisClientOnEvent).toHaveBeenCalledWith(REDIS_CLIENT_ERROR_EVENT, expect.any(Function))
         })
     })
 })
@@ -66,16 +66,16 @@ test('sessionStore configure', () => {
     const spyClassStore = jest.spyOn(sessionStore, 'getClassStore').mockReturnValue({} as Store)
     const spySessionOptions = jest.spyOn(sessionStore, 'mapSessionOptions').mockReturnValue({} as any)
     const returnRouter = sessionStore.configure(options)
-    expect(spyClassStore).toBeCalled()
-    expect(spySessionOptions).toBeCalled()
-    expect(spyUse).toBeCalled()
+    expect(spyClassStore).toHaveBeenCalled()
+    expect(spySessionOptions).toHaveBeenCalled()
+    expect(spyUse).toHaveBeenCalled()
 })
 
 test('sessionStore getClassStore error', () => {
     const mockRouter = createMock<Router>()
     const sessionStore = new RedisSessionStore(mockRouter)
     expect(() => {
-        sessionStore.getClassStore((null as unknown) as SessionMetadata)
+        sessionStore.getClassStore(null as unknown as SessionMetadata)
     }).toThrowError('Store Options are missing')
 })
 
@@ -86,7 +86,7 @@ test('sessionStore getClassStore', () => {
     const sessionStore = new RedisSessionStore(mockRouter)
     const spyGetStore = jest.spyOn(sessionStore, 'getStore').mockReturnValue(storeMock)
     sessionStore.getClassStore(mockSessionMetadata)
-    expect(spyGetStore).toBeCalled()
+    expect(spyGetStore).toHaveBeenCalled()
 })
 
 test('sessionStore mapSessionOptions', () => {
@@ -121,8 +121,8 @@ test('emitEvent with no subscribers', () => {
     const spyEmit = jest.spyOn(redisSessionStore, 'emit')
     const spy = jest.spyOn(redisSessionStore, 'listenerCount').mockReturnValue(0)
     redisSessionStore.emitEvent('eventName', {})
-    expect(spy).toBeCalled()
-    expect(spyEmit).not.toBeCalled()
+    expect(spy).toHaveBeenCalled()
+    expect(spyEmit).not.toHaveBeenCalled()
 })
 
 test('emitEvent with subscribers', () => {
@@ -132,6 +132,6 @@ test('emitEvent with subscribers', () => {
     const spyEmit = jest.spyOn(redisSessionStore, 'emit')
     const spy = jest.spyOn(redisSessionStore, 'listenerCount').mockReturnValue(1)
     redisSessionStore.emitEvent('eventName', {})
-    expect(spy).toBeCalled()
-    expect(spyEmit).toBeCalled()
+    expect(spy).toHaveBeenCalled()
+    expect(spyEmit).toHaveBeenCalled()
 })
