@@ -656,6 +656,7 @@ xtest('keepAliveHandler session and isAuthenticated', async () => {
     expect(spyConvertTokenSet).toHaveBeenCalled()
     expect(mockRequest.session.passport.user.tokenset).toEqual(convertedTokenSet)
     expect(spyAuthSuccEmit).toHaveBeenCalledWith(AUTH.EVENT.AUTHENTICATE_SUCCESS, mockRequest, mockResponse, next)
+
     oidc.removeAllListeners()
 })
 
