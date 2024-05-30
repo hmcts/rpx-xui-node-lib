@@ -19,7 +19,7 @@ describe('OAUTH2 Auth', () => {
         tokenURL: '1234',
         clientID: 'clientID12',
         clientSecret: 'secret123',
-        discoveryEndpoint: 'http://localhost/someEndpoint',
+        discoveryEndpoint: 'http://localhost:/someEndpoint',
         issuerURL: 'issuer_url',
         logoutURL: 'http://testUrl',
         callbackURL: 'http://localhost/callback',
@@ -62,7 +62,6 @@ describe('OAUTH2 Auth', () => {
 
     test('loginHandler with session and sessionKey', async () => {
         const mockRouter = createMock<Router>()
-        const options = createMock<AuthOptions>()
         const logger = ({
             log: jest.fn(),
             error: jest.fn(),
