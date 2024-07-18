@@ -1,7 +1,7 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
   "version": "2.29.0",
-  "description": "Common Nodejs library components for XUI",
+  "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
   "scripts": {
