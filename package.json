@@ -100,7 +100,6 @@
     "jwt-decode": "^2.2.0",
     "openid-client": "^3.10.0",
     "otplib": "^12.0.1",
-    "package.json": "^2.0.1",
     "passport": "^0.4.1",
     "passport-oauth2": "^1.5.0",
     "redis": "^3.0.2",
