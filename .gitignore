@@ -76,3 +76,5 @@ testem.log
 /typings
 /reports
 api/.nyc_output
+.yarn/cache
+.yarn/install-state.gz

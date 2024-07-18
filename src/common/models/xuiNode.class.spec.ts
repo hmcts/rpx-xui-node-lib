@@ -16,8 +16,8 @@ test('xuiNode configure', () => {
     const options = {} as XuiNodeOptions
     const spy = jest.spyOn(xuinode, 'applyMiddleware')
     xuinode.configure(options)
-    expect(spy).toBeCalledWith('session1', options)
-    expect(spy).toBeCalledWith('auth1', options)
+    expect(spy).toHaveBeenCalledWith('session1', options)
+    expect(spy).toHaveBeenCalledWith('auth1', options)
 })
 
 test('applyMiddlewareLayer() should call importMiddleware with the baseDir and middleware', () => {
