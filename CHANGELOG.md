@@ -1,3 +1,10 @@
+## [2.29.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.0...v2.29.1) (2024-07-18)
+
+
+### Bug Fixes
+
+* yarn lock ([#242](https://github.com/hmcts/rpx-xui-node-lib/issues/242)) ([d38f1e5](https://github.com/hmcts/rpx-xui-node-lib/commit/d38f1e5296c5c855f22eb0c5132a28ab847a18e9))
+
 # [2.28.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.27.2...v2.28.0) (2024-01-18)
 
 
