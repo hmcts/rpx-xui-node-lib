@@ -19,7 +19,7 @@ describe('OAUTH2 Auth', () => {
         tokenURL: '1234',
         clientID: 'clientID12',
         clientSecret: 'secret123',
-        discoveryEndpoint: 'http://localhost/someEndpoint',
+        discoveryEndpoint: 'http://localhost:/someEndpoint',
         issuerURL: 'issuer_url',
         logoutURL: 'http://testUrl',
         callbackURL: 'http://localhost/callback',

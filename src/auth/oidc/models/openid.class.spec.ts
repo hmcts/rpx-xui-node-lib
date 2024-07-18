@@ -21,13 +21,13 @@ const mockRequestRequired = {
 }
 
 const options = {
-    authorizationURL: 'someAuthorizationURL',
-    tokenURL: '1234',
+    authorizationURL: 'http://localhost/someAuthorizationURL',
+    tokenURL: 'http://localhost/1234',
     clientID: 'clientID12',
     clientSecret: 'secret123',
-    discoveryEndpoint: 'someEndpoint',
-    issuerURL: 'issuer_url',
-    logoutURL: 'http://testUrl',
+    discoveryEndpoint: 'http://localhost/someEndpoint',
+    issuerURL: 'http://localhost/issuer_url',
+    logoutURL: 'http://localhost/testUrl',
     callbackURL: 'http://localhost/callback',
     responseTypes: ['none'],
     scope: 'some scope',
