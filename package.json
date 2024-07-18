@@ -1,7 +1,7 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
   "version": "2.29.0",
-  "description": "Common Nodejs library components for XUI",
+  "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,7 +14,8 @@
     "commit": "git cz",
     "ci:lint": "eslint \"*/**/*.{js,ts}\" --quiet",
     "ci": "yarn && yarn ci:lint && yarn build",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -65,7 +66,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "husky": ">=4",
+    "husky": "^8.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^27.5.1",
     "lint-staged": "^10.2.2",
@@ -112,4 +113,3 @@
     "minimist": "1.2.6"
   }
 }
-
