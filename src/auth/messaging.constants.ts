@@ -1,1 +1,1 @@
-export const VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES = 'User does not have any access roles.'
+export const VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES = 'User does not have any IDAM roles.'
