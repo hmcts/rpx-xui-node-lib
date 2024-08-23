@@ -123,14 +123,14 @@ export abstract class Strategy extends events.EventEmitter {
                     state,
                 } as any,
                 (error: any, user: any, info: any) => {
-                    this.logger.log('authenticate callback user', JSON.stringify(user));
+                    this.logger.log('authenticate callback user', JSON.stringify(user))
                     /* istanbul ignore next */
                     if (error) {
                         this.logger.error('authenticate callback error ', JSON.stringify(error))
                     }
                     /* istanbul ignore next */
                     if (info) {
-                        this.logger.info('authenticate callback',info)
+                        this.logger.info('authenticate callback', info)
                     }
                     /* istanbul ignore next */
                     if (!user) {
@@ -263,7 +263,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
-        this.logger.log('inside callbackHandler for ', req.originalUrl);
+        this.logger.log('inside callbackHandler for ', req.originalUrl)
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
         const reqSession = req.session as MySessionData
 
@@ -314,7 +314,7 @@ export abstract class Strategy extends events.EventEmitter {
                     this.logger.log(message)
 
                     emitAuthenticationFailure(errorMessages)
-                    this.logger.info('redirecting to ' + AUTH.ROUTE.LOGIN);
+                    this.logger.info('redirecting to ' + AUTH.ROUTE.LOGIN)
                     return res.redirect(AUTH.ROUTE.LOGIN)
                 }
                 emitAuthenticationFailure(errorMessages)
@@ -401,9 +401,9 @@ export abstract class Strategy extends events.EventEmitter {
                 return next(err)
             }
             if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
-                this.logger.error(
-                    `User has no application access, roles ${roles.join(' ')} don't match ${this.options.allowRolesRegex} role.`,
-                )
+                const re = this.options.allowRolesRegex
+                const roleStr = roles.join(' ')
+                this.logger.error('Missing required roles', re, roleStr)
                 return this.logout(req, res)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
