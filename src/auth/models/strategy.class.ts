@@ -105,7 +105,7 @@ export abstract class Strategy extends events.EventEmitter {
                     resolve(true)
                 })
             } else {
-                this.logger.warn('resolved promise, state not saved')
+                this.logger.warn('resolved promise, no session key, state not saved')
                 resolve(false)
             }
         })
@@ -123,13 +123,14 @@ export abstract class Strategy extends events.EventEmitter {
                     state,
                 } as any,
                 (error: any, user: any, info: any) => {
+                    this.logger.log('authenticate callback user', JSON.stringify(user))
                     /* istanbul ignore next */
                     if (error) {
-                        this.logger.error('error => ', JSON.stringify(error))
+                        this.logger.error('authenticate callback error ', JSON.stringify(error))
                     }
                     /* istanbul ignore next */
                     if (info) {
-                        this.logger.info(info)
+                        this.logger.info('authenticate callback', info)
                     }
                     /* istanbul ignore next */
                     if (!user) {
@@ -140,7 +141,7 @@ export abstract class Strategy extends events.EventEmitter {
             )(req, res, next)
             /* istanbul ignore next */
         } catch (error) {
-            this.logger.error(error, this.strategyName)
+            this.logger.error('authentication exception', error, this.strategyName)
             next(error)
             return Promise.reject(error)
         }
@@ -196,13 +197,13 @@ export abstract class Strategy extends events.EventEmitter {
             }
 
             const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
-            this.logger.log('redirecting to => ', redirect)
+            this.logger.log('logout redirecting to ', redirect)
             // 401 is when no accessToken
             res.redirect(redirect as string)
 
             /* istanbul ignore next */
         } catch (e) {
-            this.logger.error('error => ', e)
+            this.logger.error('logout exception ', e)
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
         }
         this.logger.log('logout end')
@@ -262,7 +263,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
-        this.logger.log('inside callbackHandler')
+        this.logger.log('inside callbackHandler for ', req.originalUrl)
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
         const reqSession = req.session as MySessionData
 
@@ -284,8 +285,7 @@ export abstract class Strategy extends events.EventEmitter {
             } as any,
             (error: any, user: any, info: any) => {
                 const errorMessages: string[] = []
-                this.logger.log('inside passport authenticate')
-
+                this.logger.log('in passport authenticate callback')
                 if (error) {
                     switch (error.name) {
                         case 'TimeoutError':
@@ -305,8 +305,7 @@ export abstract class Strategy extends events.EventEmitter {
                     if (info.message === INVALID_STATE_ERROR) {
                         errorMessages.push(INVALID_STATE_ERROR)
                     }
-
-                    this.logger.info(info)
+                    this.logger.info('callbackHandler authenticate info', info)
                 }
 
                 if (!user) {
@@ -315,9 +314,9 @@ export abstract class Strategy extends events.EventEmitter {
                     this.logger.log(message)
 
                     emitAuthenticationFailure(errorMessages)
+                    this.logger.info('redirecting to ' + AUTH.ROUTE.LOGIN)
                     return res.redirect(AUTH.ROUTE.LOGIN)
                 }
-
                 emitAuthenticationFailure(errorMessages)
                 this.verifyLogin(req, user, next, res)
             },
@@ -402,13 +401,13 @@ export abstract class Strategy extends events.EventEmitter {
                 return next(err)
             }
             if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
-                this.logger.error(
-                    `User has no application access, as they do not have a ${this.options.allowRolesRegex} role.`,
-                )
+                const re = this.options.allowRolesRegex
+                const roleStr = roles.join(' ')
+                this.logger.error('Missing required roles', re, roleStr)
                 return this.logout(req, res)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
-                this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
+                this.logger.log(`no listener count, redirecting to: ${AUTH.ROUTE.DEFAULT_REDIRECT}`)
                 res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
             } else {
                 req.isRefresh = false

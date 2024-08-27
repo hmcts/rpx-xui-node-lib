@@ -108,16 +108,17 @@ export class OpenID extends AuthStrategy {
                         reqsession.passport.user.tokenset = this.convertTokenSet(tokenSet)
 
                         if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
-                            this.logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
+                            this.logger.log(`refresh: no listeners: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
                             return next()
                         } else {
                             req.isRefresh = true
+                            this.logger.log('refresh: success')
                             this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
                             return
                         }
                     }
                 } catch (e) {
-                    this.logger.error('refresh error => ', e)
+                    this.logger.error('refresh exception ', e)
                     next(e)
                 }
             }
@@ -160,7 +161,7 @@ export class OpenID extends AuthStrategy {
             this.logger.warn(VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES)
             return done(null, false, { message: VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES })
         }
-        this.logger.info('verify okay, user:', userinfo)
+        this.logger.info('verify success, user:', userinfo)
 
         return done(null, { tokenset: this.convertTokenSet(tokenset), userinfo })
     }
@@ -234,7 +235,7 @@ export class OpenID extends AuthStrategy {
             if (req.session && this.options?.sessionKey) {
                 reqsession[this.options?.sessionKey] = { state }
                 req.session.save(() => {
-                    this.logger.log('resolved promise, nonce & state saved')
+                    this.logger.log('resolved promise, state saved')
                     resolve(true)
                 })
             } else {
@@ -246,7 +247,7 @@ export class OpenID extends AuthStrategy {
         try {
             await promise
 
-            this.logger.log('calling passport authenticate')
+            this.logger.log('OAuth2 calling passport authenticate')
 
             return passport.authenticate(
                 this.strategyName,
@@ -256,28 +257,27 @@ export class OpenID extends AuthStrategy {
                     state,
                 } as any,
                 (error: any, user: any, info: any) => {
-                    this.logger.log('passport authenticate')
-
+                    this.logger.log('OAuth2 passport authenticate callback')
                     if (error) {
                         this.logger.error('loginHandler error: ', JSON.stringify(error))
                     }
                     /* istanbul ignore next */
                     if (info) {
-                        this.logger.info(info)
+                        this.logger.info('OAuth2 info', info)
                     }
                     /* istanbul ignore next */
                     if (user) {
-                        const message = 'loginHandler User details returned by passport authenticate'
+                        const message = 'OAuth2 loginHandler User details from passport authenticate'
                         this.logger.log(message)
                     }
                     if (!user) {
-                        const message = 'loginHandler no User details returned by passport authenticate'
+                        const message = 'OAuth2 loginHandler no User details returned by passport authenticate'
                         this.logger.log(message)
                     }
                 },
             )(req, res, next)
         } catch (error) {
-            this.logger.error('this should not throw an error')
+            this.logger.error('OAuth2 loginHandler unexpected error', error)
             throw new Error(`this should not throw an ${error}`)
         }
     }
