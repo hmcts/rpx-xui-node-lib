@@ -1578,9 +1578,9 @@
     "@types/node" "*"
 
 "@types/hapi__joi@^17.1.0":
-  version "17.1.13"
-  resolved "https://registry.yarnpkg.com/@types/hapi__joi/-/hapi__joi-17.1.13.tgz#ccb0b75e8b155aed38075bcf75f7e8aef9961fa9"
-  integrity sha512-LcYYQiDUde97jztKd3oQ9D/P6nEK6FYhbBWoxQ0VJK9D9eWGu+XyiEGyPwjRxlP5lAKNMagyCL8QGiduGh0k9g==
+  version "17.1.14"
+  resolved "https://registry.yarnpkg.com/@types/hapi__joi/-/hapi__joi-17.1.14.tgz#937843b8a5d49fbfa8a87cc3527f6575e2140ca8"
+  integrity sha512-elV1VhwXUfA1sw59ij75HWyCH+3cA7xLbaOY9GQ+iQo/S+jSSf22LNZAmsXMdfV8DZwquCZaCT+F43Xf6/txrQ==
 
 "@types/http-errors@*":
   version "2.0.4"
