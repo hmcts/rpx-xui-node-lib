@@ -331,9 +331,14 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-    public authenticate = (req: Request, _res: Response, next: NextFunction): void => {
-        if (req.isUnauthenticated()) {
+    public authenticate = (
+        req: Request,
+        _res: Response,
+        next: NextFunction,
+    ): void | Response<any, Record<string, any>> => {
+        if (req.isUnauthenticated() || !req?.session?.passport?.user?.userinfo) {
             this.logger.log('unauthenticated')
+            return _res.status(401).send({ message: 'Unauthorized' })
         }
         next()
     }
