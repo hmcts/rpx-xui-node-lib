@@ -1,3 +1,10 @@
+## [2.29.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.3...v2.29.4) (2024-11-04)
+
+
+### Bug Fixes
+
+* EXUI-2510 - Return 401 when unauthenticated ([#249](https://github.com/hmcts/rpx-xui-node-lib/issues/249)) ([7bf8ae8](https://github.com/hmcts/rpx-xui-node-lib/commit/7bf8ae81b2a67a36034601ddf4ff296211053f48))
+
 ## [2.29.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.0...v2.29.1) (2024-07-18)
 
 
