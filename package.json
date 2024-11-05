@@ -110,6 +110,6 @@
   "resolutions": {
     "@babel/traverse": "7.23.2",
     "minimatch": "3.0.5",
-    "minimist": "1.2.6"
+    "minimist": "1.2.8"
   }
 }
