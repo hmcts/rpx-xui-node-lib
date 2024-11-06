@@ -25,11 +25,6 @@ jobs:
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
-      - name: Enable corepack
-        run: |
-          corepack enable
-          corepack prepare yarn@4.5.1 --activate
-          yarn set version 4.5.1
       - run: yarn install
       - run: yarn ci
       - run: yarn publish
