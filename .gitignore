@@ -78,3 +78,12 @@ testem.log
 api/.nyc_output
 .yarn/cache
 .yarn/install-state.gz
+
+# Yarn files
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
