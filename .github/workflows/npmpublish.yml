@@ -12,6 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+          corepack-enable: true
       - run: yarn install
       - run: yarn ci
       - run: yarn test
@@ -24,6 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+          corepack-enable: true
           registry-url: https://registry.npmjs.org/
       - run: yarn install
       - run: yarn ci
@@ -39,6 +41,7 @@ jobs:
       - uses: actions/setup-node@4
         with:
           node-version: 18
+          corepack-enable: true
           registry-url: https://npm.pkg.github.com/
           scope: '@hmcts'
       - run: yarn install
