@@ -8,7 +8,7 @@ import { AuthOptions } from './authOptions.interface'
 import Joi from 'joi'
 import * as URL from 'url'
 import { generators } from 'openid-client'
-import * as csrf from '@dr.pogodin/csurf'
+import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
 
 export abstract class Strategy extends events.EventEmitter {
@@ -239,9 +239,9 @@ export abstract class Strategy extends events.EventEmitter {
 
         this.serializeUser()
         this.deserializeUser()
-        ;(async () => {
-            await this.initialiseStrategy(this.options)
-        })()
+            ; (async () => {
+                await this.initialiseStrategy(this.options)
+            })()
 
         this.initializePassport()
         this.initializeSession()
