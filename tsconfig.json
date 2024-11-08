@@ -16,7 +16,8 @@
          "transform": "ts-auto-mock/transformer",
          "cacheBetweenTests": false
      }
-    ]
+    ],
+    "noImplicitAny": false
   },
   "include": ["typings.d.ts", "src"],
   "exclude": ["node_modules", "**/*.spec.ts"]

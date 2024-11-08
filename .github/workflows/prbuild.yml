@@ -34,11 +34,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: 18
+      - name: Enable corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.1 --activate
+          yarn set version 4.5.1
       - run: yarn install
       - run: yarn ci
       - run: yarn test
@@ -66,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Clone Repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
@@ -97,11 +102,11 @@ jobs:
     steps:
       - run: echo ${{github.ref}}
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 14
+          node-version: 18
       - name: Install dependencies
         run: yarn ci
       - name: Semantic Release

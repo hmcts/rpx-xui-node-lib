@@ -5,10 +5,10 @@ import { AUTH } from '../auth.constants'
 import jwtDecode from 'jwt-decode'
 import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
-import Joi from '@hapi/joi'
+import Joi from 'joi'
 import * as URL from 'url'
 import { generators } from 'openid-client'
-import csrf from 'csurf'
+import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
 
 export abstract class Strategy extends events.EventEmitter {
