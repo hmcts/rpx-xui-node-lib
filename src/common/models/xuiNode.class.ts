@@ -46,7 +46,7 @@ export class XuiNode extends EventEmitter {
             this.logger.log('unauthenticated')
             res.status(401).send({ message: 'Unauthorized' })
         } else {
-            this.logger.log('user is authenticated ' + req.user.)
+            this.logger.log('user is authenticated ' + req?.user?.toString());
         }
         next()
     }
