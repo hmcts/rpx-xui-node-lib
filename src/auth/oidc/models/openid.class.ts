@@ -132,15 +132,17 @@ export class OpenID extends AuthStrategy {
         const metadata = issuer.metadata
         metadata.issuer = this.options.issuerURL
 
-        this.logger.log('metadata', metadata)
+        this.logger.log('discover metadata', metadata)
 
         return this.newIssuer(metadata)
     }
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
+        this.logger.log('initialiseStrategy start')
         const options = this.getOpenIDOptions(authOptions)
         const strategy = await this.createNewStrategy(options)
         this.useStrategy(this.strategyName, strategy)
+        this.logger.log('initialiseStrategy end')
     }
 
     public convertTokenSet = (tokenset: TokenSet | undefined): any => {
@@ -233,21 +235,21 @@ export class OpenID extends AuthStrategy {
         const promise = new Promise((resolve) => {
             if (req.session && this.options?.sessionKey) {
                 reqsession[this.options?.sessionKey] = { state }
+                this.logger.log('saving state in session')
                 req.session.save(() => {
-                    this.logger.log('resolved promise, nonce & state saved')
+                    this.logger.log('state saved in session')
                     resolve(true)
                 })
             } else {
-                this.logger.warn('resolved promise, nonce & state not saved!')
+                this.logger.warn('no session in request, state not saved')
                 resolve(false)
             }
         })
 
         try {
+            this.logger.log('waiting for session state to be saved')
             await promise
-
             this.logger.log('calling passport authenticate')
-
             return passport.authenticate(
                 this.strategyName,
                 {
@@ -263,7 +265,7 @@ export class OpenID extends AuthStrategy {
                     }
                     /* istanbul ignore next */
                     if (info) {
-                        this.logger.info(info)
+                        this.logger.info('loginHandler info: ', JSON.stringify(info))
                     }
                     /* istanbul ignore next */
                     if (user) {

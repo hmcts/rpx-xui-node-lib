@@ -7,6 +7,7 @@ import { AuthOptions } from '../../models/authOptions.interface'
 import { OAuth2Metadata } from './OAuth2Metadata.interface'
 import { Router } from 'express'
 import { getLogger, XuiLogger } from '../../../common'
+import { userInfo } from "node:os";
 
 export class OAuth2 extends Strategy {
     constructor(router = Router({ mergeParams: true }), logger: XuiLogger = getLogger('auth:oauth2')) {
@@ -31,6 +32,7 @@ export class OAuth2 extends Strategy {
     }
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
+        this.logger.log('initialiseStrategy start')
         const options = this.getOAuthOptions(authOptions)
         passport.use(this.strategyName, new XUIOAuth2Strategy(options, this.verify))
         this.logger.log('initialiseStrategy end')
@@ -43,6 +45,7 @@ export class OAuth2 extends Strategy {
         profile: any,
         done: VerifyCallback,
     ): void => {
+        this.logger.log('verify callback ' + profile?.email)
         done(null, { tokenset: { accessToken, refreshToken }, userinfo: profile })
     }
 }
