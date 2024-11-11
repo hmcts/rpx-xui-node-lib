@@ -7,7 +7,7 @@ import { AuthOptions } from '../../models/authOptions.interface'
 import { OAuth2Metadata } from './OAuth2Metadata.interface'
 import { Router } from 'express'
 import { getLogger, XuiLogger } from '../../../common'
-import { userInfo } from "node:os";
+import { userInfo } from 'node:os'
 
 export class OAuth2 extends Strategy {
     constructor(router = Router({ mergeParams: true }), logger: XuiLogger = getLogger('auth:oauth2')) {

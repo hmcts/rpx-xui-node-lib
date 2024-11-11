@@ -306,7 +306,7 @@ export abstract class Strategy extends events.EventEmitter {
                     if (info.message === INVALID_STATE_ERROR) {
                         errorMessages.push(INVALID_STATE_ERROR)
                     }
-                    this.logger.info('Authenticate callback info',info)
+                    this.logger.info('Authenticate callback info', info)
                 }
 
                 if (!user) {
@@ -413,7 +413,9 @@ export abstract class Strategy extends events.EventEmitter {
                 return this.logout(req, res)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
-                this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}, user: ${user.email}`)
+                this.logger.log(
+                    `redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}, user: ${user.email}`,
+                )
                 res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
             } else {
                 req.isRefresh = false
@@ -539,7 +541,7 @@ export abstract class Strategy extends events.EventEmitter {
         done: (err: any, id?: any) => void,
     ): void => {
         if (!this.listenerCount(eventName)) {
-            this.logger.error('no listeners for event ' + eventName);
+            this.logger.error('no listeners for event ' + eventName)
             done(null, eventObject)
         } else {
             this.emit(eventName, eventObject, done)
