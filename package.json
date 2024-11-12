@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.29.4-exui-2079-rc4",
+  "version": "2.29.4-exui-2079-rc5",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -98,7 +98,7 @@
     "jest-ts-auto-mock": "^2.1.0",
     "joi": "^17.13.3 ",
     "jwt-decode": "^2.2.0",
-    "openid-client": "^5.7.0",
+    "openid-client": "^3.10.0",
     "otplib": "^12.0.1",
     "passport": "^0.6.0",
     "passport-oauth2": "^1.5.0",
