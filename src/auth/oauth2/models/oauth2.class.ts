@@ -37,6 +37,10 @@ export class OAuth2 extends Strategy {
         this.logger.log('initialiseStrategy end')
     }
 
+    public isInitialised(): boolean {
+        return passport.strategies != null;
+    }
+
     public verify = (
         accessToken: string,
         refreshToken: string,

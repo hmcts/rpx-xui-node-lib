@@ -40,6 +40,25 @@ describe('OAUTH2 Auth', () => {
         expect(oauth2).toBeDefined()
     })
 
+    test('initialiseStrategy', () => {
+        const options = {
+            authorizationURL: 'http://localhost/someauthurl',
+            tokenURL: 'sometokenUrl',
+            clientID: 'client',
+            clientSecret: 'secret',
+            callbackURL: 'callbackUrl',
+            scope: 'scope',
+            sessionKey: 'node-lib',
+            useRoutes: false,
+            logoutURL: 'logoutUrl',
+            discoveryEndpoint: 'http://localhost/someEndpoint',
+            issuerURL: 'string',
+            responseTypes: [''],
+            tokenEndpointAuthMethod: 'string',
+        }
+        oauth2.initialiseStrategy(options)
+        expect(oauth2.isInitialised()).toBeTruthy()
+    })
     test('it should be configurable', () => {
         const options = {
             authorizationURL: 'http://localhost/someauthurl',
