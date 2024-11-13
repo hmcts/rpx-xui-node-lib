@@ -1,132 +1,127 @@
 name: Build & Release
 
 on:
-  # Trigger analysis when creating a pull request or push to master
-  push:
-    branches:
-      - master
-  pull_request:
-      types: [opened, synchronize, reopened]
+    # Trigger analysis when creating a pull request or push to master
+    push:
+        branches:
+            - master
+    pull_request:
+        types: [opened, synchronize, reopened]
 
 jobs:
-  lint-pr-title:
-    if: github.ref != 'refs/heads/master' && github.event_name == 'pull_request'
-    name: Lint PR Title
-    runs-on: ubuntu-latest
-    steps:
-      - name: Lint PR title
-        uses: amannn/action-semantic-pull-request@v1.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Send slack
-        if: failure()
-        uses: sonots/slack-notice-action@v3
-        with:
-          status: ${{ job.status }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      - name: Cancel job
-        if: failure()
-        uses: andymckay/cancel-action@0.2
+    lint-pr-title:
+        if: github.ref != 'refs/heads/master' && github.event_name == 'pull_request'
+        name: Lint PR Title
+        runs-on: ubuntu-latest
+        steps:
+            - name: Lint PR title
+              uses: amannn/action-semantic-pull-request@v1.2.0
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Send slack
+              if: failure()
+              uses: sonots/slack-notice-action@v3
+              with:
+                  status: ${{ job.status }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+            - name: Cancel job
+              if: failure()
+              uses: andymckay/cancel-action@0.2
 
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone Repo
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - name: Enable corepack
-        run: |
-          corepack enable
-          corepack prepare yarn@4.5.1 --activate
-          yarn set version 4.5.1
-      - run: yarn install
-      - run: yarn ci
-      - run: yarn test
-      - name: Create code coverage report
-        run: yarn test:coverage
-      - name: Change Report Path
-        run: sed -i 's+/home/runner/work/rpx-xui-node-lib/rpx-xui-node-lib+/github/workspace+g' coverage/lcov.info
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-coverage-report
-          path: coverage
-      - name: Send slack
-        if: failure()
-        uses: sonots/slack-notice-action@v3
-        with:
-          status: ${{ job.status }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Clone Repo
+              uses: actions/checkout@v4
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+            - name: Enable corepack
+              run: |
+                  corepack enable
+                  corepack prepare yarn@4.5.1 --activate
+                  yarn set version 4.5.1
+            - run: yarn install
+            - run: yarn ci
+            - run: yarn test
+            - name: Create code coverage report
+              run: yarn test:coverage
+            - name: Change Report Path
+              run: sed -i 's+/home/runner/work/rpx-xui-node-lib/rpx-xui-node-lib+/github/workspace+g' coverage/lcov.info
+            - name: Archive code coverage results
+              uses: actions/upload-artifact@v4
+              with:
+                  name: code-coverage-report
+                  path: coverage
+            - name: Send slack
+              if: failure()
+              uses: sonots/slack-notice-action@v3
+              with:
+                  status: ${{ job.status }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  sonarcloud:
-    needs: build
-    name: SonarCloud Trigger
-    runs-on: ubuntu-latest
-    steps:
-    - name: Clone Repo
-      uses: actions/checkout@v4
-      with:
-        # Disabling shallow clone is recommended for improving relevancy of reporting
-        fetch-depth: 0
-    - name: Download code coverage results
-      uses: actions/download-artifact@v4
-      with:
-        name: code-coverage-report
-        path: coverage
-    - name: Analyze with SonarCloud
-      uses: sonarsource/sonarcloud-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    - name: Send slack
-      if: failure()
-      uses: sonots/slack-notice-action@v3
-      with:
-        status: ${{ job.status }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    sonarcloud:
+        needs: build
+        name: SonarCloud Trigger
+        runs-on: ubuntu-latest
+        steps:
+            - name: Clone Repo
+              uses: actions/checkout@v4
+              with:
+                  # Disabling shallow clone is recommended for improving relevancy of reporting
+                  fetch-depth: 0
+            - name: Download code coverage results
+              uses: actions/download-artifact@v4
+              with:
+                  name: code-coverage-report
+                  path: coverage
+            - name: Analyze with SonarCloud
+              uses: sonarsource/sonarcloud-github-action@master
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            - name: Send slack
+              if: failure()
+              uses: sonots/slack-notice-action@v3
+              with:
+                  status: ${{ job.status }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  release:
-    needs: sonarcloud
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    name: Semantic-Release
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo ${{github.ref}}
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - name: Install dependencies
-        run: yarn ci
-      - name: Semantic Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.npm_token }}
-        run: npx semantic-release
-      - name: Send slack
-        if: always()
-        uses: sonots/slack-notice-action@v3
-        with:
-          status: ${{ job.status }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-
-
-
-
-
-
-
+    release:
+        needs: sonarcloud
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        name: Semantic-Release
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo ${{github.ref}}
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+            - name: Enable corepack
+              run: |
+                  corepack enable
+            - name: Install dependencies
+              run: yarn ci
+            - name: Semantic Release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  NPM_TOKEN: ${{ secrets.npm_token }}
+              run: npx semantic-release
+            - name: Send slack
+              if: always()
+              uses: sonots/slack-notice-action@v3
+              with:
+                  status: ${{ job.status }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
