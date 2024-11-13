@@ -1,3 +1,11 @@
+## [2.29.5](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.4...v2.29.5) (2024-11-13)
+
+
+### Bug Fixes
+
+* #EXUI-2531: Update yarn and node version for rpx-xui-node-lib ([#251](https://github.com/hmcts/rpx-xui-node-lib/issues/251)) ([b939127](https://github.com/hmcts/rpx-xui-node-lib/commit/b9391279c179be1a9899ca7b812eaf1c1c2ef147)), closes [#EXUI-2531](https://github.com/hmcts/rpx-xui-node-lib/issues/EXUI-2531) [#EXUI-2531](https://github.com/hmcts/rpx-xui-node-lib/issues/EXUI-2531)
+* enable code pack step added ([#254](https://github.com/hmcts/rpx-xui-node-lib/issues/254)) ([9907069](https://github.com/hmcts/rpx-xui-node-lib/commit/99070699f3a777a073e336c2cfb5e20ad99822f2))
+
 ## [2.29.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.3...v2.29.4) (2024-11-04)
 
 
