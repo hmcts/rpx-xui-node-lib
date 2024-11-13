@@ -38,7 +38,7 @@ export class OAuth2 extends Strategy {
     }
 
     public isInitialised(): boolean {
-        return passport.strategies != null;
+        return passport.strategies != null
     }
 
     public verify = (
