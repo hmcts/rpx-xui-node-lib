@@ -240,7 +240,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.serializeUser()
         this.deserializeUser()
         ;(async () => {
-            await this.initialiseStrategy(this.options)
+            await Promise.all([this.initialiseStrategy(this.options)])
         })()
 
         this.initializePassport()
