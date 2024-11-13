@@ -36,13 +36,13 @@ describe('OAUTH2 Auth', () => {
         },
     }
 
-    xtest('it should be defined', () => {
+    test('it should be defined', () => {
         expect(oauth2).toBeDefined()
     })
 
-    xtest('it should be configurable', () => {
+    test('it should be configurable', () => {
         const options = {
-            authorizationURL: 'someauthurl',
+            authorizationURL: 'http://localhost/someauthurl',
             tokenURL: 'sometokenUrl',
             clientID: 'client',
             clientSecret: 'secret',
@@ -60,7 +60,7 @@ describe('OAUTH2 Auth', () => {
         expect(handler).toBeTruthy()
     })
 
-    xtest('loginHandler with session and sessionKey', async () => {
+    test('loginHandler with session and sessionKey', async () => {
         const mockRouter = createMock<Router>()
         const options = createMock<AuthOptions>()
         const logger = {
@@ -70,6 +70,9 @@ describe('OAUTH2 Auth', () => {
         } as unknown as XuiLogger
         options.sessionKey = 'test'
         options.discoveryEndpoint = 'http://localhost/someEndpoint'
+        options.authorizationURL = 'http://localhost/someAuthorizationURL'
+        options.tokenURL = 'http://localhost/someTokenURL'
+        options.clientID = 'clientID1234'
         const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => () => true)
         const oAuth2 = new OAuth2(mockRouter, logger)
         jest.spyOn(oAuth2, 'validateOptions')
@@ -97,8 +100,20 @@ describe('OAUTH2 Auth', () => {
         expect(spy).toHaveBeenCalled()
     })
 
-    xtest('loginHandler with session and no sessionKey', async () => {
+    test('loginHandler with session and no sessionKey', async () => {
         const mockRouter = createMock<Router>()
+        const options = createMock<AuthOptions>()
+        options.sessionKey = 'test'
+        options.discoveryEndpoint = 'http://localhost/someEndpoint'
+        options.authorizationURL = 'http://localhost/someAuthorizationURL'
+        options.tokenURL = 'http://localhost/someTokenURL'
+        options.clientID = 'clientID1234'
+        options.callbackURL = 'http://localhost/callback'
+        options.clientSecret = 'secret123'
+        options.issuerURL = 'http://localhost/someEndpoint'
+        options.logoutURL = 'http://localhost/testUrl'
+        options.tokenEndpointAuthMethod = 'string'
+        options.scope = 'periscope'
         const logger = {
             log: jest.fn(),
             error: jest.fn(),
@@ -128,7 +143,7 @@ describe('OAUTH2 Auth', () => {
         expect(spy).toHaveBeenCalled()
     })
 
-    xtest('setCallbackURL', () => {
+    test('setCallbackURL', () => {
         const mockRequest = {
             ...mockRequestRequired,
             body: {},
@@ -148,7 +163,7 @@ describe('OAUTH2 Auth', () => {
         expect(next).toHaveBeenCalled()
     })
 
-    xtest('setHeaders should set auth headers', () => {
+    test('setHeaders should set auth headers', () => {
         const roles = ['test', 'test1']
         const authToken = 'Bearer abc123'
         const mockRequest = {

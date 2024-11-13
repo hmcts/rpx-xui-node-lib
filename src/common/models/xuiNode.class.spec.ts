@@ -13,7 +13,7 @@ test('xuiNode configure', () => {
     const logger = createMock<typeof console>()
     const middlewares: Array<string> = ['session1', 'auth1']
     const xuinode = new XuiNode(mockRouter, middlewares, logger)
-    const options = {} as XuiNodeOptions
+    const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
     const spy = jest.spyOn(xuinode, 'applyMiddleware')
     xuinode.configure(options)
     expect(spy).toHaveBeenCalledWith('session1', options)
@@ -70,7 +70,7 @@ test('defaultAuthenticate, fake authenticated', () => {
     const logger = createMock<typeof console>()
     const middlewares: Array<string> = []
     const xuinode = new XuiNode(mockRouter, middlewares, logger)
-    const options = {} as XuiNodeOptions
+    const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
     xuinode.configure(options)
     const req = createMock<Request>()
     const resp = createMock<Response>()
@@ -84,7 +84,7 @@ test('defaultAuthenticate, unauthenticated', () => {
     const logger = createMock<typeof console>()
     const middlewares: Array<string> = []
     const xuinode = new XuiNode(mockRouter, middlewares, logger)
-    const options = {} as XuiNodeOptions
+    const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
     xuinode.configure(options)
     const req = createMock<Request>()
     const resp = createMock<Response>()
