@@ -65,7 +65,7 @@ test('proxyEvents ', () => {
     expect(spyOnXuinode).toHaveBeenCalledWith('event2')
 })
 
-test('defaultAuthenticate, authenticated', () => {
+test('defaultAuthenticate, fake authenticated', () => {
     const mockRouter = {} as Router
     const logger = createMock<typeof console>()
     const middlewares: Array<string> = []
@@ -74,8 +74,8 @@ test('defaultAuthenticate, authenticated', () => {
     xuinode.configure(options)
     const req = createMock<Request>()
     const resp = createMock<Response>()
-    const next = jest.fn();
-    xuinode.authenticate(req, resp, next);
+    const next = jest.fn()
+    xuinode.authenticate(req, resp, next)
     expect(resp.statusCode).toEqual(0)
 })
 
@@ -88,8 +88,8 @@ test('defaultAuthenticate, unauthenticated', () => {
     xuinode.configure(options)
     const req = createMock<Request>()
     const resp = createMock<Response>()
-    const next = jest.fn();
-    req.isUnauthenticated = jest.fn(() => true )
-    xuinode.authenticate(req, resp, next);
+    const next = jest.fn()
+    req.isUnauthenticated = jest.fn(() => true)
+    xuinode.authenticate(req, resp, next)
     expect(resp.statusCode).toEqual(401)
 })
