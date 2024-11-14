@@ -110,6 +110,7 @@ jobs:
             - name: Enable corepack
               run: |
                   corepack enable
+            - run: yarn install
             - name: Install dependencies
               run: yarn ci
             - name: Semantic Release
