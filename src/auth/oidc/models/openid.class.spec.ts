@@ -297,10 +297,10 @@ test('OIDC authenticate when authenticated but session and client not initialise
         mockResponse.statusCode = n
         return mockResponse
     }
-    const mockResponse = { status:  statusFn } as Response
-    mockResponse.send = jest.fn( (a: string) =>  {
+    const mockResponse = { status: statusFn } as Response
+    mockResponse.send = jest.fn((a: string) => {
         return mockResponse
-    });
+    })
     const mockRedirect = jest.fn()
     mockResponse.redirect = mockRedirect
 
@@ -337,9 +337,9 @@ xtest('OIDC authenticate when authenticated but session and client initialised',
         return mockResponse
     }
     mockResponse.status = statusFn
-    mockResponse.send = jest.fn( (a: string) =>  {
+    mockResponse.send = jest.fn((a: string) => {
         return mockResponse
-    });
+    })
     const mockClient = createMock<Client>()
     const spyOnClient = jest.spyOn(oidc, 'getClient').mockReturnValue(mockClient)
     const spyOnisTokenExpired = jest.spyOn(oidc, 'isTokenExpired').mockReturnValue(false)
