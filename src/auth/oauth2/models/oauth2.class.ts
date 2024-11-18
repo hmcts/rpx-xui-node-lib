@@ -48,7 +48,6 @@ export class OAuth2 extends Strategy {
         profile: any,
         done: VerifyCallback,
     ): void => {
-        this.logger.log('verify callback ' + profile?.email)
         done(null, { tokenset: { accessToken, refreshToken }, userinfo: profile })
     }
 }
