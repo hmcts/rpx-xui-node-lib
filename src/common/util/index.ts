@@ -1,5 +1,6 @@
 export { hasKey } from './hasKey'
 export { getLogger, XuiLogger } from './debug.logger'
+export { getContentSecurityPolicy } from './contentSecurityPolicy'
 export { sortArray } from './sortArray'
 export { isStringPatternMatch } from './stringPatternMatch'
 export { arrayPatternMatch } from './arrayPatternMatch'
