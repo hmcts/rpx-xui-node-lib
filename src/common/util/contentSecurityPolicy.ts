@@ -11,7 +11,7 @@ export const SECURITY_POLICY = {
             '*.hmcts.net',
             'wss://*.webpubsub.azure.com',
             'https://*.in.applicationinsights.azure.com',
-            'https://*.monitor.azure.com'
+            'https://*.monitor.azure.com',
         ],
         defaultSrc: ["'self'"],
         fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
