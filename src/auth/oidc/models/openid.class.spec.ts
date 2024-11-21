@@ -399,7 +399,7 @@ xtest('verify() Should return a no access roles messages if the User has no role
     const tokenSet = createMock<TokenSet>()
     const userinfo = createMock<UserinfoResponse>()
 
-    const doneFunction = jest.fn((err, user, message) => { })
+    const doneFunction = jest.fn((err, user, message) => {})
 
     oidc.verify(tokenSet, userinfo, doneFunction)
 
@@ -421,7 +421,7 @@ xtest('verify() Should return the user token set if a User has roles.', async ()
         idToken: tokenSet.id_token,
     }
 
-    const doneFunction = jest.fn((err, user, message) => { })
+    const doneFunction = jest.fn((err, user, message) => {})
 
     oidc.verify(tokenSet, userinfo, doneFunction)
 
