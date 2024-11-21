@@ -1,6 +1,6 @@
 import * as events from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
-import passport from 'passport'
+import passport, { LogOutOptions } from 'passport'
 import { AUTH } from '../auth.constants'
 import jwtDecode from 'jwt-decode'
 import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
@@ -185,7 +185,7 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout((err) => {
+            req.logout({ keepSessionInfo: true } as LogOutOptions, (err) => {
                 console.error(err)
             })
             await this.destroySession(req)
@@ -281,6 +281,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.strategyName,
             {
                 redirect_uri: reqSession?.callbackURL,
+                keepSessionInfo: true,
             } as any,
             (error: any, user: any, info: any) => {
                 const errorMessages: string[] = []
