@@ -2,7 +2,7 @@
 
 import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
-import express, { Request, response, Response, Router } from 'express'
+import express, { NextFunction, Request, response, Response, Router } from 'express'
 import { AUTH } from '../../auth.constants'
 import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import { createMock } from 'ts-auto-mock'
@@ -399,7 +399,7 @@ xtest('verify() Should return a no access roles messages if the User has no role
     const tokenSet = createMock<TokenSet>()
     const userinfo = createMock<UserinfoResponse>()
 
-    const doneFunction = jest.fn((err, user, message) => {})
+    const doneFunction = jest.fn((err, user, message) => { })
 
     oidc.verify(tokenSet, userinfo, doneFunction)
 
@@ -421,7 +421,7 @@ xtest('verify() Should return the user token set if a User has roles.', async ()
         idToken: tokenSet.id_token,
     }
 
-    const doneFunction = jest.fn((err, user, message) => {})
+    const doneFunction = jest.fn((err, user, message) => { })
 
     oidc.verify(tokenSet, userinfo, doneFunction)
 
@@ -452,6 +452,7 @@ xtest('makeAuthorization() Should make an authorisation string', async () => {
 xtest('strategy logout', async () => {
     const session = createMock<MySessionData>()
     const mockRequest = createMock<Request>()
+    const mockNextFunction = createMock<NextFunction>()
     session.passport = {
         user: {
             tokenset: {
@@ -472,7 +473,7 @@ xtest('strategy logout', async () => {
     mockResponse.redirect = jest.fn()
     const spyhttp = jest.spyOn(http, 'delete').mockImplementation(() => Promise.resolve({} as any))
     const spySessionDestroy = jest.spyOn(oidc, 'destroySession').mockImplementation(() => Promise.resolve({} as any))
-    await oidc.logout(mockRequest, mockResponse)
+    await oidc.logout(mockRequest, mockResponse, mockNextFunction)
     expect(spyhttp).toHaveBeenCalled()
     expect(spySessionDestroy).toHaveBeenCalled()
 })

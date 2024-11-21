@@ -241,9 +241,9 @@ export abstract class Strategy extends events.EventEmitter {
 
         this.serializeUser()
         this.deserializeUser()
-        ;(async () => {
-            await Promise.all([this.initialiseStrategy(this.options)])
-        })()
+            ; (async () => {
+                await Promise.all([this.initialiseStrategy(this.options)])
+            })()
 
         this.initializePassport()
         this.initializeSession()
@@ -413,7 +413,7 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.error(
                     `User has no application access, as they do not have a ${this.options.allowRolesRegex} role.`,
                 )
-                return this.logout(req, res)
+                return this.logout(req, res, next)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                 this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
