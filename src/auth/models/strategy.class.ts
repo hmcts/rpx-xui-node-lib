@@ -164,7 +164,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-    public logout = async (req: Request, res: Response): Promise<void> => {
+    public logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const reqSession = req.session as MySessionData
 
         try {
@@ -185,21 +185,23 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout({ keepSessionInfo: true } as LogOutOptions, (err) => {
-                console.error(err)
+            req.logout(async (err) => {
+                if (err) {
+                    console.error(err)
+                    return next(err)
+                }
+                await this.destroySession(req)
+                /* istanbul ignore next */
+                if (req.query.noredirect) {
+                    res.status(200).send({ message: 'You have been logged out!' })
+                    return Promise.resolve()
+                }
+
+                const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
+                this.logger.log('redirecting to => ', redirect)
+                // 401 is when no accessToken
+                res.redirect(redirect as string)
             })
-            await this.destroySession(req)
-            /* istanbul ignore next */
-            if (req.query.noredirect) {
-                res.status(200).send({ message: 'You have been logged out!' })
-                return Promise.resolve()
-            }
-
-            const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
-            this.logger.log('redirecting to => ', redirect)
-            // 401 is when no accessToken
-            res.redirect(redirect as string)
-
             /* istanbul ignore next */
         } catch (e) {
             this.logger.error('error => ', e)
