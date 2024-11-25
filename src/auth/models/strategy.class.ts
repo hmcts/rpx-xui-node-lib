@@ -91,7 +91,6 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
         this.logger.log('Base loginHandler Hit')
-
         const reqSession = req.session as MySessionData
 
         // we are using oidc generator but it's just a helper, rather than installing another library to provide this
@@ -121,6 +120,7 @@ export abstract class Strategy extends events.EventEmitter {
                 {
                     redirect_uri: reqSession?.callbackURL,
                     state,
+                    keepSessionInfo: true,
                 } as any,
                 (error: any, user: any, info: any) => {
                     /* istanbul ignore next */
@@ -188,20 +188,21 @@ export abstract class Strategy extends events.EventEmitter {
             req.logout(async (err) => {
                 if (err) {
                     console.error(err)
-                    return next(err)
+                    // return next(err)
                 }
-                await this.destroySession(req)
-                /* istanbul ignore next */
-                if (req.query.noredirect) {
-                    res.status(200).send({ message: 'You have been logged out!' })
-                    return Promise.resolve()
-                }
-
-                const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
-                this.logger.log('redirecting to => ', redirect)
-                // 401 is when no accessToken
-                res.redirect(redirect as string)
             })
+
+            await this.destroySession(req)
+            /* istanbul ignore next */
+            if (req.query.noredirect) {
+                res.status(200).send({ message: 'You have been logged out!' })
+                return Promise.resolve()
+            }
+
+            const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
+            this.logger.log('redirecting to => ', redirect)
+            // 401 is when no accessToken
+            res.redirect(redirect as string)
             /* istanbul ignore next */
         } catch (e) {
             this.logger.error('error => ', e)
@@ -242,7 +243,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.serializeUser()
         this.deserializeUser()
         ;(async () => {
-            await Promise.all([this.initialiseStrategy(this.options)])
+            await this.initialiseStrategy(this.options)
         })()
 
         this.initializePassport()
@@ -284,6 +285,7 @@ export abstract class Strategy extends events.EventEmitter {
             {
                 redirect_uri: reqSession?.callbackURL,
                 keepSessionInfo: true,
+                failureMessage: true,
             } as any,
             (error: any, user: any, info: any) => {
                 const errorMessages: string[] = []
