@@ -185,25 +185,24 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout(async (err) => {
+            req.logout({ keepSessionInfo: true }, async (err) => {
                 if (err) {
                     console.error(err)
-                    // return next(err)
+                    return next(err)
                 }
+                await this.destroySession(req)
+                /* istanbul ignore next */
+                if (req.query.noredirect) {
+                    res.status(200).send({ message: 'You have been logged out!' })
+                    return Promise.resolve()
+                }
+
+                const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
+                this.logger.log('redirecting to => ', redirect)
+                // 401 is when no accessToken
+                res.redirect(redirect as string)
+                /* istanbul ignore next */
             })
-
-            await this.destroySession(req)
-            /* istanbul ignore next */
-            if (req.query.noredirect) {
-                res.status(200).send({ message: 'You have been logged out!' })
-                return Promise.resolve()
-            }
-
-            const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
-            this.logger.log('redirecting to => ', redirect)
-            // 401 is when no accessToken
-            res.redirect(redirect as string)
-            /* istanbul ignore next */
         } catch (e) {
             this.logger.error('error => ', e)
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
@@ -242,9 +241,9 @@ export abstract class Strategy extends events.EventEmitter {
 
         this.serializeUser()
         this.deserializeUser()
-        ;(async () => {
-            await this.initialiseStrategy(this.options)
-        })()
+            ; (async () => {
+                await this.initialiseStrategy(this.options)
+            })()
 
         this.initializePassport()
         this.initializeSession()
