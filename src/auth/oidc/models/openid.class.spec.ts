@@ -42,30 +42,30 @@ const options = {
     },
 }
 
-xtest('OIDC Auth', () => {
+test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
 })
 
-xtest('OIDC configure strategy', () => {
+test('OIDC configure strategy', () => {
     const spy = jest.spyOn(passport, 'use')
     const strategy = {} as Strategy<any, any>
     oidc.useStrategy('name', strategy)
     expect(spy).toHaveBeenCalledWith('name', strategy)
 })
 
-xtest('OIDC configure serializeUser', () => {
+test('OIDC configure serializeUser', () => {
     const spy = jest.spyOn(passport, 'serializeUser')
     oidc.serializeUser()
     expect(spy).toHaveBeenCalled()
 })
 
-xtest('OIDC configure deserializeUser', () => {
+test('OIDC configure deserializeUser', () => {
     const spy = jest.spyOn(passport, 'deserializeUser')
     oidc.deserializeUser()
     expect(spy).toHaveBeenCalled()
 })
 
-xtest('OIDC loginHandler', async () => {
+test('OIDC loginHandler', async () => {
     const spy = jest.spyOn(passport, 'authenticate')
     const mockRequest = {
         ...mockRequestRequired,
@@ -78,7 +78,7 @@ xtest('OIDC loginHandler', async () => {
     expect(spy).toHaveBeenCalled()
 })
 
-xtest('OIDC loginHandler with session', async () => {
+test('OIDC loginHandler with session', async () => {
     const mockRouter = createMock<Router>()
     options.sessionKey = 'test'
     const logger = {
@@ -112,7 +112,7 @@ xtest('OIDC loginHandler with session', async () => {
     expect(spy).toHaveBeenCalled()
 })
 
-xtest('OIDC jwTokenExpired', () => {
+test('OIDC jwTokenExpired', () => {
     let jwtData = { exp: new Date('Jun 04, 2020').getTime() / 1000 }
     let isTokenExpired = oidc.jwTokenExpired(jwtData)
     expect(isTokenExpired).toBeTruthy()
@@ -122,19 +122,19 @@ xtest('OIDC jwTokenExpired', () => {
     expect(isTokenExpired).toBeFalsy()
 })
 
-xtest('OIDC configure initializePassport', () => {
+test('OIDC configure initializePassport', () => {
     const spy = jest.spyOn(passport, 'initialize')
     oidc.initializePassport()
     expect(spy).toHaveBeenCalled()
 })
 
-xtest('OIDC configure initializeSession', () => {
+test('OIDC configure initializeSession', () => {
     const spy = jest.spyOn(passport, 'session')
     oidc.initializeSession()
     expect(spy).toHaveBeenCalled()
 })
 
-xtest('OIDC OptionsMapper', () => {
+test('OIDC OptionsMapper', () => {
     const options = {
         authorizationURL: '',
         tokenURL: '',
@@ -164,7 +164,7 @@ xtest('OIDC OptionsMapper', () => {
     expect(openIdOptions.useRoutes).toEqual(options.useRoutes)
 })
 
-xtest('test validateOptions', () => {
+test('test validateOptions', () => {
     const options = {
         authorizationURL: '',
         tokenURL: '454',
@@ -189,7 +189,8 @@ xtest('test validateOptions', () => {
     const isValid = oidc.validateOptions(options)
     expect(isValid).toBeTruthy()
 })
-xtest('OIDC verifyLogin error Path', () => {
+
+test('OIDC verifyLogin error Path', () => {
     const mockRequest = {
         ...mockRequestRequired,
         body: {},
@@ -213,7 +214,7 @@ xtest('OIDC verifyLogin error Path', () => {
     expect(next).toHaveBeenCalledWith({})
 })
 
-xtest('OIDC verifyLogin happy Path with no subscription', () => {
+test('OIDC verifyLogin happy Path with no subscription', () => {
     const mockRequest = {
         ...mockRequestRequired,
         body: {},
@@ -221,7 +222,7 @@ xtest('OIDC verifyLogin happy Path with no subscription', () => {
     mockRequest.csrfToken = jest.fn()
     mockRequest.logIn = (user: any, optionsOrDone: any, maybeDone?: (err: any) => void) => {
         if (typeof optionsOrDone === 'function') {
-            optionsOrDone({})
+            optionsOrDone()
         } else if (maybeDone) {
             maybeDone({})
         }
@@ -236,13 +237,12 @@ xtest('OIDC verifyLogin happy Path with no subscription', () => {
             roles: ['test', 'admin'],
         },
     }
-
     oidc.verifyLogin(mockRequest, user, next, mockResponse)
     expect(next).not.toHaveBeenCalledWith({})
     expect(mockRedirect).toHaveBeenCalledWith(AUTH.ROUTE.DEFAULT_REDIRECT)
 })
 
-xtest('OIDC verifyLogin happy Path with subscription', () => {
+test('OIDC verifyLogin happy Path with subscription', () => {
     const mockRequest = {
         ...mockRequestRequired,
         body: {},
@@ -250,7 +250,7 @@ xtest('OIDC verifyLogin happy Path with subscription', () => {
     mockRequest.csrfToken = jest.fn()
     mockRequest.logIn = (user: any, optionsOrDone: any, maybeDone?: (err: any) => void) => {
         if (typeof optionsOrDone === 'function') {
-            optionsOrDone({})
+            optionsOrDone()
         } else if (maybeDone) {
             maybeDone({})
         }
@@ -273,34 +273,40 @@ xtest('OIDC verifyLogin happy Path with subscription', () => {
     oidc.removeAllListeners()
 })
 
-xtest('OIDC discoverIssuer', async () => {
+test('OIDC discoverIssuer', async () => {
     const spy = jest.spyOn(Issuer, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<Client>))
     await oidc.discoverIssuer()
     expect(spy).toHaveBeenCalled()
 })
 
-xtest('OIDC discover', () => {
+test('OIDC discover', () => {
     const issuer = {}
-    const spyNewIssuer = jest.spyOn(oidc, 'newIssuer')
     const spy = jest.spyOn(oidc, 'discoverIssuer').mockImplementation(() => Promise.resolve({ metadata: issuer }))
 
-    const result = oidc.discover()
+    oidc.discover()
     expect(spy).toHaveBeenCalled()
 })
 
-xtest('OIDC authenticate when authenticated but session and client not initialised', () => {
+test('OIDC authenticate when authenticated but session and client not initialised', () => {
     const mockRequest = {
         ...mockRequestRequired,
         body: {},
     } as unknown as Request
     mockRequest.isUnauthenticated = () => false
-    const mockResponse = {} as Response
+    const statusFn = (n: number) => {
+        mockResponse.statusCode = n
+        return mockResponse
+    }
+    const mockResponse = { status: statusFn } as Response
+    mockResponse.send = jest.fn((a: string) => {
+        return mockResponse
+    })
     const mockRedirect = jest.fn()
     mockResponse.redirect = mockRedirect
 
     const next = jest.fn()
     oidc.authenticate(mockRequest, mockResponse, next)
-    expect(mockRedirect).toHaveBeenCalledWith(AUTH.ROUTE.LOGIN)
+    expect(mockResponse.send).toHaveBeenCalled()
 })
 
 xtest('OIDC authenticate when authenticated but session and client initialised', async () => {
@@ -326,6 +332,14 @@ xtest('OIDC authenticate when authenticated but session and client initialised',
     }
     mockRequest.session = session
     mockRequest.headers = {}
+    const statusFn = (n: number) => {
+        mockResponse.statusCode = n
+        return mockResponse
+    }
+    mockResponse.status = statusFn
+    mockResponse.send = jest.fn((a: string) => {
+        return mockResponse
+    })
     const mockClient = createMock<Client>()
     const spyOnClient = jest.spyOn(oidc, 'getClient').mockReturnValue(mockClient)
     const spyOnisTokenExpired = jest.spyOn(oidc, 'isTokenExpired').mockReturnValue(false)

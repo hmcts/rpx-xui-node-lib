@@ -100,12 +100,13 @@ export abstract class Strategy extends events.EventEmitter {
         const promise = new Promise((resolve) => {
             if (req.session && this.options?.sessionKey) {
                 reqSession[this.options?.sessionKey] = { state }
+                this.logger.log('saving state in session')
                 req.session.save(() => {
-                    this.logger.log('resolved promise, state saved')
+                    this.logger.log('state saved in session')
                     resolve(true)
                 })
             } else {
-                this.logger.warn('resolved promise, state not saved')
+                this.logger.warn('sessionKey not available state not saved')
                 resolve(false)
             }
         })
@@ -125,22 +126,24 @@ export abstract class Strategy extends events.EventEmitter {
                 (error: any, user: any, info: any) => {
                     /* istanbul ignore next */
                     if (error) {
-                        this.logger.error('error => ', JSON.stringify(error))
+                        this.logger.error('passport authenticate error ', JSON.stringify(error))
                     }
                     /* istanbul ignore next */
                     if (info) {
-                        this.logger.info(info)
+                        this.logger.info('passport authenticate info', JSON.stringify(info))
                     }
                     /* istanbul ignore next */
                     if (!user) {
                         const message = 'No user details returned by the authentication service, redirecting to login'
                         this.logger.log(message)
+                    } else {
+                        this.logger.log('User details from passport.authenticate ' + user.userInfo?.email)
                     }
                 },
             )(req, res, next)
             /* istanbul ignore next */
         } catch (error) {
-            this.logger.error(error, this.strategyName)
+            this.logger.error('Exception in passport.authenticate', error, this.strategyName)
             next(error)
             return Promise.reject(error)
         }
@@ -271,7 +274,7 @@ export abstract class Strategy extends events.EventEmitter {
 
             if (!logMessages.length) return
 
-            this.logger.log(`emitAuthenticationFailure logMessages ${logMessages}`)
+            this.logger.log(`emitAuthenticationFailure logMessages ${logMessages.join('\n')}`)
 
             res.locals.message = logMessages.join('\n')
             this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
@@ -284,8 +287,7 @@ export abstract class Strategy extends events.EventEmitter {
             } as any,
             (error: any, user: any, info: any) => {
                 const errorMessages: string[] = []
-                this.logger.log('inside passport authenticate')
-
+                this.logger.log('in passport authenticate callback')
                 if (error) {
                     switch (error.name) {
                         case 'TimeoutError':
@@ -293,7 +295,6 @@ export abstract class Strategy extends events.EventEmitter {
                             errorMessages.push(timeoutErrorMessage)
                             this.logger.error(error)
                             break
-
                         default:
                             errorMessages.push(error)
                             this.logger.error(error)
@@ -305,8 +306,7 @@ export abstract class Strategy extends events.EventEmitter {
                     if (info.message === INVALID_STATE_ERROR) {
                         errorMessages.push(INVALID_STATE_ERROR)
                     }
-
-                    this.logger.info(info)
+                    this.logger.info('Authenticate callback info', info)
                 }
 
                 if (!user) {
@@ -317,7 +317,6 @@ export abstract class Strategy extends events.EventEmitter {
                     emitAuthenticationFailure(errorMessages)
                     return res.redirect(AUTH.ROUTE.LOGIN)
                 }
-
                 emitAuthenticationFailure(errorMessages)
                 this.verifyLogin(req, user, next, res)
             },
@@ -404,16 +403,19 @@ export abstract class Strategy extends events.EventEmitter {
         req.logIn(user, (err) => {
             const roles = user.userinfo.roles
             if (err) {
+                this.logger.error('verifyLogin error', err)
                 return next(err)
             }
             if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
                 this.logger.error(
-                    `User has no application access, as they do not have a ${this.options.allowRolesRegex} role.`,
+                    `User has no application access, as they do not have a role that matches ${this.options.allowRolesRegex}.`,
                 )
                 return this.logout(req, res)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
-                this.logger.log(`redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
+                this.logger.log(
+                    `redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}, user: ${user.email}`,
+                )
                 res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
             } else {
                 req.isRefresh = false
@@ -539,6 +541,7 @@ export abstract class Strategy extends events.EventEmitter {
         done: (err: any, id?: any) => void,
     ): void => {
         if (!this.listenerCount(eventName)) {
+            this.logger.error('no listeners for event ' + eventName)
             done(null, eventObject)
         } else {
             this.emit(eventName, eventObject, done)
@@ -555,6 +558,7 @@ export abstract class Strategy extends events.EventEmitter {
             const idamClient = options.clientID
             return `grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
         }
+        const msg = 'options.routeCredential missing values'
         throw new Error('options.routeCredential missing values')
     }
 
@@ -563,6 +567,8 @@ export abstract class Strategy extends events.EventEmitter {
         if (options.routeCredential) {
             return `${options.logoutURL}/o/token`
         }
-        throw new Error('missing routeCredential in options')
+        const msg = 'missing routeCredential in options'
+        this.logger.error('msg')
+        throw new Error(msg)
     }
 }
