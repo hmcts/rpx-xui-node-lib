@@ -31,9 +31,14 @@ export class OAuth2 extends Strategy {
     }
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
+        this.logger.log('initialiseStrategy start')
         const options = this.getOAuthOptions(authOptions)
         passport.use(this.strategyName, new XUIOAuth2Strategy(options, this.verify))
         this.logger.log('initialiseStrategy end')
+    }
+
+    public isInitialised(): boolean {
+        return passport.strategies != null
     }
 
     public verify = (

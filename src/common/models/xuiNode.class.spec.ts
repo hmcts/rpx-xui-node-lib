@@ -1,5 +1,5 @@
 import { xuiNode, XuiNode } from './xuiNode.class'
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
 import { createMock } from 'ts-auto-mock'
@@ -13,7 +13,7 @@ test('xuiNode configure', () => {
     const logger = createMock<typeof console>()
     const middlewares: Array<string> = ['session1', 'auth1']
     const xuinode = new XuiNode(mockRouter, middlewares, logger)
-    const options = {} as XuiNodeOptions
+    const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
     const spy = jest.spyOn(xuinode, 'applyMiddleware')
     xuinode.configure(options)
     expect(spy).toHaveBeenCalledWith('session1', options)
@@ -32,7 +32,7 @@ test('applyMiddlewareLayer() should call importMiddleware with the baseDir and m
 })
 
 test('importMiddleware should throw error', async () => {
-    await xuiNode.importMiddleware('some').catch((error) => {
+    await xuiNode.importMiddleware('invalidMiddleware').catch((error) => {
         expect(error.message).toEqual('unknown middleware')
     })
 })
@@ -63,4 +63,33 @@ test('proxyEvents ', () => {
     expect(spyOnMiddleware).toHaveBeenCalledWith()
     expect(spyOnXuinode).toHaveBeenCalledWith('event1')
     expect(spyOnXuinode).toHaveBeenCalledWith('event2')
+})
+
+test('defaultAuthenticate, fake authenticated', () => {
+    const mockRouter = {} as Router
+    const logger = createMock<typeof console>()
+    const middlewares: Array<string> = []
+    const xuinode = new XuiNode(mockRouter, middlewares, logger)
+    const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
+    xuinode.configure(options)
+    const req = createMock<Request>()
+    const resp = createMock<Response>()
+    const next = jest.fn()
+    xuinode.authenticate(req, resp, next)
+    expect(resp.statusCode).toEqual(0)
+})
+
+test('defaultAuthenticate, unauthenticated', () => {
+    const mockRouter = {} as Router
+    const logger = createMock<typeof console>()
+    const middlewares: Array<string> = []
+    const xuinode = new XuiNode(mockRouter, middlewares, logger)
+    const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
+    xuinode.configure(options)
+    const req = createMock<Request>()
+    const resp = createMock<Response>()
+    const next = jest.fn()
+    req.isUnauthenticated = jest.fn(() => true)
+    xuinode.authenticate(req, resp, next)
+    expect(resp.statusCode).toEqual(401)
 })
