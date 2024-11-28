@@ -130,7 +130,6 @@ export class OpenID extends AuthStrategy {
         const issuer = await this.discoverIssuer()
 
         const metadata = issuer.metadata
-        metadata.issuer = this.options.issuerURL
 
         this.logger.log('metadata', metadata)
 
