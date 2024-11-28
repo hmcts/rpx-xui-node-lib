@@ -2,7 +2,6 @@ import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import { hasKey, getLogger, XuiLogger } from '../util'
-import { AUTH } from '../../auth/auth.constants' // NOTE: do not shorten this path, tests fail (circular import somewhere)
 import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
 
 export class XuiNode extends EventEmitter {
@@ -24,7 +23,9 @@ export class XuiNode extends EventEmitter {
 
     public authenticate = (req: Request, res: Response, next: NextFunction): void => {
         const authMiddleware = this.authenticateMiddleware ? this.authenticateMiddleware : this.authenticateDefault
+        this.logger.info('authenticate: authMiddleware = ', authMiddleware.name)
         authMiddleware(req, res, next)
+        this.logger.log('authenticate: end')
     }
 
     /**
@@ -41,8 +42,12 @@ export class XuiNode extends EventEmitter {
         next: NextFunction,
     ): void | Response<any, Record<string, any>> => {
         if (req.isUnauthenticated()) {
-            this.logger.log('unauthenticated')
+            this.logger.log('request is unauthenticated')
+            res.statusCode = 401
+            res.statusMessage = 'Unauthorized'
             res.status(401).send({ message: 'Unauthorized' })
+        } else {
+            this.logger.log('user is authenticated ' + req?.user?.toString())
         }
         next()
     }
@@ -65,6 +70,7 @@ export class XuiNode extends EventEmitter {
             case 'session':
                 return await import(/* webpackChunkName: "xuiNodeSession" */ '../../session')
             default:
+                this.logger.error('unknown middleware: ' + middleware)
                 throw new Error('unknown middleware')
         }
     }

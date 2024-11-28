@@ -1,3 +1,10 @@
+## [2.29.6](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.5...v2.29.6) (2024-11-26)
+
+
+### Bug Fixes
+
+* Additional logging ([#253](https://github.com/hmcts/rpx-xui-node-lib/issues/253)) ([1402bd3](https://github.com/hmcts/rpx-xui-node-lib/commit/1402bd3d4395fb429be8ab60ff8d2ad2c45c6e53))
+
 ## [2.29.5](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.4...v2.29.5) (2024-11-13)
 
 
