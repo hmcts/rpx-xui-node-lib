@@ -12,5 +12,6 @@ export const AUTH = {
         KEEPALIVE_ROUTE: '/auth/keepalive',
         OAUTH_CALLBACK: '/oauth2/callback',
         LOGOUT: '/auth/logout',
+        EXPIRED_LOGIN_LINK: '/expired-login-link',
     },
 }
