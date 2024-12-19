@@ -16,6 +16,7 @@ export interface AuthOptions {
     allowRolesRegex?: string
     useCSRF?: boolean
     routeCredential?: RouteCredential
+    serviceOverride?: boolean
 }
 
 export interface RouteCredential {
