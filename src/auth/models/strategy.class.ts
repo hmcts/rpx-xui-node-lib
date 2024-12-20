@@ -10,6 +10,7 @@ import * as URL from 'url'
 import { generators } from 'openid-client'
 import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
+import s from 'connect-redis'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -36,6 +37,7 @@ export abstract class Strategy extends events.EventEmitter {
         allowRolesRegex: '.',
         useCSRF: true,
         routeCredential: undefined,
+        serviceOverride: false,
     }
 
     protected constructor(strategyName: string, router: Router, logger: XuiLogger = getLogger('auth:strategy')) {
@@ -69,6 +71,7 @@ export abstract class Strategy extends events.EventEmitter {
             customHeaders: Joi.any(),
             allowRolesRegex: Joi.string(),
             useCSRF: Joi.bool(),
+            serviceOverride: Joi.bool(),
             routeCredential: Joi.any(),
         })
         const { error } = schema.validate(options)
