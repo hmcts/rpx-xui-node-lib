@@ -1,3 +1,10 @@
+## [2.29.7](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.6...v2.29.7) (2024-12-18)
+
+
+### Bug Fixes
+
+* Add samesite setting for XSRF ([#257](https://github.com/hmcts/rpx-xui-node-lib/issues/257)) ([6ee0223](https://github.com/hmcts/rpx-xui-node-lib/commit/6ee022345a0ea48acbb29baddbf8726b742f2ab7))
+
 ## [2.29.6](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.5...v2.29.6) (2024-11-26)
 
 
