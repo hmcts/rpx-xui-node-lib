@@ -1,5 +1,5 @@
 import * as events from 'events'
-import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
+import { CookieOptions, NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import passport, { LogOutOptions } from 'passport'
 import { AUTH } from '../auth.constants'
 import jwtDecode from 'jwt-decode'
@@ -457,9 +457,14 @@ export abstract class Strategy extends events.EventEmitter {
             const csrfProtection = csrf({
                 value: this.getCSRFValue,
             })
+            // cookie options added via EXUI-986, fortify issues
+            const cookieOptions: CookieOptions = {
+                sameSite: 'none',
+                secure: true,
+            }
             /* istanbul ignore next */
             this.router.use(csrfProtection, (req, res, next) => {
-                res.cookie('XSRF-TOKEN', req.csrfToken())
+                res.cookie('XSRF-TOKEN', req.csrfToken(), cookieOptions)
                 next()
             })
         }
