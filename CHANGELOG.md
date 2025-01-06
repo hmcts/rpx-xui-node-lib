@@ -1,3 +1,10 @@
+# [2.30.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.7...v2.30.0) (2025-01-06)
+
+
+### Features
+
+* Tech/ex UI 2249 content security ([#256](https://github.com/hmcts/rpx-xui-node-lib/issues/256)) ([1dd3a8a](https://github.com/hmcts/rpx-xui-node-lib/commit/1dd3a8a30342d981bf4a1036ec7ad6c1881625ca))
+
 ## [2.29.7](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.6...v2.29.7) (2024-12-18)
 
 
