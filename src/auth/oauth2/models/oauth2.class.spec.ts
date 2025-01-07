@@ -4,6 +4,7 @@ import { createMock } from 'ts-auto-mock'
 import { Request, Response, Router } from 'express'
 import { AuthOptions } from '../../models'
 import { XuiLogger } from '../../../common'
+import { AUTH } from '../../auth.constants'
 
 describe('OAUTH2 Auth', () => {
     const mockRequestRequired = {
@@ -206,5 +207,83 @@ describe('OAUTH2 Auth', () => {
         expect(mockRequest.headers['user-roles']).toEqual(roles.join())
         expect(mockRequest.headers.Authorization).toEqual(authToken)
         expect(next).toHaveBeenCalled()
+    })
+
+    test('should handle INVALID_STATE_ERROR in info', () => {
+        const info = { message: 'Invalid authorization request state.' }
+        jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
+            if (callback) {
+                callback(null, null, info)
+            }
+            return jest.fn()
+        })
+
+        const mockRouter = createMock<Router>()
+        const logger = {
+            log: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+        } as unknown as XuiLogger
+        const oAuth2 = new OAuth2(mockRouter, logger)
+        const mockRequest = createMock<Request>()
+        const mockResponse = createMock<Response>()
+        const next = jest.fn()
+
+        oAuth2.callbackHandler(mockRequest, mockResponse, next)
+
+        expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+    })
+
+    test('should handle MISMATCH_NONCE or MISMATCH_STATE in info', () => {
+        const info = { message: 'nonce mismatch' }
+        jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
+            if (callback) {
+                callback(null, null, info)
+            }
+            return jest.fn()
+        })
+
+        const mockRouter = createMock<Router>()
+        const logger = {
+            log: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+        } as unknown as XuiLogger
+        const oAuth2 = new OAuth2(mockRouter, logger)
+        const mockRequest = createMock<Request>()
+        const mockResponse = createMock<Response>()
+        const next = jest.fn()
+
+        oAuth2.callbackHandler(mockRequest, mockResponse, next)
+
+        expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+    })
+
+    test('should handle no user returned', () => {
+        const info = { message: 'Some other error' }
+        jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
+            if (callback) {
+                callback(null, null, info)
+            }
+            return jest.fn()
+        })
+
+        const mockRouter = createMock<Router>()
+        const logger = {
+            log: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+        } as unknown as XuiLogger
+        const oAuth2 = new OAuth2(mockRouter, logger)
+        const mockRequest = createMock<Request>()
+        const mockResponse = createMock<Response>()
+        const next = jest.fn()
+
+        oAuth2.callbackHandler(mockRequest, mockResponse, next)
+
+        expect(logger.log).toHaveBeenCalledWith(
+            'No user details returned by the authentication service, redirecting to login',
+        )
+        expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.LOGIN)
     })
 })
