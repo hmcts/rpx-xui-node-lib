@@ -1,3 +1,10 @@
+## [2.30.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.0...v2.30.1) (2025-01-07)
+
+
+### Bug Fixes
+
+* #exui-112: rediect to link expired login link page of state or nonce is stale ([#258](https://github.com/hmcts/rpx-xui-node-lib/issues/258)) ([f366fd2](https://github.com/hmcts/rpx-xui-node-lib/commit/f366fd262eea9a6ef9af8fd8f8051cdeb3383434)), closes [#exui-112](https://github.com/hmcts/rpx-xui-node-lib/issues/exui-112) [#exui-112](https://github.com/hmcts/rpx-xui-node-lib/issues/exui-112)
+
 # [2.30.0](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.29.7...v2.30.0) (2025-01-06)
 
 
