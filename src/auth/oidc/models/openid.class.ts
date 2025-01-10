@@ -126,11 +126,16 @@ export class OpenID extends AuthStrategy {
     }
 
     public discover = async (): Promise<Issuer<Client>> => {
-        this.logger.log(`discovering endpoint: ${this.options.discoveryEndpoint}`)
+        this.logger.info(`discovering endpoint: ${this.options.discoveryEndpoint}`)
         const issuer = await this.discoverIssuer()
 
         const metadata = issuer.metadata
-        metadata.issuer = this.options.issuerURL
+        this.logger.info(`serviceOverride: ${this.options.serviceOverride}`)
+        if (!this.options.serviceOverride) {
+            this.logger.info(`serviceOverride is false`)
+            this.logger.info(`issuerURL: ${this.options?.issuerURL}`)
+            metadata.issuer = this.options.issuerURL
+        }
 
         this.logger.log('discover metadata', metadata)
 
