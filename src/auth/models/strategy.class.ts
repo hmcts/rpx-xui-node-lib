@@ -285,6 +285,12 @@ export abstract class Strategy extends events.EventEmitter {
             this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
         }
 
+        const redirectWithFailure = (errorMessages: string[], INVALID_STATE_ERROR: string, uri: string) => {
+            errorMessages.push(INVALID_STATE_ERROR)
+            emitAuthenticationFailure(errorMessages)
+            return res.redirect(uri)
+        }
+
         passport.authenticate(
             this.strategyName,
             {
@@ -310,19 +316,21 @@ export abstract class Strategy extends events.EventEmitter {
                 }
 
                 if (info) {
-                    if (info.message === INVALID_STATE_ERROR) {
-                        errorMessages.push(INVALID_STATE_ERROR)
-                    }
                     this.logger.info('Authenticate callback info', info)
                 }
 
                 if (!user) {
-                    const message = 'No user details returned by the authentication service, redirecting to login'
-                    errorMessages.push(message)
-                    this.logger.log(message)
-
-                    emitAuthenticationFailure(errorMessages)
-                    return res.redirect(AUTH.ROUTE.LOGIN)
+                    const MISMATCH_NONCE = 'nonce mismatch'
+                    const MISMATCH_STATE = 'state mismatch'
+                    if (info?.message === INVALID_STATE_ERROR) {
+                        return redirectWithFailure(errorMessages, INVALID_STATE_ERROR, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+                    } else if (info?.message.includes(MISMATCH_NONCE) || info?.message.includes(MISMATCH_STATE)) {
+                        return redirectWithFailure(errorMessages, info.message, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+                    } else {
+                        const message = 'No user details returned by the authentication service, redirecting to login'
+                        this.logger.log(message)
+                        return redirectWithFailure(errorMessages, message, AUTH.ROUTE.LOGIN)
+                    }
                 }
                 emitAuthenticationFailure(errorMessages)
                 this.verifyLogin(req, user, next, res)
