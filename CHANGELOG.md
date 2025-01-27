@@ -1,3 +1,10 @@
+## [2.30.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.1...v2.30.2) (2025-01-27)
+
+
+### Bug Fixes
+
+*  #EXUI-2656: passport js rollout needs serviceOverride flag ([#259](https://github.com/hmcts/rpx-xui-node-lib/issues/259)) ([155a5d3](https://github.com/hmcts/rpx-xui-node-lib/commit/155a5d360ab18b591c6acd5060507fe241d55574)), closes [#EXUI-2656](https://github.com/hmcts/rpx-xui-node-lib/issues/EXUI-2656) [#EXUI-2656](https://github.com/hmcts/rpx-xui-node-lib/issues/EXUI-2656)
+
 ## [2.30.1](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.0...v2.30.1) (2025-01-07)
 
 
