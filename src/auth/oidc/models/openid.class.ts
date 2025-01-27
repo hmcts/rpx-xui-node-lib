@@ -130,11 +130,8 @@ export class OpenID extends AuthStrategy {
         const issuer = await this.discoverIssuer()
 
         const metadata = issuer.metadata
-        this.logger.info(`serviceOverride: ${this.options.serviceOverride}`)
         this.logger.info(`start serviceOverride check`)
-        this.logger.info('options object: ', this.options)
         if (!this.options.serviceOverride) {
-            this.logger.info(`serviceOverride is false`)
             this.logger.info(`issuerURL: ${this.options?.issuerURL}`)
             metadata.issuer = this.options.issuerURL
         }
