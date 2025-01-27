@@ -1,15 +1,16 @@
 import * as events from 'events'
 import { CookieOptions, NextFunction, Request, RequestHandler, Response, Router } from 'express'
-import passport from 'passport'
+import passport, { LogOutOptions } from 'passport'
 import { AUTH } from '../auth.constants'
 import jwtDecode from 'jwt-decode'
 import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
-import Joi from '@hapi/joi'
+import Joi from 'joi'
 import * as URL from 'url'
 import { generators } from 'openid-client'
-import csrf from 'csurf'
+import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
+import s from 'connect-redis'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -93,7 +94,6 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
         this.logger.log('Base loginHandler Hit')
-
         const reqSession = req.session as MySessionData
 
         // we are using oidc generator but it's just a helper, rather than installing another library to provide this
@@ -124,6 +124,7 @@ export abstract class Strategy extends events.EventEmitter {
                 {
                     redirect_uri: reqSession?.callbackURL,
                     state,
+                    keepSessionInfo: true,
                 } as any,
                 (error: any, user: any, info: any) => {
                     /* istanbul ignore next */
@@ -169,7 +170,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-    public logout = async (req: Request, res: Response): Promise<void> => {
+    public logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const reqSession = req.session as MySessionData
 
         try {
@@ -190,22 +191,24 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout((err) => {
-                console.error(err)
+            req.logout({ keepSessionInfo: true }, async (err) => {
+                if (err) {
+                    console.error(err)
+                    return next(err)
+                }
+                await this.destroySession(req)
+                /* istanbul ignore next */
+                if (req.query.noredirect) {
+                    res.status(200).send({ message: 'You have been logged out!' })
+                    return Promise.resolve()
+                }
+
+                const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
+                this.logger.log('redirecting to => ', redirect)
+                // 401 is when no accessToken
+                res.redirect(redirect as string)
+                /* istanbul ignore next */
             })
-            await this.destroySession(req)
-            /* istanbul ignore next */
-            if (req.query.noredirect) {
-                res.status(200).send({ message: 'You have been logged out!' })
-                return Promise.resolve()
-            }
-
-            const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
-            this.logger.log('redirecting to => ', redirect)
-            // 401 is when no accessToken
-            res.redirect(redirect as string)
-
-            /* istanbul ignore next */
         } catch (e) {
             this.logger.error('error => ', e)
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
@@ -292,6 +295,8 @@ export abstract class Strategy extends events.EventEmitter {
             this.strategyName,
             {
                 redirect_uri: reqSession?.callbackURL,
+                keepSessionInfo: true,
+                failureMessage: true,
             } as any,
             (error: any, user: any, info: any) => {
                 const errorMessages: string[] = []
@@ -420,7 +425,7 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.error(
                     `User has no application access, as they do not have a role that matches ${this.options.allowRolesRegex}.`,
                 )
-                return this.logout(req, res)
+                return this.logout(req, res, next)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                 this.logger.log(
