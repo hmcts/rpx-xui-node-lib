@@ -36,6 +36,7 @@ export abstract class Strategy extends events.EventEmitter {
         allowRolesRegex: '.',
         useCSRF: true,
         routeCredential: undefined,
+        serviceOverride: false,
     }
 
     protected constructor(strategyName: string, router: Router, logger: XuiLogger = getLogger('auth:strategy')) {
@@ -69,6 +70,7 @@ export abstract class Strategy extends events.EventEmitter {
             customHeaders: Joi.any(),
             allowRolesRegex: Joi.string(),
             useCSRF: Joi.bool(),
+            serviceOverride: Joi.bool(),
             routeCredential: Joi.any(),
         })
         const { error } = schema.validate(options)
