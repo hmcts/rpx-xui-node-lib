@@ -9,6 +9,7 @@ export const SECURITY_POLICY = {
             'https://*.googletagmanager.com',
             'https://*.analytics.google.com',
             '*.hmcts.net',
+            'wss://*.platform.hmcts.net',
             'wss://*.webpubsub.azure.com',
             'https://*.in.applicationinsights.azure.com',
             'https://*.monitor.azure.com',
