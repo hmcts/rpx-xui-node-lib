@@ -10,6 +10,8 @@ export const SECURITY_POLICY = {
             'https://*.analytics.google.com',
             '*.hmcts.net',
             'wss://*.webpubsub.azure.com',
+            'wss://em-icp-webpubsub.*.platform.hmcts.net',
+            'wss://em-icp-webpubsub.platform.hmcts.net',
             'https://*.in.applicationinsights.azure.com',
             'https://*.monitor.azure.com',
         ],
