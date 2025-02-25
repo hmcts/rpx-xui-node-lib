@@ -1,3 +1,10 @@
+## [2.30.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.2...v2.30.3) (2025-02-25)
+
+
+### Bug Fixes
+
+* update CSP ([#261](https://github.com/hmcts/rpx-xui-node-lib/issues/261)) ([d71e144](https://github.com/hmcts/rpx-xui-node-lib/commit/d71e1442a29c9e0b50ffbe0466e3815f0706bfd1))
+
 ## [2.30.2](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.1...v2.30.2) (2025-01-27)
 
 
