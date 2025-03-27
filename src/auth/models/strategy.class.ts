@@ -321,6 +321,11 @@ export abstract class Strategy extends events.EventEmitter {
                         return redirectWithFailure(errorMessages, INVALID_STATE_ERROR, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
                     } else if (info?.message.includes(MISMATCH_NONCE) || info?.message.includes(MISMATCH_STATE)) {
                         return redirectWithFailure(errorMessages, info.message, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+                    } else if (
+                        !info &&
+                        error?.message.includes('did not find expected authorization request details in session')
+                    ) {
+                        return redirectWithFailure(errorMessages, error.message, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
                     } else {
                         const message = 'No user details returned by the authentication service, redirecting to login'
                         this.logger.log(message)
