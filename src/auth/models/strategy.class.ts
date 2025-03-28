@@ -270,7 +270,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log('inside callbackHandler')
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
         const reqSession = req.session as MySessionData
-        const LOGIN_BOOKMARK_ERROR = 'LoginBookmarkUsed :';
+        const LOGIN_BOOKMARK_ERROR = 'LoginBookmarkUsed :'
         const emitAuthenticationFailure = (logMessages: string[]): void => {
             this.logger.log('inside emitAuthenticationFailure')
 
@@ -323,7 +323,9 @@ export abstract class Strategy extends events.EventEmitter {
                     } else if (info?.message.includes(MISMATCH_NONCE) || info?.message.includes(MISMATCH_STATE)) {
                         errorMessages.push(LOGIN_BOOKMARK_ERROR)
                         return redirectWithFailure(errorMessages, info.message, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
-                    } else if (error?.message.includes('did not find expected authorization request details in session')) {
+                    } else if (
+                        error?.message.includes('did not find expected authorization request details in session')
+                    ) {
                         errorMessages = [LOGIN_BOOKMARK_ERROR]
                         return redirectWithFailure(errorMessages, error.message, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
                     } else {
