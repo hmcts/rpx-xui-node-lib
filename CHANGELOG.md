@@ -1,3 +1,10 @@
+## [2.30.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.3...v2.30.4) (2025-04-02)
+
+
+### Bug Fixes
+
+* #Exui-2914-expired session issue ([#263](https://github.com/hmcts/rpx-xui-node-lib/issues/263)) ([c530d76](https://github.com/hmcts/rpx-xui-node-lib/commit/c530d76b4e8983e858e355173ea0ede885e8c817)), closes [#Exui-2914](https://github.com/hmcts/rpx-xui-node-lib/issues/Exui-2914)
+
 ## [2.30.3](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.2...v2.30.3) (2025-02-25)
 
 
