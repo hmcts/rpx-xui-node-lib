@@ -270,7 +270,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log('inside callbackHandler')
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
         const reqSession = req.session as MySessionData
-
+        const LOGIN_BOOKMARK_ERROR = 'LoginBookmarkUsed :'
         const emitAuthenticationFailure = (logMessages: string[]): void => {
             this.logger.log('inside emitAuthenticationFailure')
 
@@ -294,7 +294,7 @@ export abstract class Strategy extends events.EventEmitter {
                 redirect_uri: reqSession?.callbackURL,
             } as any,
             (error: any, user: any, info: any) => {
-                const errorMessages: string[] = []
+                let errorMessages: string[] = []
                 this.logger.log('in passport authenticate callback')
                 if (error) {
                     switch (error.name) {
@@ -318,9 +318,16 @@ export abstract class Strategy extends events.EventEmitter {
                     const MISMATCH_NONCE = 'nonce mismatch'
                     const MISMATCH_STATE = 'state mismatch'
                     if (info?.message === INVALID_STATE_ERROR) {
+                        errorMessages.push(LOGIN_BOOKMARK_ERROR)
                         return redirectWithFailure(errorMessages, INVALID_STATE_ERROR, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
                     } else if (info?.message.includes(MISMATCH_NONCE) || info?.message.includes(MISMATCH_STATE)) {
+                        errorMessages.push(LOGIN_BOOKMARK_ERROR)
                         return redirectWithFailure(errorMessages, info.message, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+                    } else if (
+                        error?.message.includes('did not find expected authorization request details in session')
+                    ) {
+                        errorMessages = [LOGIN_BOOKMARK_ERROR]
+                        return redirectWithFailure(errorMessages, error.message, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
                     } else {
                         const message = 'No user details returned by the authentication service, redirecting to login'
                         this.logger.log(message)
