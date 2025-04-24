@@ -1,4 +1,5 @@
-module.exports = {
+/** @type {import('jest').Config} */
+const config = {
     setupFiles: ['<rootDir>config.ts'],
     displayName: {
         name: 'XUI Node Lib',
@@ -12,3 +13,5 @@ module.exports = {
     restoreMocks: true,
     globals: {},
 }
+
+module.exports = config
