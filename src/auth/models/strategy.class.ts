@@ -2,7 +2,6 @@ import * as events from 'events'
 import { CookieOptions, NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import passport from 'passport'
 import { AUTH } from '../auth.constants'
-import jwtDecode from 'jwt-decode'
 import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from '@hapi/joi'
@@ -10,6 +9,7 @@ import * as URL from 'url'
 import { generators } from 'openid-client'
 import csrf from 'csurf'
 import { MySessionData } from './sessionData.interface'
+import jwtDecode from 'jwt-decode'
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -102,9 +102,9 @@ export abstract class Strategy extends events.EventEmitter {
         const promise = new Promise((resolve) => {
             if (req.session && this.options?.sessionKey) {
                 reqSession[this.options?.sessionKey] = { state }
-                this.logger.log('saving state in session')
+                this.logger.log(`saving state ${state} in session`)
                 req.session.save(() => {
-                    this.logger.log('state saved in session')
+                    this.logger.log(`state ${state} saved in session`)
                     resolve(true)
                 })
             } else {
@@ -117,7 +117,7 @@ export abstract class Strategy extends events.EventEmitter {
             /* istanbul ignore next */
             await promise
             /* istanbul ignore next */
-            this.logger.log('calling passport authenticate')
+            this.logger.log('calling passport authenticate with state ' + state)
             /* istanbul ignore next */
             return passport.authenticate(
                 this.strategyName,
@@ -267,7 +267,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
-        this.logger.log('inside callbackHandler')
+        this.logger.log('inside callbackHandler for url ' + req.url)
         const INVALID_STATE_ERROR = 'Invalid authorization request state.'
         const reqSession = req.session as MySessionData
         const LOGIN_BOOKMARK_ERROR = 'LoginBookmarkUsed :'
@@ -295,7 +295,12 @@ export abstract class Strategy extends events.EventEmitter {
             } as any,
             (error: any, user: any, info: any) => {
                 let errorMessages: string[] = []
-                this.logger.log('in passport authenticate callback')
+                if (this.options?.sessionKey) {
+                    const sessState = reqSession[this.options.sessionKey]?.state
+                    this.logger.log(
+                        `in passport authenticate callback, strategy ${this.strategyName}, state ${sessState}`,
+                    )
+                }
                 if (error) {
                     switch (error.name) {
                         case 'TimeoutError':
@@ -309,11 +314,9 @@ export abstract class Strategy extends events.EventEmitter {
                             break
                     }
                 }
-
                 if (info) {
                     this.logger.info('Authenticate callback info', info)
                 }
-
                 if (!user) {
                     const MISMATCH_NONCE = 'nonce mismatch'
                     const MISMATCH_STATE = 'state mismatch'
