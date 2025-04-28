@@ -209,7 +209,7 @@ describe('OAUTH2 Auth', () => {
         expect(next).toHaveBeenCalled()
     })
 
-    test('should handle INVALID_STATE_ERROR in info', () => {
+    test('should handle INVALID_STATE_ERROR in info', async () => {
         const info = { message: 'Invalid authorization request state.' }
         jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
             if (callback) {
@@ -224,17 +224,34 @@ describe('OAUTH2 Auth', () => {
             error: jest.fn(),
             info: jest.fn(),
         } as unknown as XuiLogger
+
         const oAuth2 = new OAuth2(mockRouter, logger)
-        const mockRequest = createMock<Request>()
-        const mockResponse = createMock<Response>()
+
+        const mockRequest = {
+            ...mockRequestRequired,
+            body: {},
+            session: {},
+            app: {
+                set: jest.fn(),
+            },
+            protocol: 'http',
+            get: jest.fn().mockImplementation(() => 'localhost'),
+            query: { state: 'whata' }
+        } as unknown as Request
+
+        const mockResponse = {
+            redirect: jest.fn(),
+            locals: { message: ''}
+        } as unknown as Response
+
         const next = jest.fn()
 
-        oAuth2.callbackHandler(mockRequest, mockResponse, next)
+        await oAuth2.callbackHandler(mockRequest, mockResponse, next)
 
         expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
     })
 
-    test('should handle MISMATCH_NONCE or MISMATCH_STATE in info', () => {
+    test('should handle MISMATCH_NONCE or MISMATCH_STATE in info', async () => {
         const info = { message: 'nonce mismatch' }
         jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
             if (callback) {
@@ -254,12 +271,12 @@ describe('OAUTH2 Auth', () => {
         const mockResponse = createMock<Response>()
         const next = jest.fn()
 
-        oAuth2.callbackHandler(mockRequest, mockResponse, next)
+        await oAuth2.callbackHandler(mockRequest, mockResponse, next)
 
         expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
     })
 
-    test('should handle no user returned', () => {
+    test('should handle no user returned', async () => {
         const info = { message: 'Some other error' }
         jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
             if (callback) {
@@ -279,7 +296,7 @@ describe('OAUTH2 Auth', () => {
         const mockResponse = createMock<Response>()
         const next = jest.fn()
 
-        oAuth2.callbackHandler(mockRequest, mockResponse, next)
+        await oAuth2.callbackHandler(mockRequest, mockResponse, next)
 
         expect(logger.log).toHaveBeenCalledWith(
             'No user details returned by the authentication service, redirecting to login',
