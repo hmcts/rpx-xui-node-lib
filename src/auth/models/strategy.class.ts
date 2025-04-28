@@ -82,6 +82,29 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public initialiseStrategy = async (options: any): Promise<void> => {
         this.options = options
+        this.logger.log('initialising strategy, options:')
+        this.logger.log(JSON.stringify(options))
+    }
+
+    private saveStateInSession(reqSession: MySessionData, state?: string): { promise: Promise<boolean>, state: string } {
+        if (!state) {
+            state = generators.state()
+            this.logger.log(`state not found, generating new state ${state}`)
+        }
+        const p = new Promise<boolean>((resolve) => {
+            if (reqSession && this.options?.sessionKey) {
+                reqSession[this.options?.sessionKey] = { state }
+                this.logger.log(`saving state ${state} in session`)
+                reqSession.save(() => {
+                    this.logger.log(`state ${state} saved in session`)
+                    resolve(true), state
+                })
+            } else {
+                this.logger.log('sessionKey not available state not saved')
+                resolve(false)
+            }
+        })
+        return { promise: p, state: state}
     }
 
     /**
@@ -95,24 +118,8 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log('Base loginHandler Hit')
 
         const reqSession = req.session as MySessionData
-
-        // we are using oidc generator but it's just a helper, rather than installing another library to provide this
-        const state = generators.state()
+        const { promise, state } = this.saveStateInSession(reqSession)
         /* istanbul ignore next */
-        const promise = new Promise((resolve) => {
-            if (req.session && this.options?.sessionKey) {
-                reqSession[this.options?.sessionKey] = { state }
-                this.logger.log(`saving state ${state} in session`)
-                req.session.save(() => {
-                    this.logger.log(`state ${state} saved in session`)
-                    resolve(true)
-                })
-            } else {
-                this.logger.warn('sessionKey not available state not saved')
-                resolve(false)
-            }
-        })
-
         try {
             /* istanbul ignore next */
             await promise
@@ -154,7 +161,14 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
-
+        this.logger.log(`setCallbackURL, options.callbackurl: ${this.options.callbackURL}`)
+        if (this.options.sessionKey) {
+            const sessionKey = this.options.sessionKey
+            this.logger.log(`sessionKey: ${sessionKey}`)
+            this.logger.log(`state from session = ${reqSession[sessionKey]?.state}`)
+        } else {
+            this.logger.log('sessionKey not set')
+        }
         /* istanbul ignore else */
         if (req.session && !reqSession.callbackURL) {
             req.app.set('trust proxy', true)
@@ -266,18 +280,29 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-    public callbackHandler = (req: Request, res: Response, next: NextFunction): void => {
-        this.logger.log('inside callbackHandler for url ' + req.url)
-        const INVALID_STATE_ERROR = 'Invalid authorization request state.'
+    public callbackHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        this.logger.log('in callbackHandler for url ' + req.url)
         const reqSession = req.session as MySessionData
+        var qstate = typeof req.query.state == "string" ? req.query.state : undefined
+        const { promise, state } = this.saveStateInSession(reqSession, qstate)
+        if(!qstate) {
+            req.query.state = state
+        }
+        await promise
+        if (this.options.sessionKey) {
+            const sessionKey = this.options.sessionKey
+            this.logger.log(`sessionKey: ${sessionKey}`)
+            this.logger.log(`state from session = ${reqSession[sessionKey]?.state}`)
+            this.logger.log('session data:' + JSON.stringify(reqSession))
+        } else {
+            this.logger.log('sessionKey not set')
+        }
+        const INVALID_STATE_ERROR = 'Invalid authorization request state.'
         const LOGIN_BOOKMARK_ERROR = 'LoginBookmarkUsed :'
         const emitAuthenticationFailure = (logMessages: string[]): void => {
-            this.logger.log('inside emitAuthenticationFailure')
-
+            this.logger.log(`inside emitAuthenticationFailure, message count ${logMessages.length}`)
             if (!logMessages.length) return
-
             this.logger.log(`emitAuthenticationFailure logMessages ${logMessages.join('\n')}`)
-
             res.locals.message = logMessages.join('\n')
             this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
         }
@@ -287,13 +312,16 @@ export abstract class Strategy extends events.EventEmitter {
             emitAuthenticationFailure(errorMessages)
             return res.redirect(uri)
         }
-
+        this.logger.log(`calling passport authenticate with ${this.strategyName} strategy`)
         passport.authenticate(
             this.strategyName,
             {
                 redirect_uri: reqSession?.callbackURL,
             } as any,
             (error: any, user: any, info: any) => {
+                if (info) {
+                    this.logger.log(`in passport authenticate callback info: ${info}`)
+                }
                 let errorMessages: string[] = []
                 if (this.options?.sessionKey) {
                     const sessState = reqSession[this.options.sessionKey]?.state
@@ -302,6 +330,7 @@ export abstract class Strategy extends events.EventEmitter {
                     )
                 }
                 if (error) {
+                    this.logger.log(`in passport authenticate error: ${error}`)
                     switch (error.name) {
                         case 'TimeoutError':
                             const timeoutErrorMessage = `${error.name}: timeout awaiting ${error.url} for ${error.gotOptions.gotTimeout.request}ms`
@@ -314,15 +343,17 @@ export abstract class Strategy extends events.EventEmitter {
                             break
                     }
                 }
-                if (info) {
-                    this.logger.info('Authenticate callback info', info)
-                }
                 if (!user) {
                     const MISMATCH_NONCE = 'nonce mismatch'
                     const MISMATCH_STATE = 'state mismatch'
                     if (info?.message === INVALID_STATE_ERROR) {
-                        errorMessages.push(LOGIN_BOOKMARK_ERROR)
-                        return redirectWithFailure(errorMessages, INVALID_STATE_ERROR, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+                        if (!qstate) { // if state is not in query, then we can ignore
+                            this.logger.log('Invalid state error, redirecting to default')
+                            return res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
+                        } else {
+                            errorMessages.push(LOGIN_BOOKMARK_ERROR)
+                            return redirectWithFailure(errorMessages, INVALID_STATE_ERROR, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+                        }
                     } else if (info?.message.includes(MISMATCH_NONCE) || info?.message.includes(MISMATCH_STATE)) {
                         errorMessages.push(LOGIN_BOOKMARK_ERROR)
                         return redirectWithFailure(errorMessages, info.message, AUTH.ROUTE.EXPIRED_LOGIN_LINK)
@@ -336,6 +367,8 @@ export abstract class Strategy extends events.EventEmitter {
                         this.logger.log(message)
                         return redirectWithFailure(errorMessages, message, AUTH.ROUTE.LOGIN)
                     }
+                } else {
+                    this.logger.log('User id from passport.authenticate ' + user?.userInfo?.id)
                 }
                 emitAuthenticationFailure(errorMessages)
                 this.verifyLogin(req, user, next, res)
@@ -427,6 +460,7 @@ export abstract class Strategy extends events.EventEmitter {
                 return next(err)
             }
             if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
+                this.logger.info(JSON.stringify(user.userInfo))
                 this.logger.error(
                     `User has no application access, as they do not have a role that matches ${this.options.allowRolesRegex}.`,
                 )
