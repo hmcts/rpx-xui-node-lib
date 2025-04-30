@@ -6,7 +6,7 @@ const config = {
         color: 'magenta',
     },
     transform: {
-        '^.+\\.(t|j)sx?$': ['ts-jest', { compiler: 'ttypescript' }],
+        '^.+\\.(t|j)sx?$': ['ts-jest', { compiler: 'typescript' }],
     },
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],

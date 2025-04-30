@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-
 import { OAuth2Metadata } from './OAuth2Metadata.interface'
 import OAuth2Strategy from 'passport-oauth2'
 import { AxiosResponse } from 'axios'

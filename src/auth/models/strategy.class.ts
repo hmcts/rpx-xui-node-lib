@@ -97,7 +97,7 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.log(`saving state ${state} in session`)
                 reqSession.save(() => {
                     this.logger.log(`state ${state} saved in session`)
-                    resolve(true), state
+                    resolve(true)
                 })
             } else {
                 this.logger.log('sessionKey not available state not saved')
@@ -108,7 +108,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /**
-     * The login route handler, will attempt to setup security state param and redirect user if not authenticated
+     * The login route handler will attempt to setup security state param and redirect user if not authenticated
      * @param req Request
      * @param res Response
      * @param next NextFunction
@@ -283,7 +283,7 @@ export abstract class Strategy extends events.EventEmitter {
     public callbackHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         this.logger.log('in callbackHandler for url ' + req.url)
         const reqSession = req.session as MySessionData
-        var qstate = typeof req.query.state == "string" ? req.query.state : undefined
+        const qstate = typeof req.query.state == 'string' ? req.query.state : undefined
         const { promise, state } = this.saveStateInSession(reqSession, qstate)
         if(!qstate) {
             req.query.state = state
@@ -618,7 +618,7 @@ export abstract class Strategy extends events.EventEmitter {
             return `grant_type=password&password=${userPassword}&username=${userName}&scope=${scope}&client_id=${idamClient}&client_secret=${clientSecret}`
         }
         const msg = 'options.routeCredential missing values'
-        throw new Error('options.routeCredential missing values')
+        throw new Error(msg)
     }
 
     /* istanbul ignore next */
