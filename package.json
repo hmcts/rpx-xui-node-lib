@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.6",
+  "version": "2.30.6-sso-fix",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
     "ci:lint": "eslint \"*/**/*.{js,ts}\" --quiet",
     "ci": "yarn && yarn ci:lint && yarn build",
     "watch": "tsc --watch",
-    "prepare": "husky"
+    "prepare": "ts-patch install -s & husky"
   },
   "repository": {
     "type": "git",
@@ -43,6 +43,8 @@
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^8.2.0",
+    "@eslint/js": "^9.25.1",
+    "@golevelup/ts-jest": "^0.6.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.1.0",
@@ -58,28 +60,24 @@
     "@types/passport": "^1.0.2",
     "@types/passport-oauth2": "^1.4.9",
     "@types/session-file-store": "^1.2.1",
-    "@typescript-eslint/eslint-plugin": "8.31.0",
-    "@typescript-eslint/parser": "8.31.0",
     "commitizen": "^4.0.3",
     "commitlint-config-cz": "^0.13.1",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "9.25.1",
-    "eslint-config-prettier": "10.1.2",
-    "eslint-plugin-prettier": "5.2.6",
+    "eslint": "^9.25.1",
     "husky": "^8.0.0",
-    "jest": "latest",
+    "jest": "^29.7.0",
     "jest-config": "29.5.0",
     "jest-environment-node": "29.5.0",
     "lint-staged": "^10.2.2",
-    "prettier": "^3.5.3",
     "semantic-release": "^19.0.2",
     "standard-version": "^9.5.0",
     "supports-color": "^7.1.0",
-    "ts-jest": "latest",
+    "ts-auto-mock": "^3.7.4",
+    "ts-jest": "^29.3.2",
     "ts-node": "^10.8.1",
-    "tslint": "^6.1.0",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "4.9.5"
+    "ts-patch": "^3.3.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.1"
   },
   "config": {
     "commitizen": {
@@ -104,9 +102,7 @@
     "passport": "^0.5.3",
     "passport-oauth2": "^1.5.0",
     "redis": "^3.0.2",
-    "session-file-store": "^1.5.0",
-    "ts-auto-mock": "^3.7.4",
-    "ttypescript": "1.5.15"
+    "session-file-store": "^1.5.0"
   },
   "resolutions": {
     "@babel/traverse": "7.23.2",
