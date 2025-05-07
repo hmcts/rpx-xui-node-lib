@@ -44,7 +44,13 @@ jobs:
                   corepack enable
                   corepack prepare yarn@4.5.1 --activate
                   yarn set version 4.5.1
-            - run: yarn install
+            - name: Install dependencies (allow lockfile changes)
+              run: CI=false yarn install
+            - name: Upload modified yarn.lock
+              uses: actions/upload-artifact@v4
+              with:
+               name: modified-yarn-lock
+               path: yarn.lock
             - run: yarn ci
             - run: yarn test
             - name: Create code coverage report
