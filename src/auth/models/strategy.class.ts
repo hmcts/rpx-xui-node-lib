@@ -93,7 +93,8 @@ export abstract class Strategy extends events.EventEmitter {
         }
         const p = new Promise<boolean>((resolve) => {
             if (reqSession && this.options?.sessionKey) {
-                reqSession[this.options?.sessionKey] = { state }
+                // add the state to the current session object, this will then contain both nonce and state
+                reqSession[this.options?.sessionKey] = { ...reqSession[this.options.sessionKey], state }
                 this.logger.log(`saving state ${state} in session`)
                 reqSession.save(() => {
                     this.logger.log(`state ${state} saved in session`)
