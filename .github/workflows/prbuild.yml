@@ -44,8 +44,7 @@ jobs:
                   corepack enable
                   corepack prepare yarn@4.5.1 --activate
                   yarn set version 4.5.1
-            - name: Install dependencies (allow lockfile changes)
-              run: yarn install --immutable-cache
+              run: yarn install
             - run: yarn ci
             - run: yarn test
             - name: Create code coverage report
