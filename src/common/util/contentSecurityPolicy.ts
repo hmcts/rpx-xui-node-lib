@@ -48,6 +48,8 @@ export const SECURITY_POLICY = {
             'https://fonts.googleapis.com',
             'https://fonts.gstatic.com',
             'https://www.googletagmanager.com',
+            "'unsafe-hashes'", // Add this
+            "'sha256-edW+KixhylnxLGOJoo3iC5UsjEj4HijvIQvP3cgo7ig='",
         ],
     },
 }
@@ -57,7 +59,6 @@ export const getContentSecurityPolicy = (helmet: any) => {
         directives: {
             ...SECURITY_POLICY.directives,
             scriptSrc: [...SECURITY_POLICY.directives.scriptSrc, (req: any, res: any) => `'nonce-${res.locals.nonce}'`],
-            styleSrc: [...SECURITY_POLICY.directives.styleSrc, (req: any, res: any) => `'nonce-${res.locals.nonce}'`],
         },
     })
 }
