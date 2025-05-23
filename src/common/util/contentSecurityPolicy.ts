@@ -38,6 +38,7 @@ export const SECURITY_POLICY = {
         mediaSrc: ["'self'"],
         scriptSrc: [
             "'self'",
+            "'unsafe-eval'",
             'https://*.google-analytics.com',
             'https://*.googletagmanager.com',
             'az416426.vo.msecnd.net',
