@@ -12,6 +12,7 @@ describe('getContentSecurityPolicy(helmet)', () => {
             directives: {
                 ...SECURITY_POLICY.directives,
                 scriptSrc: [...SECURITY_POLICY.directives.scriptSrc, expect.any(Function)],
+                styleSrc: [...SECURITY_POLICY.directives.styleSrc, expect.any(Function)],
             },
         })
     })
