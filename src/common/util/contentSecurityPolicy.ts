@@ -38,7 +38,6 @@ export const SECURITY_POLICY = {
         mediaSrc: ["'self'"],
         scriptSrc: [
             "'self'",
-            "'unsafe-inline'",
             "'unsafe-eval'",
             'https://*.google-analytics.com',
             'https://*.googletagmanager.com',
@@ -46,7 +45,7 @@ export const SECURITY_POLICY = {
         ],
         styleSrc: [
             "'self'",
-            "'unsafe-inline'",
+            "'unsafe-eval'",
             'https://fonts.googleapis.com',
             'https://fonts.gstatic.com',
             'https://www.googletagmanager.com',
@@ -55,5 +54,11 @@ export const SECURITY_POLICY = {
 }
 
 export const getContentSecurityPolicy = (helmet: any) => {
-    return helmet.contentSecurityPolicy(SECURITY_POLICY)
+    return helmet.contentSecurityPolicy({
+        directives: {
+            ...SECURITY_POLICY.directives,
+            scriptSrc: [...SECURITY_POLICY.directives.scriptSrc, (req: any, res: any) => `'nonce-${res.locals.nonce}'`],
+            styleSrc: [...SECURITY_POLICY.directives.styleSrc, (req: any, res: any) => `'nonce-${res.locals.nonce}'`],
+        },
+    })
 }

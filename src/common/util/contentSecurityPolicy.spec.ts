@@ -8,6 +8,12 @@ describe('getContentSecurityPolicy(helmet)', () => {
                 return policy
             },
         }
-        expect(getContentSecurityPolicy(helmet)).toBe(SECURITY_POLICY)
+        expect(getContentSecurityPolicy(helmet)).toEqual({
+            directives: {
+                ...SECURITY_POLICY.directives,
+                scriptSrc: [...SECURITY_POLICY.directives.scriptSrc, expect.any(Function)],
+                styleSrc: [...SECURITY_POLICY.directives.styleSrc, expect.any(Function)],
+            },
+        })
     })
 })
