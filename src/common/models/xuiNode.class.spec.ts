@@ -2,7 +2,42 @@ import { xuiNode, XuiNode } from './xuiNode.class'
 import { Router, Request, Response } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
-import { createMock } from 'ts-auto-mock'
+import { createMock } from '@golevelup/ts-jest';
+
+export interface PassportRequest extends Request {
+    user?: any;
+    isAuthenticated(): this is AuthenticatedRequest;
+    isUnauthenticated(): this is UnauthenticatedRequest;
+}
+
+interface AuthenticatedRequest extends Request {
+    user: any;
+}
+
+interface UnauthenticatedRequest extends Request {
+    user?: undefined;
+}
+
+export function createMockPassportRequest(
+    user?: any,
+    overrides: Partial<PassportRequest> = {}
+): PassportRequest {
+    const req = createMock<Request>() as unknown as PassportRequest;
+
+    req.user = user ?? undefined;
+
+    // Use function expressions, not arrow functions, to define type predicates
+    req.isAuthenticated = function (): this is AuthenticatedRequest {
+        return !!this.user;
+    };
+
+    req.isUnauthenticated = function (): this is UnauthenticatedRequest {
+        return !this.user;
+    };
+
+    Object.assign(req, overrides);
+    return req;
+}
 
 test('xuiNode isTruthy', () => {
     expect(xuiNode).toBeTruthy()
@@ -72,8 +107,9 @@ test('defaultAuthenticate, fake authenticated', () => {
     const xuinode = new XuiNode(mockRouter, middlewares, logger)
     const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
     xuinode.configure(options)
-    const req = createMock<Request>()
+    const req = createMockPassportRequest('user')
     const resp = createMock<Response>()
+    resp.statusCode = 0
     const next = jest.fn()
     xuinode.authenticate(req, resp, next)
     expect(resp.statusCode).toEqual(0)
@@ -86,10 +122,11 @@ test('defaultAuthenticate, unauthenticated', () => {
     const xuinode = new XuiNode(mockRouter, middlewares, logger)
     const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
     xuinode.configure(options)
-    const req = createMock<Request>()
+    const req = createMockPassportRequest(null)
     const resp = createMock<Response>()
+    resp.statusCode = 0
     const next = jest.fn()
-    req.isUnauthenticated = jest.fn(() => true)
+
     xuinode.authenticate(req, resp, next)
     expect(resp.statusCode).toEqual(401)
 })
