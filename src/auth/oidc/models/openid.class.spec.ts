@@ -2,7 +2,7 @@
 
 import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
-import express, { Request, response, Response, Router } from 'express'
+import express, { NextFunction, Request, response, Response, Router } from 'express'
 import { AUTH } from '../../auth.constants'
 import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
 import { createMock } from '@golevelup/ts-jest';
@@ -464,6 +464,7 @@ xtest('makeAuthorization() Should make an authorisation string', async () => {
 xtest('strategy logout', async () => {
     const session = createMock<MySessionData>()
     const mockRequest = createMock<Request>()
+    const mockNextFunction = createMock<NextFunction>()
     session.passport = {
         user: {
             tokenset: {
@@ -484,7 +485,7 @@ xtest('strategy logout', async () => {
     mockResponse.redirect = jest.fn()
     const spyhttp = jest.spyOn(http, 'delete').mockImplementation(() => Promise.resolve({} as any))
     const spySessionDestroy = jest.spyOn(oidc, 'destroySession').mockImplementation(() => Promise.resolve({} as any))
-    await oidc.logout(mockRequest, mockResponse)
+    await oidc.logout(mockRequest, mockResponse, mockNextFunction)
     expect(spyhttp).toHaveBeenCalled()
     expect(spySessionDestroy).toHaveBeenCalled()
 })

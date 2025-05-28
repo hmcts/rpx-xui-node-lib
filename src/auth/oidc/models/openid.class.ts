@@ -260,6 +260,8 @@ export class OpenID extends AuthStrategy {
                     redirect_uri: reqsession?.callbackURL,
                     nonce,
                     state,
+                    keepSessionInfo: true,
+                    failureMessage: true,
                 } as any,
                 (error: any, user: any, info: any) => {
                     this.logger.log('passport authenticate')
