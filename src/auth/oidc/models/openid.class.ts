@@ -130,12 +130,12 @@ export class OpenID extends AuthStrategy {
         const issuer = await this.discoverIssuer()
 
         const metadata = issuer.metadata
-        this.logger.info(`start serviceOverride check`)
+        this.logger.info('start serviceOverride check')
         if (!this.options.serviceOverride) {
             this.logger.info(`issuerURL: ${this.options?.issuerURL}`)
             metadata.issuer = this.options.issuerURL
         }
-        this.logger.info(`end serviceOverride check`)
+        this.logger.info('end serviceOverride check')
         this.logger.log('discover metadata', metadata)
 
         return this.newIssuer(metadata)
@@ -260,6 +260,8 @@ export class OpenID extends AuthStrategy {
                     redirect_uri: reqsession?.callbackURL,
                     nonce,
                     state,
+                    keepSessionInfo: true,
+                    failureMessage: true,
                 } as any,
                 (error: any, user: any, info: any) => {
                     this.logger.log('passport authenticate')
