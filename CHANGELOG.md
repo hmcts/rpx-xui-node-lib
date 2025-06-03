@@ -1,3 +1,17 @@
+## [2.30.8](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.7...v2.30.8) (2025-05-28)
+
+
+### Bug Fixes
+
+* #EXUI-2531: Update yarn and node version for rpx-xui-node-lib ([1bca96a](https://github.com/hmcts/rpx-xui-node-lib/commit/1bca96af740ddb0be8aef6b70dc8eb74c960dbe2)), closes [#EXUI-2531](https://github.com/hmcts/rpx-xui-node-lib/issues/EXUI-2531)
+
+## [2.30.7](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.6...v2.30.7) (2025-05-28)
+
+
+### Bug Fixes
+
+* SSO "session expired" problem EXUI-3037 ([#265](https://github.com/hmcts/rpx-xui-node-lib/issues/265)) ([f65c477](https://github.com/hmcts/rpx-xui-node-lib/commit/f65c47776f1f6d5a35f974425cbc103804e8fab4))
+
 ## [2.30.4](https://github.com/hmcts/rpx-xui-node-lib/compare/v2.30.3...v2.30.4) (2025-04-02)
 
 

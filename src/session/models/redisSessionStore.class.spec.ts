@@ -1,5 +1,5 @@
 import { RedisSessionStore } from './redisSessionStore.class'
-import { createMock } from 'ts-auto-mock'
+import { createMock } from '@golevelup/ts-jest';
 import { RedisSessionMetadata, SessionMetadata } from './sessionMetadata.interface'
 import { default as redis } from 'redis'
 import { Router } from 'express'
@@ -65,7 +65,9 @@ test('sessionStore configure', () => {
     const options = {} as SessionMetadata
     const spyClassStore = jest.spyOn(sessionStore, 'getClassStore').mockReturnValue({} as Store)
     const spySessionOptions = jest.spyOn(sessionStore, 'mapSessionOptions').mockReturnValue({} as any)
-    const returnRouter = sessionStore.configure(options)
+
+    sessionStore.configure(options)
+
     expect(spyClassStore).toHaveBeenCalled()
     expect(spySessionOptions).toHaveBeenCalled()
     expect(spyUse).toHaveBeenCalled()
