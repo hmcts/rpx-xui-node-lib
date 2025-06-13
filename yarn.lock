@@ -848,7 +848,6 @@ __metadata:
     "@semantic-release/git": "npm:^10.0.1"
     "@semantic-release/github": "npm:^8.1.0"
     "@types/connect-redis": "npm:^0.0.23"
-    "@types/csurf": "npm:^1.11.0"
     "@types/debug": "npm:^4.1.5"
     "@types/express": "npm:^4.17.2"
     "@types/express-session": "npm:1.17.10"
@@ -2021,15 +2020,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/csurf@npm:^1.11.0":
-  version: 1.11.5
-  resolution: "@types/csurf@npm:1.11.5"
-  dependencies:
-    "@types/express-serve-static-core": "npm:*"
-  checksum: 10c0/f1d831f5ffe5ed6f9fad71f1ca8ac68e464625d6ff1c229f2761e392b92888d6fa83209a4dd451f9923b55142f8a7b9945b77d26f9252db409d823a1358d2155
-  languageName: node
-  linkType: hard
-
 "@types/debug@npm:^4.1.5":
   version: 4.1.11
   resolution: "@types/debug@npm:4.1.11"
@@ -2046,7 +2036,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express-serve-static-core@npm:*, @types/express-serve-static-core@npm:^4.17.33":
+"@types/express-serve-static-core@npm:^4.17.33":
   version: 4.17.41
   resolution: "@types/express-serve-static-core@npm:4.17.41"
   dependencies:
