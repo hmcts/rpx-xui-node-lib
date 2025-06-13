@@ -11,6 +11,15 @@ import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
 import jwtDecode from 'jwt-decode'
 
+// Extend Express Request interface to include csrfToken method
+declare global {
+    namespace Express {
+        interface Request {
+            csrfToken?: () => string;
+        }
+    }
+}
+
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
 
@@ -516,7 +525,9 @@ export abstract class Strategy extends events.EventEmitter {
             }
             /* istanbul ignore next */
             this.router.use(csrfProtection, (req, res, next) => {
-                res.cookie('XSRF-TOKEN', req.csrfToken(), cookieOptions)
+                if (typeof req.csrfToken === 'function') {
+                    res.cookie('XSRF-TOKEN', req.csrfToken(), cookieOptions)
+                }
                 next()
             })
         }
