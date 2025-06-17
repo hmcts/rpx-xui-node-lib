@@ -1,4 +1,4 @@
- 
+
 
 import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
@@ -220,7 +220,6 @@ test('OIDC verifyLogin happy Path with no subscription', () => {
         ...mockRequestRequired,
         body: {},
     } as unknown as Request
-    mockRequest.csrfToken = jest.fn()
     mockRequest.logIn = (user: any, optionsOrDone: any, maybeDone?: (err: any) => void) => {
         if (typeof optionsOrDone === 'function') {
             optionsOrDone()
@@ -248,7 +247,6 @@ test('OIDC verifyLogin happy Path with subscription', () => {
         ...mockRequestRequired,
         body: {},
     } as unknown as Request
-    mockRequest.csrfToken = jest.fn()
     mockRequest.logIn = (user: any, optionsOrDone: any, maybeDone?: (err: any) => void) => {
         if (typeof optionsOrDone === 'function') {
             optionsOrDone()
@@ -411,7 +409,7 @@ xtest('verify() Should return a no access roles messages if the User has no role
     const tokenSet = createMock<TokenSet>()
     const userinfo = createMock<UserinfoResponse>()
 
-    const doneFunction = jest.fn((_err, _user, _message) => {})
+    const doneFunction = jest.fn((_err, _user, _message) => { })
 
     oidc.verify(tokenSet, userinfo, doneFunction)
 
@@ -433,7 +431,7 @@ xtest('verify() Should return the user token set if a User has roles.', async ()
         idToken: tokenSet.id_token,
     }
 
-    const doneFunction = jest.fn((_err, _user, _message) => {})
+    const doneFunction = jest.fn((_err, _user, _message) => { })
 
     oidc.verify(tokenSet, userinfo, doneFunction)
 
@@ -646,7 +644,15 @@ xtest('keepAliveHandler session and isAuthenticated', async () => {
         session: session
     }
 
-    const mockRequest = createMockPassportRequest('user', mockRequestProps)
+    const mockRequest = createMockPassportRequest('user', mockRequestProps) as unknown as {
+        session: {
+            passport: {
+                user: {
+                    tokenset: any;
+                };
+            };
+        };
+    };
     const isAuth = jest.fn()
     isAuth.mockReturnValue(true)
     const spyOnClient = jest.spyOn(oidc, 'getClient')
@@ -665,7 +671,7 @@ xtest('keepAliveHandler session and isAuthenticated', async () => {
 
     const spyAuthSuccEmit = jest.spyOn(oidc, 'emit').mockReturnValue(false)
 
-    await oidc.keepAliveHandler(mockRequest, mockResponse, next)
+    await oidc.keepAliveHandler(mockRequest as any, mockResponse, next)
     expect(spyOnClient).toHaveBeenCalledTimes(2)
     expect(spyOnRefresh).toHaveBeenCalled()
     expect(spyConvertTokenSet).toHaveBeenCalled()
