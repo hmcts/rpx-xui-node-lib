@@ -1,3 +1,4 @@
+import * as crypto from 'crypto'
 import * as events from 'events'
 import { CookieOptions, NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import passport, { LogOutOptions } from 'passport'
@@ -7,15 +8,8 @@ import { AuthOptions } from './authOptions.interface'
 import Joi from 'joi'
 import * as URL from 'url'
 import { generators } from 'openid-client'
-import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
 import jwtDecode from 'jwt-decode'
-
-declare module 'express-serve-static-core' {
-  interface Request {
-    csrfToken?: () => string;
-  }
-}
 
 export abstract class Strategy extends events.EventEmitter {
     public readonly strategyName: string
@@ -111,7 +105,7 @@ export abstract class Strategy extends events.EventEmitter {
                 resolve(false)
             }
         })
-        return { promise: p, state: state}
+        return { promise: p, state: state }
     }
 
     /**
@@ -267,9 +261,9 @@ export abstract class Strategy extends events.EventEmitter {
 
         this.serializeUser()
         this.deserializeUser()
-        ;(async () => {
-            await this.initialiseStrategy(this.options)
-        })()
+            ; (async () => {
+                await this.initialiseStrategy(this.options)
+            })()
 
         this.initializePassport()
         this.initializeSession()
@@ -294,7 +288,7 @@ export abstract class Strategy extends events.EventEmitter {
         const reqSession = req.session as MySessionData
         const qstate = typeof req.query.state == 'string' ? req.query.state : undefined
         const { promise, state } = this.saveStateInSession(reqSession, qstate)
-        if(!qstate) {
+        if (!qstate) {
             req.query.state = state
         }
         await promise
@@ -510,25 +504,39 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public initialiseCSRF = (): void => {
         if (this.options.useCSRF) {
-            this.logger.log('initialising CSRF middleware')
+            this.logger.log('initialising custom CSRF middleware');
 
-            const csrfProtection = csrf({
-                value: this.getCSRFValue,
-            })
-            // cookie options added via EXUI-986, fortify issues
             const cookieOptions: CookieOptions = {
                 sameSite: 'none',
                 secure: true,
-            }
-            /* istanbul ignore next */
-            this.router.use(csrfProtection, (req, res, next) => {
-                if (req.csrfToken) {
-                    res.cookie('XSRF-TOKEN', req.csrfToken(), cookieOptions)
+                httpOnly: false, // must be false so frontend can read it
+            };
+
+            this.router.use((req: Request, res: Response, next: NextFunction) => {
+                const method = req.method.toUpperCase();
+                const exemptMethods = ['GET', 'HEAD', 'OPTIONS'];
+                const tokenName = 'XSRF-TOKEN';
+
+                if (exemptMethods.includes(method)) {
+                    let token = req.cookies?.[tokenName];
+                    if (!token) {
+                        token = crypto.randomBytes(32).toString('hex');
+                        res.cookie(tokenName, token, cookieOptions);
+                    }
+                    return next();
                 }
-                next()
-            })
+
+                const cookieToken = req.cookies?.[tokenName];
+                const headerToken = req.headers['x-xsrf-token'] as string;
+
+                if (cookieToken && headerToken && cookieToken === headerToken) {
+                    return next();
+                }
+
+                return res.status(403).send('Invalid or missing CSRF token');
+            });
         }
-    }
+    };
 
     /**
      * retrieve the csrf token value, lastly from sent cookies
