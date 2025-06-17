@@ -220,7 +220,7 @@ describe('OAUTH2 Auth', () => {
 
         const mockResponse = {
             redirect: jest.fn(),
-            locals: { message: ''}
+            locals: { message: '' }
         } as unknown as Response
 
         const next = jest.fn()
@@ -246,7 +246,7 @@ describe('OAUTH2 Auth', () => {
             info: jest.fn(),
         } as unknown as XuiLogger
         const oAuth2 = new OAuth2(mockRouter, logger)
-        const mockProps = {url: 'http://localhost/callbackUrl'}
+        const mockProps = { url: 'http://localhost/callbackUrl' }
         const mockRequest = createMockPassportRequest('user', mockProps)
         const mockResponse = createMock<Response>()
         const next = jest.fn()
