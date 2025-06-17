@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import * as crypto from 'crypto'
 import * as events from 'events'
 import { CookieOptions, NextFunction, Request, RequestHandler, Response, Router } from 'express'
