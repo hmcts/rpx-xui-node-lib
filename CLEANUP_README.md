@@ -60,6 +60,12 @@ Navigate to the repository folder on your local:
 cd path/to/target/repo
 ```
 
+Ensure youre on the master branch:
+
+```bash
+git checkout master
+```
+
 Add the `secrets-to-remove.txt` file (found in the `Attachments` section of the Jira ticket) to the root of the repo directory.
 
 Sanity check to confirm the repo has the correct remote URL configured:
@@ -72,6 +78,7 @@ git remote -v
 > The repo username and name should look like:
 >
 > origin git@github.com:hmcts/rpx-xui-node-lib.git (fetch)
+>
 > origin git@github.com:hmcts/rpx-xui-node-lib.git (push)
 
 Run the following command to replace secrets in your repository:
@@ -93,17 +100,18 @@ Once happy, push changes to remote (force push required):
 *optional* dry run sanity check:
 
 ```bash
-git push --force --dry-run origin <branch-name>
+git push --force --dry-run origin master
 ```
 
 Command to push changes to remote:
 
 ```bash
-git push --force origin <branch-name>
+git push --force origin master
 ```
 
 ## Post Cleanup Actions
 
+* Verify pushed changes on Github.
 * Immediately inform all team members upon completion of cleanup.
 * All users of that repo must then discard their local clone and clone a fresh copy of the repository:
 
