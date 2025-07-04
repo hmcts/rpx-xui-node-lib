@@ -122,7 +122,7 @@ git clone <repo-url>
 * WIP branches can then be recreated by cherry picking stored commit SHA's onto a new branch off the fresh clone:
 
 ```bash
-git checkout -b <new-feature-branch> origin/main
+git checkout -b <new-feature-branch> origin/master
 git cherry-pick <SHA1> <SHA2> <SHA3>
 ```
 
