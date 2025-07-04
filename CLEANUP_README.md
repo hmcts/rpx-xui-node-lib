@@ -14,6 +14,8 @@ This guide details the steps to remove secrets from our Git repositories using t
 
 * For WIP feature branches created _before_ cleanup, developers must locally record commit SHAs. After cleanup, these commits must be cherry-picked onto a new feature branch created from a fresh, post-cleanup clone of the repo.
 
+* Github [recommends](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository#:~:text=Poor%20interaction%20with,from%20your%20repository) merging or closing all open pull requests before altering the git history as the changed SHAs may cause problems.
+
 ```bash
 git checkout my-feature-branch
 git log --oneline
