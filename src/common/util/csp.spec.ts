@@ -27,6 +27,7 @@ describe('csp middleware', () => {
     )
     expect(res.locals.cspNonce).toBeDefined()
     expect(typeof res.locals.cspNonce).toBe('string')
+    expect(next).toHaveBeenCalled(); 
   })
 
   it('should call helmet.contentSecurityPolicy with correct directives', () => {
@@ -66,6 +67,7 @@ describe('csp middleware', () => {
     expect(call.directives['connect-src']).toContain('https://extra-connect.com')
     expect(call.directives['font-src']).toContain('https://extra-font.com')
     expect(call.directives['img-src']).toContain('https://extra-img.com')
+    expect(next).toHaveBeenCalled(); 
   })
 
   it('should set Content-Security-Policy header', () => {
@@ -80,6 +82,7 @@ describe('csp middleware', () => {
     const opts = ((helmet.contentSecurityPolicy as unknown) as jest.Mock).mock.calls.pop()[0];
     expect(opts.reportOnly).toBe(true);
     delete process.env.CSP_REPORT_ONLY;
+    expect(next).toHaveBeenCalled(); 
   })
 
   it('merges extras from environment variables', () => {
@@ -88,5 +91,6 @@ describe('csp middleware', () => {
     const opts = ((helmet.contentSecurityPolicy as unknown) as jest.Mock).mock.calls.pop()[0];
     expect(opts.directives['script-src']).toContain('https://env-script.com');
     delete process.env.CSP_SCRIPT_EXTRA;
+    expect(next).toHaveBeenCalled(); 
   })
 })
