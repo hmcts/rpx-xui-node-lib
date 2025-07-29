@@ -60,7 +60,7 @@ describe('csp middleware', () => {
       extraImg: ['https://extra-img.com']
     })(req, res, next)
     const calls = ((helmet.contentSecurityPolicy as unknown) as jest.Mock).mock.calls;
-    const call  = calls[calls.length - 1][0];
+    const call = calls[calls.length - 1][0];
     expect(call.directives['script-src']).toContain('https://extra-script.com')
     expect(call.directives['style-src']).toContain('https://extra-style.com')
     expect(call.directives['connect-src']).toContain('https://extra-connect.com')
@@ -72,5 +72,21 @@ describe('csp middleware', () => {
     csp()(req, res, next)
     expect(res.setHeader).toHaveBeenCalledWith('Content-Security-Policy', 'mocked-csp-header')
     expect(next).toHaveBeenCalled()
+  })
+
+  it('honours CSP_REPORT_ONLY env flag', () => {
+    process.env.CSP_REPORT_ONLY = 'true';
+    csp()(req, res, next);
+    const opts = ((helmet.contentSecurityPolicy as unknown) as jest.Mock).mock.calls.pop()[0];
+    expect(opts.reportOnly).toBe(true);
+    delete process.env.CSP_REPORT_ONLY;
+  })
+
+  it('merges extras from environment variables', () => {
+    process.env.CSP_SCRIPT_EXTRA = 'https://env-script.com';
+    csp()(req, res, next);
+    const opts = ((helmet.contentSecurityPolicy as unknown) as jest.Mock).mock.calls.pop()[0];
+    expect(opts.directives['script-src']).toContain('https://env-script.com');
+    delete process.env.CSP_SCRIPT_EXTRA;
   })
 })
