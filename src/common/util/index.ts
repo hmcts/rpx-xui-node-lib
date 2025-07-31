@@ -1,3 +1,4 @@
+export { SECURITY_POLICY } from './contentSecurityPolicy';
 export { csp } from './csp'
 export { hasKey } from './hasKey'
 export { getLogger, XuiLogger } from './debug.logger'
