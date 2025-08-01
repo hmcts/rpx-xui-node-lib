@@ -24,7 +24,7 @@ export function csp({
         "default-src": ["'self'"],
         "script-src":  ["'self'", `'nonce-${nonce}'`, ...extraScript],
         "style-src":   ["'self'", `'nonce-${nonce}'`, ...extraStyle],
-        "style-src-attr":  ["'unsafe-inline'"],
+        "styleSrcAttr":  ["'unsafe-inline'"],
         "connect-src": ["'self'", "blob:", "data:", ...extraConnect],
         "img-src":     ["'self'", "data:", ...extraImg],
         "font-src":    ["'self'", "data:", "https://fonts.gstatic.com", ...extraFont],
