@@ -39,11 +39,11 @@ describe('csp middleware', () => {
     expect(helmet.contentSecurityPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
         directives: expect.objectContaining({
-          "script-src": expect.arrayContaining([
+          "scriptSrc": expect.arrayContaining([
             "'self'",
             expect.stringMatching(/^'nonce-/)
           ]),
-          "style-src": expect.arrayContaining([
+          "styleSrc": expect.arrayContaining([
             "'self'",
             expect.stringMatching(/^'nonce-/)
           ])
@@ -62,12 +62,12 @@ describe('csp middleware', () => {
     })(req, res, next)
     const calls = ((helmet.contentSecurityPolicy as unknown) as jest.Mock).mock.calls;
     const call = calls[calls.length - 1][0];
-    expect(call.directives['script-src']).toContain('https://extra-script.com')
-    expect(call.directives['style-src']).toContain('https://extra-style.com')
-    expect(call.directives['connect-src']).toContain('https://extra-connect.com')
-    expect(call.directives['font-src']).toContain('https://extra-font.com')
-    expect(call.directives['img-src']).toContain('https://extra-img.com')
-    expect(next).toHaveBeenCalled(); 
+    expect(call.directives['scriptSrc']).toContain('https://extra-script.com')
+    expect(call.directives['styleSrc']).toContain('https://extra-style.com')
+    expect(call.directives['connectSrc']).toContain('https://extra-connect.com')
+    expect(call.directives['fontSrc']).toContain('https://extra-font.com')
+    expect(call.directives['imgSrc']).toContain('https://extra-img.com')
+    expect(next).toHaveBeenCalled();
   })
 
   it('should set Content-Security-Policy header', () => {
@@ -89,7 +89,7 @@ describe('csp middleware', () => {
     process.env.CSP_SCRIPT_EXTRA = 'https://env-script.com';
     csp()(req, res, next);
     const opts = ((helmet.contentSecurityPolicy as unknown) as jest.Mock).mock.calls.pop()[0];
-    expect(opts.directives['script-src']).toContain('https://env-script.com');
+    expect(opts.directives['scriptSrc']).toContain('https://env-script.com');
     delete process.env.CSP_SCRIPT_EXTRA;
     expect(next).toHaveBeenCalled(); 
   })
