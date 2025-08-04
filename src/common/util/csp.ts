@@ -26,10 +26,6 @@ export function csp({
         /* THIS authorises inline *attribute* styles */
         styleSrcAttr: ["'unsafe-inline'"],
 
-        /* THIS authorises inline scripts such as javascript:void(0) */
-        /* TODO: this should be removed in future via replacing such lines in common-lib and toolkit */
-        scriptSrcAttr: ["'unsafe-inline'"],
-
         connectSrc: ["'self'", "blob:", "data:", ...extraConnect],
         imgSrc: ["'self'", "data:", ...extraImg],
         fontSrc: ["'self'", "data:", "https://fonts.gstatic.com", ...extraFont],
