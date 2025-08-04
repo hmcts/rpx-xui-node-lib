@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import crypto from 'node:crypto';
-import merge from 'deepmerge';                     // <-- deep merge helper
+import merge from 'deepmerge';
 
 export function csp({
   extraScript = (process.env.CSP_SCRIPT_EXTRA ?? '').split(',').filter(Boolean),
@@ -18,13 +18,17 @@ export function csp({
     const newCsp = {
       useDefaults: true,
       directives: {
-        /* camel‑case so they merge onto the existing ones */
-        defaultSrc: ["'self'"],                               // default-src
+        // dashed form is fine too, but keep the SAME spelling everywhere
+        defaultSrc: ["'self'"],
         scriptSrc: ["'self'", `'nonce-${nonce}'`, ...extraScript],
         styleSrc: ["'self'", `'nonce-${nonce}'`, ...extraStyle],
 
-        /* style attribute allowance */
-        styleSrcAttr: ["'unsafe-inline'"],                     // style-src-attr
+        /* THIS authorises inline *attribute* styles */
+        styleSrcAttr: ["'unsafe-inline'"],
+
+        /* THIS authorises inline scripts such as javascript:void(0) */
+        /* TODO: this should be removed in future via replacing such lines in common-lib and toolkit */
+        scriptSrcAttr: ["'unsafe-inline'"],
 
         connectSrc: ["'self'", "blob:", "data:", ...extraConnect],
         imgSrc: ["'self'", "data:", ...extraImg],
@@ -38,7 +42,9 @@ export function csp({
       reportOnly: process.env.CSP_REPORT_ONLY === 'true'
     };
 
+    // deep‑merge so we don’t lose anything from SECURITY_POLICY
     const finalCsp = merge(defaultCsp, newCsp);
+
     helmet.contentSecurityPolicy(finalCsp)(req, res, next);
   };
 }
