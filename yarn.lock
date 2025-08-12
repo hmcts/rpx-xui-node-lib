@@ -2089,9 +2089,9 @@ __metadata:
   linkType: hard
 
 "@types/hapi__joi@npm:^17.1.0":
-  version: 17.1.13
-  resolution: "@types/hapi__joi@npm:17.1.13"
-  checksum: 10c0/7d745162e94d12eac9707147219a2db4badccc8474bac5255d0b45d7ceea5213e14d96dd0a45c2637efcdfba3dbb374cf1638ff41d5388a61907725b545d2bed
+  version: 17.1.15
+  resolution: "@types/hapi__joi@npm:17.1.15"
+  checksum: 10c0/b6792fb49f23f9344e12399854ddc53e08f5fa9ac0c4d11373ebe134dae9633af93191d4836e52271deebe5b6d02d1ecf125d80068ac447f71ff540cbe154461
   languageName: node
   linkType: hard
 
