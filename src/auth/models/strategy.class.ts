@@ -511,7 +511,7 @@ export abstract class Strategy extends events.EventEmitter {
             })
             // cookie options added via EXUI-986, fortify issues
             const cookieOptions: CookieOptions = {
-                sameSite: 'strict',
+                sameSite: 'none',
                 secure: true,
             }
             /* istanbul ignore next */
