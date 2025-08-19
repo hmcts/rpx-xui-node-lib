@@ -23,6 +23,9 @@ export function csp({
         scriptSrc: ["'self'", `'nonce-${nonce}'`, ...extraScript],
         styleSrc: ["'self'", `'nonce-${nonce}'`, ...extraStyle],
 
+        // inline style attributes still allowed - should be phased out in future
+        styleSrcAttr: ["'unsafe-inline'"],
+
         connectSrc: ["'self'", "blob:", "data:", ...extraConnect],
         imgSrc: ["'self'", "data:", ...extraImg],
         fontSrc: ["'self'", "data:", "https://fonts.gstatic.com", ...extraFont],
