@@ -66,12 +66,12 @@ export class OpenID extends AuthStrategy {
         custom.setHttpOptionsDefaults(httpOptions)
     }
 
-    public getOpenIDOptions = (authOptions: AuthOptions): OpenIDMetadata => {
+    public getOpenIDOptions = (authOptions: AuthOptions, discoveryOptions: any): OpenIDMetadata => {
         return {
             client_id: authOptions.clientID,
             client_secret: authOptions.clientSecret,
             discovery_endpoint: authOptions.discoveryEndpoint,
-            issuer_url: authOptions.issuerURL,
+            issuer_url: discoveryOptions.issuer,
             logout_url: authOptions.logoutURL,
             response_types: authOptions.responseTypes as ResponseType[],
             scope: authOptions.scope,
@@ -130,12 +130,6 @@ export class OpenID extends AuthStrategy {
         const issuer = await this.discoverIssuer()
 
         const metadata = issuer.metadata
-        this.logger.info('start serviceOverride check')
-        if (!this.options.serviceOverride) {
-            this.logger.info(`issuerURL: ${this.options?.issuerURL}`)
-            metadata.issuer = this.options.issuerURL
-        }
-        this.logger.info('end serviceOverride check')
         this.logger.log('discover metadata', metadata)
 
         return this.newIssuer(metadata)
@@ -143,8 +137,7 @@ export class OpenID extends AuthStrategy {
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
         this.logger.log('initialiseStrategy start')
-        const options = this.getOpenIDOptions(authOptions)
-        const strategy = await this.createNewStrategy(options)
+        const strategy = await this.createNewStrategy(authOptions)
         this.useStrategy(this.strategyName, strategy)
         this.logger.log('initialiseStrategy end')
     }
@@ -188,11 +181,13 @@ export class OpenID extends AuthStrategy {
     // get the function to return and throw the error in the caller function.
     // Why? - this makes the function more pure, and allows it to be easily testable.
     /* istanbul ignore next */
-    public createNewStrategy = async (options: OpenIDMetadata): Promise<Strategy<any, any>> => {
+    public createNewStrategy = async (authOptions: AuthOptions): Promise<Strategy<any, any>> => {
         this.issuer = await this.discover()
         if (!this.issuer) {
             throw new Error('auto discovery failed')
         }
+        const options = this.getOpenIDOptions(authOptions, this.issuer)
+        this.logger.log('initialiseStrategy options', options)
         this.client = this.getClientFromIssuer(this.issuer, options)
         if (!this.client) {
             throw new Error('client not initialised')
