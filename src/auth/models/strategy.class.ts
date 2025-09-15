@@ -37,6 +37,7 @@ export abstract class Strategy extends events.EventEmitter {
         useCSRF: true,
         routeCredential: undefined,
         serviceOverride: false,
+        ssoLogoutURL: '',
     }
 
     protected constructor(strategyName: string, router: Router, logger: XuiLogger = getLogger('auth:strategy')) {
@@ -72,6 +73,7 @@ export abstract class Strategy extends events.EventEmitter {
             useCSRF: Joi.bool(),
             serviceOverride: Joi.bool(),
             routeCredential: Joi.any(),
+            ssoLogoutURL: Joi.string(),
         })
         const { error } = schema.validate(options)
         if (error) {
@@ -225,7 +227,16 @@ export abstract class Strategy extends events.EventEmitter {
                 return Promise.resolve()
             }
 
-            const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
+            const redirectUrl = URL.format({
+                protocol: req.protocol,
+                host: req.get('host'),
+            })
+            const params = new URLSearchParams({ post_logout_redirect_uri: redirectUrl })
+            
+            const finalSSOLogoutUrl = `${this.options.ssoLogoutURL}?${params.toString()}`
+
+            const redirect = finalSSOLogoutUrl ? finalSSOLogoutUrl : AUTH.ROUTE.LOGIN
+            
             this.logger.log('redirecting to => ', redirect)
             // 401 is when no accessToken
             res.redirect(redirect as string)
