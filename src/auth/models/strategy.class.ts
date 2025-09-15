@@ -73,7 +73,7 @@ export abstract class Strategy extends events.EventEmitter {
             useCSRF: Joi.bool(),
             serviceOverride: Joi.bool(),
             routeCredential: Joi.any(),
-            ssoLogoutURL: Joi.string(),
+            ssoLogoutURL: Joi.string().allow(''),
         })
         const { error } = schema.validate(options)
         if (error) {
