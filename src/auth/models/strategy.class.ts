@@ -37,7 +37,6 @@ export abstract class Strategy extends events.EventEmitter {
         useCSRF: true,
         routeCredential: undefined,
         serviceOverride: false,
-        ssoLogoutURL: '',
     }
 
     protected constructor(strategyName: string, router: Router, logger: XuiLogger = getLogger('auth:strategy')) {
@@ -73,7 +72,7 @@ export abstract class Strategy extends events.EventEmitter {
             useCSRF: Joi.bool(),
             serviceOverride: Joi.bool(),
             routeCredential: Joi.any(),
-            ssoLogoutURL: Joi.string().optional(),
+            ssoLogoutURL: Joi.string(),
         })
         const { error } = schema.validate(options)
         if (error) {
@@ -201,7 +200,6 @@ export abstract class Strategy extends events.EventEmitter {
 
         try {
             this.logger.log('logout start')
-            this.logger.log('logout options:', JSON.stringify(this.options))
             const { accessToken, refreshToken } = reqSession?.passport.user.tokenset || null
 
             const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
@@ -228,7 +226,16 @@ export abstract class Strategy extends events.EventEmitter {
                 return Promise.resolve()
             }
 
-            const redirect = this.options.ssoLogoutURL ? this.options.ssoLogoutURL : AUTH.ROUTE.LOGIN
+            const redirectUrl = URL.format({
+                protocol: req.protocol,
+                host: req.get('host'),
+            })
+            const params = new URLSearchParams({ post_logout_redirect_uri: redirectUrl })
+
+            const finalSSOLogoutUrl = `${this.options.ssoLogoutURL}?${params.toString()}`
+
+            const redirect = finalSSOLogoutUrl ? finalSSOLogoutUrl : AUTH.ROUTE.LOGIN
+            
             this.logger.log('redirecting to => ', redirect)
             // 401 is when no accessToken
             res.redirect(redirect as string)
@@ -266,8 +273,6 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public configure = (options: AuthOptions): RequestHandler => {
-        this.logger.log('configuring strategy, options1:', JSON.stringify(this.options))
-        this.logger.log('configuring strategy, options2:', JSON.stringify(options))
         const configuredOptions = { ...this.options, ...options }
         this.validateOptions(configuredOptions)
         this.options = configuredOptions
