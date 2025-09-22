@@ -255,7 +255,7 @@ export class OpenID extends AuthStrategy {
                     redirect_uri: reqsession?.callbackURL,
                     nonce,
                     state,
-                    keepSessionInfo: true,
+                    keepSessionInfo: false,
                     failureMessage: true,
                 } as any,
                 (error: any, user: any, info: any) => {
