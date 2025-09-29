@@ -151,7 +151,7 @@ test('OIDC OptionsMapper', () => {
         tokenEndpointAuthMethod: 'client_secret_basic',
         useRoutes: false,
     }
-    const openIdOptions = oidc.getOpenIDOptions(options)
+    const openIdOptions = oidc.getOpenIDOptions(options, { issuer: options.issuerURL })
 
     expect(openIdOptions.client_id).toEqual(options.clientID)
     expect(openIdOptions.client_secret).toEqual(options.clientSecret)
@@ -383,14 +383,14 @@ xtest('OIDC initialiseStrategy', async () => {
 
 xtest('test createNewStrategy', async () => {
     const options = {
-        redirect_uri: 'http://oauth/callback',
+        authorizationURL: 'http://oauth/authorize',
         tokenURL: '',
-        client_id: 'clientId',
+        clientID: 'clientId',
         clientSecret: 'Clientsecret',
-        discovery_endpoint: 'someEndpoint',
-        issuer_url: 'issuer_url',
-        logout_url: 'logouturl',
-        callbackURL: 'redirect_uri',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: 'issuer_url',
+        logoutURL: 'logouturl',
+        callbackURL: 'http://oauth/callback',
         responseTypes: ['none'],
         scope: 'some scope',
         sessionKey: 'key',

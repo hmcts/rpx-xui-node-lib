@@ -131,7 +131,7 @@ export abstract class Strategy extends events.EventEmitter {
                 {
                     redirect_uri: reqSession?.callbackURL,
                     state,
-                    keepSessionInfo: true,
+                    keepSessionInfo: false,
                 } as any,
                 (error: any, user: any, info: any) => {
                     /* istanbul ignore next */
@@ -205,7 +205,7 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout({ keepSessionInfo: true }, async (err) => {
+            req.logout({ keepSessionInfo: false }, async (err) => {
                 if (err) {
                     console.error(err)
                     return next(err)
@@ -320,7 +320,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.strategyName,
             {
                 redirect_uri: reqSession?.callbackURL,
-                keepSessionInfo: true,
+                keepSessionInfo: false,
                 failureMessage: true,
             } as any,
             (error: any, user: any, info: any) => {
