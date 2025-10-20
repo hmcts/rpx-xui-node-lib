@@ -893,6 +893,7 @@ __metadata:
     eslint: "npm:^9.25.1"
     express: "npm:^4.20.0"
     express-session: "npm:^1.17.0"
+    helmet: "npm:^7.0.0"
     husky: "npm:^8.0.0"
     jest: "npm:^29.7.0"
     jest-config: "npm:29.5.0"
@@ -916,6 +917,8 @@ __metadata:
     ts-patch: "npm:^3.3.0"
     typescript: "npm:^5.8.3"
     typescript-eslint: "npm:^8.31.1"
+  peerDependencies:
+    helmet: ^7.0.0
   languageName: unknown
   linkType: soft
 
@@ -5884,6 +5887,13 @@ __metadata:
   dependencies:
     function-bind: "npm:^1.1.2"
   checksum: 10c0/3769d434703b8ac66b209a4cca0737519925bbdb61dd887f93a16372b14694c63ff4e797686d87c90f08168e81082248b9b028bad60d4da9e0d1148766f56eb9
+  languageName: node
+  linkType: hard
+
+"helmet@npm:^7.0.0":
+  version: 7.2.0
+  resolution: "helmet@npm:7.2.0"
+  checksum: 10c0/7ba8503519cabc1d6410330b710da3ac01a4ff66e7e10cb68c4d73c96803a2e86ce45c71f3127dfb8ef3ea2e91c7b8316726191873f80d0572f8826878b2854e
   languageName: node
   linkType: hard
 
