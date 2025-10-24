@@ -23,9 +23,7 @@ export class XuiNode extends EventEmitter {
 
     public authenticate = (req: Request, res: Response, next: NextFunction): void => {
         const authMiddleware = this.authenticateMiddleware ? this.authenticateMiddleware : this.authenticateDefault
-        this.logger.info('authenticate: authMiddleware = ', authMiddleware.name)
         authMiddleware(req, res, next)
-        this.logger.log('authenticate: end')
     }
 
     /**
