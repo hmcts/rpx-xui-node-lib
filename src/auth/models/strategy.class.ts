@@ -314,7 +314,6 @@ export abstract class Strategy extends events.EventEmitter {
             const sessionKey = this.options.sessionKey
             this.logger.log(`sessionKey: ${sessionKey}`)
             this.logger.log(`state from session = ${reqSession[sessionKey]?.state}`)
-            this.logger.log('session data:' + JSON.stringify(reqSession))
         } else {
             this.logger.log('sessionKey not set')
         }
@@ -572,7 +571,6 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public deserializeUser = (): void => {
         passport.deserializeUser((id, done) => {
-            this.logger.log(`${this.strategyName} deserializeUser`)
             this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, done)
         })
     }
@@ -621,7 +619,6 @@ export abstract class Strategy extends events.EventEmitter {
         done: (err: any, id?: any) => void,
     ): void => {
         if (!this.listenerCount(eventName)) {
-            this.logger.error('no listeners for event ' + eventName)
             done(null, eventObject)
         } else {
             this.emit(eventName, eventObject, done)

@@ -49,13 +49,11 @@ export class S2SAuth extends EventEmitter {
             const token = await this.serviceTokenGenerator()
 
             if (token) {
-                this.logger.info('Adding S2S token to request headers')
                 req.headers.ServiceAuthorization = `Bearer ${token}`
 
                 // If there are no listeners for a success event from this emitter, just return this middleware using
                 // next(), else emit a success event with the S2S token
                 if (!this.listenerCount(S2S.EVENT.AUTHENTICATE_SUCCESS)) {
-                    this.logger.info(`S2SAuth: no listener count: ${S2S.EVENT.AUTHENTICATE_SUCCESS}`)
                     return next()
                 } else {
                     this.emit(S2S.EVENT.AUTHENTICATE_SUCCESS, token, req, res, next)
@@ -68,7 +66,6 @@ export class S2SAuth extends EventEmitter {
     }
 
     public validateCache = (): boolean => {
-        this.logger.info('Validating S2S token cache')
         const currentTime = Math.floor(Date.now() / 1000)
         if (!this.store[this.s2sConfig.microservice]) {
             return false
@@ -87,7 +84,8 @@ export class S2SAuth extends EventEmitter {
     }
 
     private generateToken = async (): Promise<string> => {
-        this.logger.info('Getting new S2S token')
+        this.logger.info('Generating new S2S token')
+
         const token = await this.postS2SLease()
 
         const tokenData: DecodedJWT = jwtDecode(token)
@@ -116,7 +114,6 @@ export class S2SAuth extends EventEmitter {
 
     public serviceTokenGenerator = async (): Promise<string> => {
         if (this.validateCache()) {
-            this.logger.info('Getting cached S2S token')
             const tokenData = this.getToken()
             return tokenData.token
         } else {
