@@ -166,7 +166,11 @@ export class OpenID extends AuthStrategy {
             this.logger.warn(VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES)
             return done(null, false, { message: VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES })
         }
-        this.logger.info('verify okay, user:', userinfo)
+        const allowedKeys = ['ssoProvider', 'uid', 'identity', 'roles', 'iss']
+        const filteredUserinfo = Object.fromEntries(
+            Object.entries(userinfo).filter(([key]) => allowedKeys.includes(key))
+        )
+        this.logger.info('verify okay, user:', filteredUserinfo)
 
         return done(null, { tokenset: this.convertTokenSet(tokenset), userinfo })
     }
