@@ -72,6 +72,7 @@ export abstract class Strategy extends events.EventEmitter {
             useCSRF: Joi.bool(),
             serviceOverride: Joi.bool(),
             routeCredential: Joi.any(),
+            ssoLogoutURL: Joi.string(),
         })
         const { error } = schema.validate(options)
         if (error) {
@@ -160,9 +161,28 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-    public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
+   public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
+
+        // Always ensure callbackURL is set (not just when missing)
+        if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
+            req.app.set('trust proxy', true)
+
+            // fallback to default if this.options.callbackURL is missing
+            const pathname = this.options.callbackURL || req.originalUrl
+
+            reqSession.callbackURL = URL.format({
+                protocol: req.protocol,
+                host: req.get('host'),
+                pathname,
+            })
+
+            this.logger.log(`callbackURL was missing — set to: ${reqSession.callbackURL}`)
+        }
+
+        // 🔍 Log current config and session key status
         this.logger.log(`setCallbackURL, options.callbackurl: ${this.options.callbackURL}`)
+
         if (this.options.sessionKey) {
             const sessionKey = this.options.sessionKey
             this.logger.log(`sessionKey: ${sessionKey}`)
@@ -170,16 +190,7 @@ export abstract class Strategy extends events.EventEmitter {
         } else {
             this.logger.log('sessionKey not set')
         }
-        /* istanbul ignore else */
-        if (req.session && !reqSession.callbackURL) {
-            req.app.set('trust proxy', true)
-            reqSession.callbackURL = URL.format({
-                protocol: req.protocol,
-                host: req.get('host'),
-                pathname: this.options.callbackURL,
-            })
-        }
-        /* istanbul ignore next */
+
         next()
     }
 
@@ -216,13 +227,18 @@ export abstract class Strategy extends events.EventEmitter {
                     res.status(200).send({ message: 'You have been logged out!' })
                     return Promise.resolve()
                 }
-
-                const redirect = req.query.redirect ? req.query.redirect : AUTH.ROUTE.LOGIN
+                const redirectUrl = URL.format({
+                    protocol: req.protocol,
+                    host: req.get('host'),
+                })
+                const params = new URLSearchParams({ post_logout_redirect_uri: redirectUrl })
+                const finalSSOLogoutUrl = `${this.options.ssoLogoutURL}?${params.toString()}`
+                const redirect = finalSSOLogoutUrl ? finalSSOLogoutUrl : AUTH.ROUTE.LOGIN
                 this.logger.log('redirecting to => ', redirect)
                 // 401 is when no accessToken
                 res.redirect(redirect as string)
-                /* istanbul ignore next */
             })
+
         } catch (e) {
             this.logger.error('error => ', e)
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
@@ -296,7 +312,6 @@ export abstract class Strategy extends events.EventEmitter {
             const sessionKey = this.options.sessionKey
             this.logger.log(`sessionKey: ${sessionKey}`)
             this.logger.log(`state from session = ${reqSession[sessionKey]?.state}`)
-            this.logger.log('session data:' + JSON.stringify(reqSession))
         } else {
             this.logger.log('sessionKey not set')
         }
@@ -556,7 +571,6 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public deserializeUser = (): void => {
         passport.deserializeUser((id, done) => {
-            this.logger.log(`${this.strategyName} deserializeUser`)
             this.emitIfListenersExist(AUTH.EVENT.DESERIALIZE_USER, id, done)
         })
     }
@@ -605,7 +619,6 @@ export abstract class Strategy extends events.EventEmitter {
         done: (err: any, id?: any) => void,
     ): void => {
         if (!this.listenerCount(eventName)) {
-            this.logger.error('no listeners for event ' + eventName)
             done(null, eventObject)
         } else {
             this.emit(eventName, eventObject, done)
