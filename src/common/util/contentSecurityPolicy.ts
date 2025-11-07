@@ -38,15 +38,12 @@ export const SECURITY_POLICY = {
         mediaSrc: ["'self'"],
         scriptSrc: [
             "'self'",
-            "'unsafe-inline'",
-            "'unsafe-eval'",
             'https://*.google-analytics.com',
             'https://*.googletagmanager.com',
             'az416426.vo.msecnd.net',
         ],
         styleSrc: [
             "'self'",
-            "'unsafe-inline'",
             'https://fonts.googleapis.com',
             'https://fonts.gstatic.com',
             'https://www.googletagmanager.com',
