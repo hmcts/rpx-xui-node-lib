@@ -307,7 +307,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-    public configure = (options: AuthOptions): RequestHandler => {
+    public configure = async (options: AuthOptions): Promise<RequestHandler> => {
         this.logger.log('=== CONFIGURE START ===')
         this.logger.log(`configure: strategy ${this.strategyName}`)
         this.logger.log(`configure: options received: ${JSON.stringify(options, null, 2)}`)
@@ -320,16 +320,15 @@ export abstract class Strategy extends events.EventEmitter {
         this.serializeUser()
         this.deserializeUser()
         
-        this.logger.log('configure: initializing strategy asynchronously')
-        ;(async () => {
-            try {
-                this.logger.log('configure: calling initialiseStrategy')
-                await this.initialiseStrategy(this.options)
-                this.logger.log('configure: initialiseStrategy completed successfully')
-            } catch (error) {
-                this.logger.error('configure: error in initialiseStrategy', error)
-            }
-        })()
+        this.logger.log('configure: initializing strategy synchronously')
+        try {
+            this.logger.log('configure: calling initialiseStrategy')
+            await this.initialiseStrategy(this.options)
+            this.logger.log('configure: initialiseStrategy completed successfully')
+        } catch (error) {
+            this.logger.error('configure: error in initialiseStrategy', error)
+            throw error // Don't continue if strategy initialization fails
+        }
 
         this.logger.log('configure: initializing passport components')
         this.initializePassport()
@@ -515,14 +514,50 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log(`authenticate: req.isUnauthenticated(): ${req.isUnauthenticated()}`)
         this.logger.log(`authenticate: session exists: ${!!req.session}`)
         this.logger.log(`authenticate: session ID: ${req.sessionID}`)
+        this.logger.log(`authenticate: req.session keys: ${req.session ? Object.keys(req.session) : 'no session'}`)
+        this.logger.log(`authenticate: req.session.passport exists: ${!!req.session?.passport}`)
+        this.logger.log(`authenticate: req.session.passport value: ${JSON.stringify(req.session?.passport)}`)
         this.logger.log(`authenticate: passport user exists: ${!!req?.session?.passport?.user}`)
         this.logger.log(`authenticate: passport user userinfo exists: ${!!req?.session?.passport?.user?.userinfo}`)
         this.logger.log(`authenticate: passport user data: ${JSON.stringify(req?.session?.passport?.user, null, 2)}`)
         
-        if (req.isUnauthenticated() || !req?.session?.passport?.user?.userinfo) {
-            this.logger.log('authenticate: user is not authenticated or missing userinfo')
-            this.logger.log(`authenticate: isUnauthenticated: ${req.isUnauthenticated()}`)
-            this.logger.log(`authenticate: missing userinfo: ${!req?.session?.passport?.user?.userinfo}`)
+        // Additional debugging for session state
+        if (req.session) {
+            this.logger.log(`authenticate: full session data: ${JSON.stringify(req.session, null, 2)}`)
+        }
+        
+        // Check if user is authenticated
+        const isAuthenticated = req.isAuthenticated && req.isAuthenticated()
+        const hasPassportUser = req?.session?.passport?.user
+        const hasUserInfo = req?.session?.passport?.user?.userinfo
+        
+        if (!isAuthenticated || !hasPassportUser || !hasUserInfo) {
+            this.logger.log('authenticate: user is not authenticated or missing data')
+            this.logger.log(`authenticate: isAuthenticated: ${isAuthenticated}`)
+            this.logger.log(`authenticate: hasPassportUser: ${!!hasPassportUser}`)
+            this.logger.log(`authenticate: hasUserInfo: ${!!hasUserInfo}`)
+            
+            // Log the specific failure reason
+            if (!isAuthenticated) {
+                this.logger.log('authenticate: FAILURE REASON - not authenticated by passport')
+            }
+            if (!hasPassportUser) {
+                this.logger.log('authenticate: FAILURE REASON - req.session.passport.user is missing')
+                this.logger.log('authenticate: This suggests passport deserialization failed or session store issue')
+            }
+            if (hasPassportUser && !hasUserInfo) {
+                this.logger.log('authenticate: FAILURE REASON - req.session.passport.user.userinfo is missing')
+                this.logger.log('authenticate: User object exists but userinfo is missing')
+            }
+            
+            // For the first-login-per-pod issue, we might want to be more lenient
+            // and redirect to login instead of returning 401 immediately
+            if (req.session && Object.keys(req.session).length > 0 && !hasPassportUser) {
+                this.logger.log('authenticate: Session exists but passport user missing - possible deserialization issue')
+                this.logger.log('authenticate: Redirecting to login to re-establish session')
+                return _res.redirect(AUTH.ROUTE.LOGIN)
+            }
+            
             return _res.status(401).send({ message: 'Unauthorized' })
         }
         
