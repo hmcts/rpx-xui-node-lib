@@ -511,22 +511,48 @@ export abstract class Strategy extends events.EventEmitter {
         _res: Response,
         next: NextFunction,
     ): void | Response<any, Record<string, any>> => {
+        const start = Date.now()
+        this.logger.log('authenticate: start')
+        this.logger.log(`authenticate: query=${JSON.stringify(req.query)}`)
+        this.logger.log(`authenticate: headers=${JSON.stringify({
+            host: req.headers.host,
+            'user-agent': req.headers['user-agent'],
+            referer: req.headers.referer,
+            cookie: !!req.headers.cookie,
+        })}`)
+
         this.logger.log('authenticate: checking authentication status')
         this.logger.log(`authenticate: req.isUnauthenticated(): ${req.isUnauthenticated()}`)
         this.logger.log(`authenticate: session exists: ${!!req.session}`)
         this.logger.log(`authenticate: session ID: ${req.sessionID}`)
         this.logger.log(`authenticate: passport user exists: ${!!req?.session?.passport?.user}`)
         this.logger.log(`authenticate: passport user userinfo exists: ${!!req?.session?.passport?.user?.userinfo}`)
-        this.logger.log(`authenticate: passport user data: ${JSON.stringify(req?.session?.passport?.user, null, 2)}`)
         
-        if (req.isUnauthenticated() || !req?.session?.passport?.user?.userinfo) {
+        const passportUser = req?.session?.passport?.user
+        const userinfo = passportUser?.userinfo
+        if (userinfo) {
+            this.logger.log(`authenticate: user email=${userinfo.email}`)
+            this.logger.log(`authenticate: user roles=${JSON.stringify(userinfo.roles)}`)
+        }
+        const accessToken = passportUser?.tokenset?.accessToken
+        if (accessToken) {
+            this.logger.log(`authenticate: accessToken present, expired=${this.isTokenExpired(accessToken)}`)
+        } else {
+            this.logger.log('authenticate: no accessToken found')
+        }
+
+        this.logger.log(`authenticate: passport user data: ${JSON.stringify(passportUser, null, 2)}`)
+        
+        if (req.isUnauthenticated() || !userinfo) {
             this.logger.log('authenticate: user is not authenticated or missing userinfo')
             this.logger.log(`authenticate: isUnauthenticated: ${req.isUnauthenticated()}`)
-            this.logger.log(`authenticate: missing userinfo: ${!req?.session?.passport?.user?.userinfo}`)
+            this.logger.log(`authenticate: missing userinfo: ${!userinfo}`)
+            this.logger.log(`authenticate: end (unauthorized) durationMs=${Date.now() - start}`)
             return _res.status(401).send({ message: 'Unauthorized' })
         }
         
         this.logger.log('authenticate: user is authenticated, proceeding')
+        this.logger.log(`authenticate: end (success) durationMs=${Date.now() - start}`)
         next()
     }
 
@@ -764,8 +790,10 @@ export abstract class Strategy extends events.EventEmitter {
         done: (err: any, id?: any) => void,
     ): void => {
         if (!this.listenerCount(eventName)) {
+            this.logger.log(`no listeners for event ${eventName}, proceeding with default done callback`)
             done(null, eventObject)
         } else {
+            this.logger.log(`emitting event ${eventName} to listeners`)
             this.emit(eventName, eventObject, done)
         }
     }
