@@ -514,12 +514,6 @@ export abstract class Strategy extends events.EventEmitter {
         const start = Date.now()
         this.logger.log('authenticate: start')
         this.logger.log(`authenticate: query=${JSON.stringify(req.query)}`)
-        this.logger.log(`authenticate: headers=${JSON.stringify({
-            host: req.headers.host,
-            'user-agent': req.headers['user-agent'],
-            referer: req.headers.referer,
-            cookie: !!req.headers.cookie,
-        })}`)
 
         this.logger.log('authenticate: checking authentication status')
         this.logger.log(`authenticate: req.isUnauthenticated(): ${req.isUnauthenticated()}`)
