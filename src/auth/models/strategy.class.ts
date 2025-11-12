@@ -555,29 +555,59 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public verifyLogin = (req: Request, user: any, next: NextFunction, res: Response): void => {
+        this.logger.log('=-=-=-=-=-=-=-=-=-=-=-=-=')
+        this.logger.log('verifyLogin: starting login verification process')
+        this.logger.log(`verifyLogin: user object exists: ${!!user}`)
+        this.logger.log(`verifyLogin: user data: ${JSON.stringify(user, null, 2)}`)
+        this.logger.log(`verifyLogin: session ID: ${req.sessionID}`)
+        
         req.logIn(user, (err) => {
+            this.logger.log('verifyLogin: req.logIn callback invoked')
+            this.logger.log(`verifyLogin: login error: ${err ? JSON.stringify(err) : 'none'}`)
+            
             const roles = user.userinfo.roles
+            this.logger.log(`verifyLogin: user roles: ${JSON.stringify(roles)}`)
+            this.logger.log(`verifyLogin: user email: ${user.userinfo?.email}`)
+            this.logger.log(`verifyLogin: user ID: ${user.userinfo?.uid || user.userinfo?.id}`)
+            this.logger.log(`verifyLogin: allowRolesRegex: ${this.options.allowRolesRegex}`)
+            
             if (err) {
                 this.logger.error('verifyLogin error', err)
+                this.logger.error(`verifyLogin: detailed error: ${JSON.stringify(err)}`)
                 return next(err)
             }
+            
             if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
+                this.logger.log('verifyLogin: role validation failed')
                 this.logger.info(JSON.stringify(user.userInfo))
                 this.logger.error(
                     `User has no application access, as they do not have a role that matches ${this.options.allowRolesRegex}.`,
                 )
+                this.logger.log('verifyLogin: calling logout due to role mismatch')
                 return this.logout(req, res, next)
+            } else {
+                this.logger.log('verifyLogin: role validation passed or not required')
             }
-            if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
+            
+            const listenerCount = this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)
+            this.logger.log(`verifyLogin: listener count for ${AUTH.EVENT.AUTHENTICATE_SUCCESS}: ${listenerCount}`)
+            
+            if (!listenerCount) {
                 this.logger.log(
                     `redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}, user: ${user.email}`,
                 )
+                this.logger.log(`verifyLogin: redirecting to default route: ${AUTH.ROUTE.DEFAULT_REDIRECT}`)
                 res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
             } else {
+                this.logger.log('verifyLogin: emitting authenticate success event')
                 req.isRefresh = false
+                this.logger.log('verifyLogin: setting req.isRefresh to false')
                 this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
+                this.logger.log('verifyLogin: authenticate success event emitted')
             }
         })
+        this.logger.log('=-=-=-=-=-=-=-=-=-=-=-=-=')
+
     }
 
     /* istanbul ignore next */
