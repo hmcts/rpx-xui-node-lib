@@ -342,7 +342,6 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log(`callbackHandler request headers: ${JSON.stringify(req.headers)}`)
         
         const reqSession = req.session as MySessionData
-        this.logger.log(`callbackHandler session ID: ${req.sessionID}`)
         this.logger.log(`callbackHandler session exists: ${!!reqSession}`)
         
         const qstate = typeof req.query.state == 'string' ? req.query.state : undefined
