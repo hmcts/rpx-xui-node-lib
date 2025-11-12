@@ -308,30 +308,51 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public configure = (options: AuthOptions): RequestHandler => {
+        this.logger.log('=== CONFIGURE START ===')
+        this.logger.log(`configure: strategy ${this.strategyName}`)
+        this.logger.log(`configure: options received: ${JSON.stringify(options, null, 2)}`)
+        
         const configuredOptions = { ...this.options, ...options }
         this.validateOptions(configuredOptions)
         this.options = configuredOptions
 
+        this.logger.log('configure: setting up serializers')
         this.serializeUser()
         this.deserializeUser()
+        
+        this.logger.log('configure: initializing strategy asynchronously')
         ;(async () => {
-            await this.initialiseStrategy(this.options)
+            try {
+                this.logger.log('configure: calling initialiseStrategy')
+                await this.initialiseStrategy(this.options)
+                this.logger.log('configure: initialiseStrategy completed successfully')
+            } catch (error) {
+                this.logger.error('configure: error in initialiseStrategy', error)
+            }
         })()
 
+        this.logger.log('configure: initializing passport components')
         this.initializePassport()
         this.initializeSession()
         this.initializeKeepAlive()
         this.initialiseCSRF()
 
         if (options.useRoutes) {
+            this.logger.log('configure: setting up routes')
             this.router.get(AUTH.ROUTE.DEFAULT_AUTH_ROUTE, this.authRouteHandler)
             this.router.get(AUTH.ROUTE.KEEPALIVE_ROUTE, this.authRouteHandler)
             this.router.get(AUTH.ROUTE.LOGIN, this.setCallbackURL, this.loginHandler)
             this.router.get(AUTH.ROUTE.OAUTH_CALLBACK, this.callbackHandler)
             this.router.get(AUTH.ROUTE.LOGOUT, this.logout)
+            this.logger.log('configure: routes setup completed')
+        } else {
+            this.logger.log('configure: skipping routes setup (useRoutes = false)')
         }
+        
         this.addHeaders()
+        this.logger.log(`configure: emitting ${this.strategyName}.bootstrap.success`)
         this.emit(`${this.strategyName}.bootstrap.success`)
+        this.logger.log('=== CONFIGURE END ===')
         return this.router
     }
 
@@ -490,10 +511,22 @@ export abstract class Strategy extends events.EventEmitter {
         _res: Response,
         next: NextFunction,
     ): void | Response<any, Record<string, any>> => {
+        this.logger.log('authenticate: checking authentication status')
+        this.logger.log(`authenticate: req.isUnauthenticated(): ${req.isUnauthenticated()}`)
+        this.logger.log(`authenticate: session exists: ${!!req.session}`)
+        this.logger.log(`authenticate: session ID: ${req.sessionID}`)
+        this.logger.log(`authenticate: passport user exists: ${!!req?.session?.passport?.user}`)
+        this.logger.log(`authenticate: passport user userinfo exists: ${!!req?.session?.passport?.user?.userinfo}`)
+        this.logger.log(`authenticate: passport user data: ${JSON.stringify(req?.session?.passport?.user, null, 2)}`)
+        
         if (req.isUnauthenticated() || !req?.session?.passport?.user?.userinfo) {
-            this.logger.log('unauthenticated')
+            this.logger.log('authenticate: user is not authenticated or missing userinfo')
+            this.logger.log(`authenticate: isUnauthenticated: ${req.isUnauthenticated()}`)
+            this.logger.log(`authenticate: missing userinfo: ${!req?.session?.passport?.user?.userinfo}`)
             return _res.status(401).send({ message: 'Unauthorized' })
         }
+        
+        this.logger.log('authenticate: user is authenticated, proceeding')
         next()
     }
 
