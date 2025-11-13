@@ -200,7 +200,8 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
    public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
-
+        this.logger.log('setCallbackURL called')
+        this.logger.log(reqSession)
         // Always ensure callbackURL is set (not just when missing)
         if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
             req.app.set('trust proxy', true)
@@ -613,10 +614,12 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log(`verifyLogin: user object exists: ${!!user}`)
         this.logger.log(`verifyLogin: user data: ${JSON.stringify(user, null, 2)}`)
         this.logger.log(`verifyLogin: session ID: ${req.sessionID}`)
+        this.logger.log(`verifyLogin: session before logIn: ${JSON.stringify(req.session, null, 2)}`)
         
         req.logIn(user, (err) => {
             this.logger.log('verifyLogin: req.logIn callback invoked')
             this.logger.log(`verifyLogin: login error: ${err ? JSON.stringify(err) : 'none'}`)
+            this.logger.log(`verifyLogin: session after logIn: ${JSON.stringify(req.session, null, 2)}`)
             
             const roles = user.userinfo.roles
             this.logger.log(`verifyLogin: user roles: ${JSON.stringify(roles)}`)
