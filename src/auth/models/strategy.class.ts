@@ -1,6 +1,6 @@
 import * as events from 'events'
 import { CookieOptions, NextFunction, Request, RequestHandler, Response, Router } from 'express'
-import passport, { LogOutOptions } from 'passport'
+import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
@@ -517,6 +517,28 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log(`authenticate: raw cookies header=${req.headers.cookie || 'none'}`)
         this.debugSessionStore(req, 'authenticate:start')
         this.logger.log(`authenticate: query=${JSON.stringify(req.query)}`)
+        this.logger.log(`authenticate: protocol=${req.protocol} secureFlag=${req.secure} trustProxy=${req.app.get('trust proxy')}`)
+        // Attempt to parse session cookie id for mismatch diagnostics
+        try {
+            const cookieHeader = req.headers.cookie || ''
+            const match = cookieHeader.match(/xui-webapp=([^;]+)/)
+            if (match) {
+                const rawVal = decodeURIComponent(match[1])
+                const parsedId = rawVal.startsWith('s:') ? rawVal.split('.')[0].substring(2) : rawVal
+                if (parsedId && parsedId !== req.sessionID) {
+                    this.logger.log(`authenticate: sessionID mismatch parsedCookieId=${parsedId} req.sessionID=${req.sessionID}`)
+                    if (!req.secure && req.session?.cookie?.secure) {
+                        this.logger.log('authenticate: POSSIBLE secure cookie ignored due to missing trust proxy (req.secure=false)')
+                    }
+                } else {
+                    this.logger.log(`authenticate: sessionID matches cookie parsedId=${parsedId}`)
+                }
+            } else {
+                this.logger.log('authenticate: session cookie pattern not found in header')
+            }
+        } catch (e) {
+            this.logger.log(`authenticate: exception parsing cookie for diagnostics ${(e as Error).message}`)
+        }
 
         this.logger.log('authenticate: checking authentication status')
         this.logger.log(`authenticate: req.isUnauthenticated(): ${req.isUnauthenticated()}`)
@@ -617,6 +639,8 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log(`verifyLogin: user data: ${JSON.stringify(user, null, 2)}`)
         this.logger.log(`verifyLogin: session ID: ${req.sessionID}`)
         this.logger.log(`verifyLogin: session before logIn: ${JSON.stringify(req.session, null, 2)}`)
+        this.logger.log(`verifyLogin: protocol=${req.protocol} secureFlag=${req.secure} trustProxy=${req.app.get('trust proxy')}`)
+        this.logger.log(`verifyLogin: raw cookies header=${req.headers.cookie || 'none'}`)
         // Normalise userinfo casing (some strategies may return user.userInfo)
         if (user && !user.userinfo && user.userInfo) {
             this.logger.log('verifyLogin: normalising user.userInfo -> user.userinfo')
@@ -676,6 +700,17 @@ export abstract class Strategy extends events.EventEmitter {
                     this.logger.log(`verifyLogin: session.save callback invoked, err: ${saveErr || 'none'}`)
                     this.logger.log(`verifyLogin: session after explicit save: ${JSON.stringify(req.session, null, 2)}`)
                     this.debugSessionStore(req, 'verifyLogin:post-session-save')
+                    try {
+                        const cookieHeader = req.headers.cookie || ''
+                        const match = cookieHeader.match(/xui-webapp=([^;]+)/)
+                        if (match) {
+                            const rawVal = decodeURIComponent(match[1])
+                            const parsedId = rawVal.startsWith('s:') ? rawVal.split('.')[0].substring(2) : rawVal
+                            this.logger.log(`verifyLogin: parsed cookie session id=${parsedId} (may not yet reflect newly saved passport data until response end)`) 
+                        }
+                    } catch (e) {
+                        this.logger.log(`verifyLogin: exception parsing cookie ${(e as Error).message}`)
+                    }
                     proceedAfterSave()
                 })
             } else {
