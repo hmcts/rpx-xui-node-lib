@@ -615,27 +615,49 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log(`verifyLogin: user data: ${JSON.stringify(user, null, 2)}`)
         this.logger.log(`verifyLogin: session ID: ${req.sessionID}`)
         this.logger.log(`verifyLogin: session before logIn: ${JSON.stringify(req.session, null, 2)}`)
-        
+        // Normalise userinfo casing (some strategies may return user.userInfo)
+        if (user && !user.userinfo && user.userInfo) {
+            this.logger.log('verifyLogin: normalising user.userInfo -> user.userinfo')
+            user.userinfo = user.userInfo
+        }
+
         req.logIn(user, (err) => {
             this.logger.log('verifyLogin: req.logIn callback invoked')
             this.logger.log(`verifyLogin: login error: ${err ? JSON.stringify(err) : 'none'}`)
-            this.logger.log(`verifyLogin: session after logIn: ${JSON.stringify(req.session, null, 2)}`)
-            
-            const roles = user.userinfo.roles
+            this.logger.log(`verifyLogin: session after logIn (pre-save): ${JSON.stringify(req.session, null, 2)}`)
+
+            const roles = user?.userinfo?.roles || []
             this.logger.log(`verifyLogin: user roles: ${JSON.stringify(roles)}`)
-            this.logger.log(`verifyLogin: user email: ${user.userinfo?.email}`)
-            this.logger.log(`verifyLogin: user ID: ${user.userinfo?.uid || user.userinfo?.id}`)
+            this.logger.log(`verifyLogin: user email: ${user?.userinfo?.email || user?.email}`)
+            this.logger.log(`verifyLogin: user ID: ${user?.userinfo?.uid || user?.userinfo?.id || user?.id}`)
             this.logger.log(`verifyLogin: allowRolesRegex: ${this.options.allowRolesRegex}`)
-            
+
             if (err) {
                 this.logger.error('verifyLogin error', err)
                 this.logger.error(`verifyLogin: detailed error: ${JSON.stringify(err)}`)
                 return next(err)
             }
-            
+
+            const proceedAfterSave = () => {
+                const listenerCount = this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)
+                this.logger.log(`verifyLogin: listener count for ${AUTH.EVENT.AUTHENTICATE_SUCCESS}: ${listenerCount}`)
+                if (!listenerCount) {
+                    this.logger.log(
+                        `redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}, user: ${user?.userinfo?.email || user?.email}`,
+                    )
+                    this.logger.log(`verifyLogin: redirecting to default route: ${AUTH.ROUTE.DEFAULT_REDIRECT}`)
+                    return res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
+                }
+                this.logger.log('verifyLogin: emitting authenticate success event')
+                req.isRefresh = false
+                this.logger.log('verifyLogin: setting req.isRefresh to false')
+                this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
+                this.logger.log('verifyLogin: authenticate success event emitted')
+            }
+
             if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
                 this.logger.log('verifyLogin: role validation failed')
-                this.logger.info(JSON.stringify(user.userInfo))
+                this.logger.info(JSON.stringify(user?.userinfo || user?.userInfo || {}))
                 this.logger.error(
                     `User has no application access, as they do not have a role that matches ${this.options.allowRolesRegex}.`,
                 )
@@ -644,22 +666,18 @@ export abstract class Strategy extends events.EventEmitter {
             } else {
                 this.logger.log('verifyLogin: role validation passed or not required')
             }
-            
-            const listenerCount = this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)
-            this.logger.log(`verifyLogin: listener count for ${AUTH.EVENT.AUTHENTICATE_SUCCESS}: ${listenerCount}`)
-            
-            if (!listenerCount) {
-                this.logger.log(
-                    `redirecting, no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}, user: ${user.email}`,
-                )
-                this.logger.log(`verifyLogin: redirecting to default route: ${AUTH.ROUTE.DEFAULT_REDIRECT}`)
-                res.redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
+
+            // Explicitly save session to avoid race on first follow-up request
+            if (req.session) {
+                this.logger.log('verifyLogin: invoking explicit req.session.save')
+                req.session.save((saveErr: any) => {
+                    this.logger.log(`verifyLogin: session.save callback invoked, err: ${saveErr || 'none'}`)
+                    this.logger.log(`verifyLogin: session after explicit save: ${JSON.stringify(req.session, null, 2)}`)
+                    proceedAfterSave()
+                })
             } else {
-                this.logger.log('verifyLogin: emitting authenticate success event')
-                req.isRefresh = false
-                this.logger.log('verifyLogin: setting req.isRefresh to false')
-                this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
-                this.logger.log('verifyLogin: authenticate success event emitted')
+                this.logger.log('verifyLogin: no session object found, proceeding without explicit save')
+                proceedAfterSave()
             }
         })
         this.logger.log('=-=-=-=-=-=-=-=-=-=-=-=-=')
