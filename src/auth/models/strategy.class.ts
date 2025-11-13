@@ -514,6 +514,8 @@ export abstract class Strategy extends events.EventEmitter {
     ): void | Response<any, Record<string, any>> => {
         const start = Date.now()
         this.logger.log('authenticate: start')
+        this.logger.log(`authenticate: raw cookies header=${req.headers.cookie || 'none'}`)
+        this.debugSessionStore(req, 'authenticate:start')
         this.logger.log(`authenticate: query=${JSON.stringify(req.query)}`)
 
         this.logger.log('authenticate: checking authentication status')
@@ -673,15 +675,39 @@ export abstract class Strategy extends events.EventEmitter {
                 req.session.save((saveErr: any) => {
                     this.logger.log(`verifyLogin: session.save callback invoked, err: ${saveErr || 'none'}`)
                     this.logger.log(`verifyLogin: session after explicit save: ${JSON.stringify(req.session, null, 2)}`)
+                    this.debugSessionStore(req, 'verifyLogin:post-session-save')
                     proceedAfterSave()
                 })
             } else {
                 this.logger.log('verifyLogin: no session object found, proceeding without explicit save')
+                this.debugSessionStore(req, 'verifyLogin:no-session-object')
                 proceedAfterSave()
             }
         })
         this.logger.log('=-=-=-=-=-=-=-=-=-=-=-=-=')
 
+    }
+
+    /* istanbul ignore next */
+    public debugSessionStore = (req: Request, label: string): void => {
+        try {
+            // sessionStore API varies; typical express-session has get
+            const store: any = (req as any).sessionStore
+            if (store && typeof store.get === 'function' && req.sessionID) {
+                store.get(req.sessionID, (err: any, sess: any) => {
+                    if (err) {
+                        this.logger.log(`${label}: sessionStore.get error: ${err}`)
+                    } else {
+                        this.logger.log(`${label}: sessionStore.get success, keys=${Object.keys(sess || {}).join(',')}`)
+                        this.logger.log(`${label}: sessionStore.get passport=${JSON.stringify(sess?.passport)}`)
+                    }
+                })
+            } else {
+                this.logger.log(`${label}: sessionStore.get unavailable (store=${!!store}, hasGet=${!!store?.get}, sessionID=${req.sessionID})`)
+            }
+        } catch (e) {
+            this.logger.log(`${label}: debugSessionStore exception ${(e as Error).message}`)
+        }
     }
 
     /* istanbul ignore next */

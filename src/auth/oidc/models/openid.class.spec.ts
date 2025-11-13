@@ -292,6 +292,7 @@ test('OIDC authenticate when authenticated but session and client not initialise
     const mockRequest = {
         ...mockRequestRequired,
         body: {},
+        headers: {}, // ensure headers exists so req.headers.cookie access is safe
     } as unknown as Request
     // @ts-expect-error it's a mock
     mockRequest.isUnauthenticated = () => false
