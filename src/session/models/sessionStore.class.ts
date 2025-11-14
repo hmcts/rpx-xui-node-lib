@@ -28,6 +28,14 @@ export abstract class SessionStore extends events.EventEmitter {
     public configure = (options: SessionMetadata): RequestHandler => {
         const store = this.getClassStore(options)
         const sessionOptions = this.mapSessionOptions(options, store)
+        // Ensure trust proxy is enabled before session middleware so secure cookies are respected
+        this.router.use((req, _res, next) => {
+            if (!req.app.get('trust proxy')) {
+                req.app.set('trust proxy', true)
+                this.logger.log('sessionStore: trust proxy enabled (pre-session middleware)')
+            }
+            next()
+        })
         this.router.use(session(sessionOptions))
         return this.router
     }

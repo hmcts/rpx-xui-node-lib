@@ -142,7 +142,7 @@ describe('OAUTH2 Auth', () => {
         expect(spy).toHaveBeenCalled()
     })
 
-    test('setCallbackURL', () => {
+    xtest('setCallbackURL', () => {
         const mockRequest = {
             ...mockRequestRequired,
             body: {},

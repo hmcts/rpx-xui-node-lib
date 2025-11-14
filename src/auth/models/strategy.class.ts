@@ -202,20 +202,26 @@ export abstract class Strategy extends events.EventEmitter {
         const reqSession = req.session as MySessionData
         this.logger.log('setCallbackURL called')
         this.logger.log(reqSession)
-        // Always ensure callbackURL is set (not just when missing)
-        if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
+
+        // Unconditionally enable trust proxy early so secure cookies / req.secure work on first hit
+        if (!req.app.get('trust proxy')) {
             req.app.set('trust proxy', true)
+            this.logger.log('setCallbackURL: trust proxy enabled (unconditional)')
+        } else {
+            this.logger.log('setCallbackURL: trust proxy already enabled')
+        }
 
-            // fallback to default if this.options.callbackURL is missing
+        // Always ensure callbackURL exists and is normalized
+        if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
             const pathname = this.options.callbackURL || req.originalUrl
-
             reqSession.callbackURL = URL.format({
                 protocol: req.protocol,
                 host: req.get('host'),
                 pathname,
             })
-
-            this.logger.log(`callbackURL was missing — set to: ${reqSession.callbackURL}`)
+            this.logger.log(`setCallbackURL: callbackURL initialised to ${reqSession.callbackURL}`)
+        } else {
+            this.logger.log(`setCallbackURL: existing callbackURL=${reqSession.callbackURL}`)
         }
 
         // 🔍 Log current config and session key status
@@ -514,24 +520,30 @@ export abstract class Strategy extends events.EventEmitter {
     ): void | Response<any, Record<string, any>> => {
         const start = Date.now()
         this.logger.log('authenticate: start')
+        // Ensure trust proxy is enabled as early as possible so req.secure reflects X-Forwarded-Proto
+        if (!req.app.get('trust proxy')) {
+            req.app.set('trust proxy', true)
+            this.logger.log('authenticate: trust proxy enabled (early)')
+        }
         this.logger.log(`authenticate: raw cookies header=${req.headers.cookie || 'none'}`)
         this.debugSessionStore(req, 'authenticate:start')
         this.logger.log(`authenticate: query=${JSON.stringify(req.query)}`)
         this.logger.log(`authenticate: protocol=${req.protocol} secureFlag=${req.secure} trustProxy=${req.app.get('trust proxy')}`)
         // Attempt to parse session cookie id for mismatch diagnostics
+        let parsedCookieSessionId: string | undefined
         try {
             const cookieHeader = req.headers.cookie || ''
             const match = cookieHeader.match(/xui-webapp=([^;]+)/)
             if (match) {
                 const rawVal = decodeURIComponent(match[1])
-                const parsedId = rawVal.startsWith('s:') ? rawVal.split('.')[0].substring(2) : rawVal
-                if (parsedId && parsedId !== req.sessionID) {
-                    this.logger.log(`authenticate: sessionID mismatch parsedCookieId=${parsedId} req.sessionID=${req.sessionID}`)
+                parsedCookieSessionId = rawVal.startsWith('s:') ? rawVal.split('.')[0].substring(2) : rawVal
+                if (parsedCookieSessionId && parsedCookieSessionId !== req.sessionID) {
+                    this.logger.log(`authenticate: sessionID mismatch parsedCookieId=${parsedCookieSessionId} req.sessionID=${req.sessionID}`)
                     if (!req.secure && req.session?.cookie?.secure) {
                         this.logger.log('authenticate: POSSIBLE secure cookie ignored due to missing trust proxy (req.secure=false)')
                     }
                 } else {
-                    this.logger.log(`authenticate: sessionID matches cookie parsedId=${parsedId}`)
+                    this.logger.log(`authenticate: sessionID matches cookie parsedId=${parsedCookieSessionId}`)
                 }
             } else {
                 this.logger.log('authenticate: session cookie pattern not found in header')
@@ -566,8 +578,30 @@ export abstract class Strategy extends events.EventEmitter {
             this.logger.log('authenticate: user is not authenticated or missing userinfo')
             this.logger.log(`authenticate: isUnauthenticated: ${req.isUnauthenticated()}`)
             this.logger.log(`authenticate: missing userinfo: ${!userinfo}`)
-            this.logger.log(`authenticate: end (unauthorized) durationMs=${Date.now() - start}`)
-            return _res.status(401).send({ message: 'Unauthorized' })
+            // Attempt lightweight recovery: if cookie session differs and store has passport, hydrate current session
+            try {
+                const store: any = (req as any).sessionStore
+                if (parsedCookieSessionId && store && typeof store.get === 'function') {
+                    store.get(parsedCookieSessionId, (err: any, sess: any) => {
+                        if (err) {
+                            this.logger.log(`authenticate: recovery store.get error: ${err}`)
+                        } else if (sess?.passport?.user?.userinfo) {
+                            this.logger.log('authenticate: recovery found passport user in cookie session; hydrating current req.session')
+                            req.session.passport = sess.passport
+                            req.session.save((saveErr: any) => {
+                                this.logger.log(`authenticate: recovery save callback err=${saveErr || 'none'}`)
+                            })
+                        } else {
+                            this.logger.log('authenticate: recovery store.get returned no usable passport data')
+                        }
+                    })
+                }
+            } catch (e) {
+                this.logger.log(`authenticate: recovery exception ${(e as Error).message}`)
+            }
+            this.logger.log('authenticate: redirecting to login route instead of 401 to initiate auth flow')
+            this.logger.log(`authenticate: end (redirect->LOGIN) durationMs=${Date.now() - start}`)
+            return _res.redirect(AUTH.ROUTE.LOGIN)
         }
         
         this.logger.log('authenticate: user is authenticated, proceeding')
