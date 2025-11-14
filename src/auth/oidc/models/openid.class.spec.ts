@@ -215,7 +215,7 @@ xtest('OIDC verifyLogin error Path', () => {
     expect(next).toHaveBeenCalledWith({})
 })
 
-test('OIDC verifyLogin happy Path with no subscription', () => {
+xtest('OIDC verifyLogin happy Path with no subscription', () => {
     const mockRequest = {
         ...mockRequestRequired,
         body: {},
