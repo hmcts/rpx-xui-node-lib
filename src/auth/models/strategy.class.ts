@@ -6,7 +6,8 @@ import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from 'joi'
 import * as URL from 'url'
-import { generators } from 'openid-client'
+// Removed manual state management; keep import commented if future generator use needed
+// import { generators } from 'openid-client'
 import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
 import jwtDecode from 'jwt-decode'
@@ -87,26 +88,10 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log(JSON.stringify(options))
     }
 
-    private saveStateInSession(reqSession: MySessionData, state?: string): { promise: Promise<boolean>, state: string } {
-        if (!state) {
-            state = generators.state()
-            this.logger.log(`state not found, generating new state ${state}`)
-        }
-        const p = new Promise<boolean>((resolve) => {
-            if (reqSession && this.options?.sessionKey) {
-                // add the state to the current session object, this will then contain both nonce and state
-                reqSession[this.options?.sessionKey] = { ...reqSession[this.options.sessionKey], state }
-                this.logger.log(`saving state ${state} in session`)
-                reqSession.save(() => {
-                    this.logger.log(`state ${state} saved in session`)
-                    resolve(true)
-                })
-            } else {
-                this.logger.log('sessionKey not available state not saved')
-                resolve(false)
-            }
-        })
-        return { promise: p, state: state}
+    // Deprecated custom state persistence; relying on openid-client passport strategy's internal handling.
+    private saveStateInSession(_reqSession: MySessionData, _state?: string): { promise: Promise<boolean>, state: string } {
+        const empty = new Promise<boolean>((resolve) => resolve(true))
+        return { promise: empty, state: '' }
     }
 
     /**
@@ -136,21 +121,21 @@ export abstract class Strategy extends events.EventEmitter {
             this.logger.log('loginHandler: sessionKey not set in options')
         }
         
-        const { promise, state } = this.saveStateInSession(reqSession)
-        this.logger.log(`loginHandler generated state: ${state}`)
+        const loginInProgress = (reqSession as any).loginInProgress === true
+        if (loginInProgress) {
+            this.logger.log('loginHandler: login already in progress, not invoking passport again')
+            return ( (_req: Request, _res: Response, _next: NextFunction) => {} )
+        }
+        (reqSession as any).loginInProgress = true
+        this.logger.log('loginHandler: flagged loginInProgress=true')
         
         /* istanbul ignore next */
         try {
             /* istanbul ignore next */
-            this.logger.log('loginHandler: waiting for state to be saved in session')
-            await promise
-            this.logger.log('loginHandler: state save operation completed')
-            
             /* istanbul ignore next */
-            this.logger.log('calling passport authenticate with state ' + state)
+            this.logger.log('calling passport authenticate (no custom state override)')
             this.logger.log(`loginHandler passport authenticate options: ${JSON.stringify({
                 redirect_uri: reqSession?.callbackURL,
-                state,
                 keepSessionInfo: false,
             })}`)
             
@@ -159,7 +144,6 @@ export abstract class Strategy extends events.EventEmitter {
                 this.strategyName,
                 {
                     redirect_uri: reqSession?.callbackURL,
-                    state,
                     keepSessionInfo: false,
                 } as any,
                 (error: any, user: any, info: any) => {
@@ -372,23 +356,9 @@ export abstract class Strategy extends events.EventEmitter {
         const reqSession = req.session as MySessionData
         this.logger.log(`callbackHandler session exists: ${!!reqSession}`)
         
-        const qstate = typeof req.query.state == 'string' ? req.query.state : undefined
+        const qstate = typeof req.query.state === 'string' ? req.query.state : undefined
         this.logger.log(`callbackHandler query state: ${qstate}`)
-        this.logger.log(`callbackHandler query state type: ${typeof req.query.state}`)
-        
-        const { promise, state } = this.saveStateInSession(reqSession, qstate)
-        this.logger.log(`callbackHandler generated/retrieved state: ${state}`)
-        
-        if(!qstate) {
-            this.logger.log('callbackHandler: no query state found, setting generated state in req.query')
-            req.query.state = state
-        } else {
-            this.logger.log('callbackHandler: query state found, using existing state')
-        }
-        
-        this.logger.log('callbackHandler: waiting for state to be saved in session')
-        await promise
-        this.logger.log('callbackHandler: state save operation completed')
+    this.logger.log('callbackHandler: not persisting or mutating state (handled by passport strategy)')
         
         if (this.options.sessionKey) {
             const sessionKey = this.options.sessionKey
@@ -440,15 +410,7 @@ export abstract class Strategy extends events.EventEmitter {
                     this.logger.log(`in passport authenticate callback info: ${JSON.stringify(info)}`)
                 }
                 let errorMessages: string[] = []
-                if (this.options?.sessionKey) {
-                    const sessState = reqSession[this.options.sessionKey]?.state
-                    this.logger.log(
-                        `in passport authenticate callback, strategy ${this.strategyName}, state ${sessState}`,
-                    )
-                    this.logger.log(`callbackHandler comparing states - session: ${sessState}, query: ${qstate}`)
-                } else {
-                    this.logger.log('callbackHandler: sessionKey not available for state comparison')
-                }
+                // Remove custom state comparison logs (passport strategy handles validation internally)
                 if (error) {
                     this.logger.log(`in passport authenticate error: ${error}`)
                     switch (error.name) {
@@ -699,6 +661,17 @@ export abstract class Strategy extends events.EventEmitter {
             }
 
             const proceedAfterSave = () => {
+                // Clear loginInProgress flag now that authentication succeeded
+                if (req.session) {
+                    (req.session as any).loginInProgress = false
+                    try {
+                        req.session.save(() => {
+                            this.logger.log('verifyLogin: cleared loginInProgress flag and saved session')
+                        })
+                    } catch (e) {
+                        this.logger.log(`verifyLogin: exception clearing loginInProgress ${(e as Error).message}`)
+                    }
+                }
                 const listenerCount = this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)
                 this.logger.log(`verifyLogin: listener count for ${AUTH.EVENT.AUTHENTICATE_SUCCESS}: ${listenerCount}`)
                 if (!listenerCount) {
