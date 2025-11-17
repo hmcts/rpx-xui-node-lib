@@ -166,8 +166,6 @@ export abstract class Strategy extends events.EventEmitter {
 
         // Always ensure callbackURL is set (not just when missing)
         if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
-            req.app.set('trust proxy', true)
-
             // fallback to default if this.options.callbackURL is missing
             const pathname = this.options.callbackURL || req.originalUrl
 
@@ -280,7 +278,8 @@ export abstract class Strategy extends events.EventEmitter {
         ;(async () => {
             await this.initialiseStrategy(this.options)
         })()
-
+        // ensure trust proxy is always enabled before any other middleware executes
+        this.initializeTrustProxy()
         this.initializePassport()
         this.initializeSession()
         this.initializeKeepAlive()
@@ -511,6 +510,18 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public initializeKeepAlive = (): void => {
         this.router.use(this.keepAliveHandler)
+    }
+
+    /* istanbul ignore next */
+    public initializeTrustProxy = (): void => {
+        // Single, idempotent middleware to enforce trust proxy for every request
+        this.router.use((req, _res, next) => {
+            if (req.app.get('trust proxy') !== true) {
+                req.app.set('trust proxy', true)
+                this.logger.log('trust proxy enabled')
+            }
+            next()
+        })
     }
 
     /**
