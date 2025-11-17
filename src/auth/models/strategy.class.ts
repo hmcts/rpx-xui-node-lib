@@ -514,7 +514,6 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public initializeTrustProxy = (): void => {
-        // Single, idempotent middleware to enforce trust proxy for every request
         this.router.use((req, _res, next) => {
             if (req.app.get('trust proxy') !== true) {
                 req.app.set('trust proxy', true)
