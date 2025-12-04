@@ -161,39 +161,6 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-//    public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
-//         const reqSession = req.session as MySessionData
-
-//         // Always ensure callbackURL is set (not just when missing)
-//         if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
-//             req.app.set('trust proxy', true)
-
-//             // fallback to default if this.options.callbackURL is missing
-//             const pathname = this.options.callbackURL || req.originalUrl
-
-//             reqSession.callbackURL = URL.format({
-//                 protocol: req.protocol,
-//                 host: req.get('host'),
-//                 pathname,
-//             })
-
-//             this.logger.log(`callbackURL was missing — set to: ${reqSession.callbackURL}`)
-//         }
-
-//         // 🔍 Log current config and session key status
-//         this.logger.log(`setCallbackURL, options.callbackurl: ${this.options.callbackURL}`)
-
-//         if (this.options.sessionKey) {
-//             const sessionKey = this.options.sessionKey
-//             this.logger.log(`sessionKey: ${sessionKey}`)
-//             this.logger.log(`state from session = ${reqSession[sessionKey]?.state}`)
-//         } else {
-//             this.logger.log('sessionKey not set')
-//         }
-
-//         next()
-//     }
-
        public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
 
