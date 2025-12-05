@@ -164,6 +164,10 @@ export abstract class Strategy extends events.EventEmitter {
        public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
 
+        console.log('setCallbackURL Hit PR-292 Idam fix outside if condition- To be removed after testing');
+        this.logger.log('setCallbackURL Hit PR-292 Idam fix outside if condition - To be removed after testing');
+
+
         // Always ensure callbackURL is set to a non-empty string
         const hasValidSessionCallback =
             typeof reqSession.callbackURL === 'string' &&
@@ -183,6 +187,10 @@ export abstract class Strategy extends events.EventEmitter {
                 host: req.get('host'),
                 pathname,
             })
+
+             console.log('setCallbackURL Hit PR-292 Idam fix inside if condition- To be removed after testing');
+             this.logger.log('setCallbackURL Hit PR-292 Idam fix inside if condition - To be removed after testing');
+
 
             this.logger.log(`callbackURL was missing/invalid — set to: ${reqSession.callbackURL}`)
         }
