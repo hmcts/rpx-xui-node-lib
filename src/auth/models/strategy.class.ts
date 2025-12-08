@@ -160,7 +160,6 @@ export abstract class Strategy extends events.EventEmitter {
         }
     }
 
-    /* istanbul ignore next */
        public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
 
