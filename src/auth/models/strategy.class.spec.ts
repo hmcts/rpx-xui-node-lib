@@ -1,4 +1,5 @@
-// ...existing code...
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
+
 import express, { Request, Response, NextFunction, Router } from 'express'
 import { Strategy } from './strategy.class'
 
@@ -7,7 +8,7 @@ const loggerStub = {
   log: jest.fn(),
   info: jest.fn(),
   error: jest.fn(),
-} as any
+} as any;
 
 // Create a concrete subclass to instantiate the abstract Strategy
 class TestStrategy extends Strategy {
@@ -77,7 +78,7 @@ describe('Strategy.setCallbackURL', () => {
   })
 
   test('falls back to req.originalUrl when options.callbackURL is missing/invalid', () => {
-    ;(strategy as any).options.callbackURL = '' // invalid option
+    (strategy as any).options.callbackURL = '' // invalid option
     const req = mockReq({ session: { callbackURL: undefined, save: (fn: Function) => fn() } as any })
     const res = {} as Response
     const next = jest.fn() as NextFunction
