@@ -73,7 +73,7 @@ describe('Strategy.saveStateInSession', () => {
   })
 
   test('does not save when sessionKey is missing and resolves false', async () => {
-    ;(strategy as any).options.sessionKey = '' // simulate missing
+    (strategy as any).options.sessionKey = '' // simulate missing
     const req = makeReq()
     const reqSession = req.session as any
 
