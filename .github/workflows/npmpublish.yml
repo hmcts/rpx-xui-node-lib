@@ -82,13 +82,11 @@ jobs:
       - run: yarn install
       - run: yarn ci
       - name: Pack dist as npm tarball
-        id: pack
         run: |
-          TAR=$(npm pack)
-          echo "tarball=$TAR" >> $GITHUB_OUTPUT
+          npm pack
       - name: Attach tarball to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ steps.pack.outputs.tarball }}
+          files: "*.tgz"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
