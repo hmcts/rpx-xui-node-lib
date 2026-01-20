@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.7-cleanup-logs",
+  "version": "2.30.7-cve-fix",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -102,7 +102,7 @@
     "jest-ts-auto-mock": "^2.1.0",
     "jwt-decode": "^3.1.2",
     "openid-client": "^3.10.0",
-    "otplib": "^12.0.1",
+    "otplib": "^13.1.1",
     "passport": "^0.5.3",
     "passport-oauth2": "^1.5.0",
     "redis": "^3.0.2",
