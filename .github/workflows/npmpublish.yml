@@ -108,34 +108,7 @@ jobs:
       - run: corepack enable && yarn --version
       - run: yarn install
       - run: yarn build
-      - name: Prepare dist package metadata
-        run: |
-          # Copy metadata files
-          cp package.json dist/
-          cp README.md dist/ || true
-          cp LICENSE dist/ || true
-
-          # (Optional) If your root package.json points to src paths,
-          # you can patch it to point to dist outputs:
-          node - <<'NODE'
-          const fs = require('fs');
-          const p = JSON.parse(fs.readFileSync('dist/package.json','utf8'));
-
-          // Ensure publish points at built outputs (adjust if your filenames differ)
-          p.main = p.main || 'index.js';
-          p.types = p.types || 'index.d.ts';
-
-          // Remove workspace/dev-only bits that can confuse publishing (optional)
-          delete p.scripts;
-          delete p.devDependencies;
-
-          fs.writeFileSync('dist/package.json', JSON.stringify(p, null, 2));
-          console.log('Wrote dist/package.json');
-          NODE
-
-          echo "dist contents:"
-          ls -la dist
-
+      - name: Pack dist as npm tarball
         id: pack
         run: |
           cd dist
