@@ -116,6 +116,7 @@ test('OIDC loginHandler with session', async () => {
             save: (callback: any): void => callback(),
         },
     } as unknown as Request;
+
     const mockResponse = {} as Response;
     const next = jest.fn();
 
