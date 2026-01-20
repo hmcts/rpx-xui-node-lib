@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import jwtDecode from 'jwt-decode'
-import { authenticator } from "@otplib/v12-adapter";
+import { authenticator } from '@otplib/v12-adapter';
 import { http, getLogger, XuiLogger } from '../../common'
 import { DecodedJWT } from './decodedJwt.interface'
 import { S2S } from './s2s.constants'

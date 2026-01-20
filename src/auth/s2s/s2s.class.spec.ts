@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { authenticator } from "@otplib/v12-adapter";
+import { authenticator } from '@otplib/v12-adapter';
 import mockAxios from 'jest-mock-axios'
 import { S2SAuth } from './s2s.class'
 import { S2S } from './s2s.constants'

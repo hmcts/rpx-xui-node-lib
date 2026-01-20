@@ -80,38 +80,49 @@ test('OIDC loginHandler', async () => {
 })
 
 test('OIDC loginHandler with session', async () => {
-    const mockRouter = createMock<Router>()
-    options.sessionKey = 'test'
+    const mockRouter = createMock<Router>();
+    options.sessionKey = 'test';
+
     const logger = {
         log: jest.fn(),
         error: jest.fn(),
         info: jest.fn(),
-    } as unknown as XuiLogger
-    const openId = new OpenID(mockRouter, logger)
-    jest.spyOn(openId, 'validateOptions')
-    jest.spyOn(openId, 'serializeUser')
-    jest.spyOn(openId, 'deserializeUser')
-    jest.spyOn(openId, 'initializePassport')
-    jest.spyOn(openId, 'initializeSession')
-    jest.spyOn(openId, 'initialiseStrategy')
-    jest.spyOn(openId, 'initialiseCSRF')
-    options.useRoutes = true
-    openId.configure(options)
+        warn: jest.fn(),
+    } as unknown as XuiLogger;
 
-    const spy = jest.spyOn(passport, 'authenticate')
+    const openId = new OpenID(mockRouter, logger);
+
+    // IMPORTANT: make configure() side-effect free (no Issuer.discover calls)
+    jest.spyOn(openId, 'validateOptions').mockReturnValue(true as any);
+    jest.spyOn(openId, 'serializeUser').mockImplementation(jest.fn() as any);
+    jest.spyOn(openId, 'deserializeUser').mockImplementation(jest.fn() as any);
+    jest.spyOn(openId, 'initializePassport').mockImplementation(jest.fn() as any);
+    jest.spyOn(openId, 'initializeSession').mockImplementation(jest.fn() as any);
+
+    // This was the root cause: spy only still runs real discovery.
+    jest.spyOn(openId, 'initialiseStrategy').mockResolvedValue(undefined as any);
+
+    jest.spyOn(openId, 'initialiseCSRF').mockImplementation(jest.fn() as any);
+
+    options.useRoutes = true;
+    openId.configure(options);
+
+    const spy = jest.spyOn(passport, 'authenticate');
+
     const mockRequest = {
         ...mockRequestRequired,
         body: {},
         session: {
             save: (callback: any): void => callback(),
         },
-    } as unknown as Request
-    const mockResponse = {} as Response
-    const next = jest.fn()
+    } as unknown as Request;
+    const mockResponse = {} as Response;
+    const next = jest.fn();
 
-    await openId.loginHandler(mockRequest, mockResponse, next)
-    expect(spy).toHaveBeenCalled()
-})
+    await openId.loginHandler(mockRequest, mockResponse, next);
+    expect(spy).toHaveBeenCalled();
+});
+
 
 test('OIDC jwTokenExpired', () => {
     let jwtData = { exp: new Date('Jun 04, 2020').getTime() / 1000 }
