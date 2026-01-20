@@ -106,16 +106,16 @@ jobs:
       - name: Pack dist as npm tarball
         id: pack
         run: |
-          cd dist/rpx-xui-node-lib
+          cd dist
           TAR=$(npm pack)
-          echo "tarball=dist/rpx-xui-node-lib/$TAR" >> $GITHUB_OUTPUT
+          echo "tarball=dist/$TAR" >> $GITHUB_OUTPUT
       - name: Attach tarball to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.pack.outputs.tarball }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npm publish dist/rpx-xui-node-lib/ --ignore-scripts
+      - run: npm publish dist/ --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_PUBLISH_REGISTRY: https://npm.pkg.github.com/
