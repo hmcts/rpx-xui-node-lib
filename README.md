@@ -77,10 +77,19 @@ User Roles shape
 
 ### Steps to implement:
 
-1. Include the node library within your package.json file ie.
+1. Include the node library within your package.json file ie. Check the installed yarn version.
+```
+yarn -v
+```
+- If you are using yarn 2+, use:
+```
+yarn add @hmcts/rpx-xui-node-lib
+```
+- Consider upgrading to yarn 2+ but if not, use:
 ```
 yarn add @hmcts/rpx-xui-node-lib@latest --save
 ```
+
 2. Import the function
 ```
 import { getUserSessionTimeout } from '@hmcts/rpx-xui-node-lib'
