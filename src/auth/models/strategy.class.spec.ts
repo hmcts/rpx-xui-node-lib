@@ -126,7 +126,7 @@ describe('Strategy.setCallbackURL ', () => {
     expect(req.app.set).toHaveBeenCalledWith('trust proxy', true)
     expect((req.session as any).callbackURL).toBe('https://example.com/oauth2/callback')
     expect(loggerStub.log).toHaveBeenCalledWith(
-      expect.stringContaining('callbackURL was missing/invalid — set to:')
+      expect.stringContaining('setCallbackURL, options.callbackurl:')
     )
     expect(next).toHaveBeenCalled()
   })
