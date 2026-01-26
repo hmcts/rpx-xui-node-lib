@@ -164,20 +164,25 @@ export abstract class Strategy extends events.EventEmitter {
    public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
 
-        // Always ensure callbackURL is set (not just when missing)
-        if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
+        // Always ensure callbackURL is set to a non-empty string
+        const hasValidSessionCallback =
+            typeof reqSession.callbackURL === 'string' &&
+            reqSession.callbackURL.trim().length > 0
+
+        const hasValidOptionCallback =
+            typeof this.options.callbackURL === 'string' &&
+            this.options.callbackURL.trim().length > 0
+
+        if (!hasValidSessionCallback) {
             req.app.set('trust proxy', true)
 
-            // fallback to default if this.options.callbackURL is missing
-            const pathname = this.options.callbackURL || req.originalUrl
+            const pathname = hasValidOptionCallback ? this.options.callbackURL.trim() : req.originalUrl
 
             reqSession.callbackURL = URL.format({
                 protocol: req.protocol,
                 host: req.get('host'),
                 pathname,
             })
-
-            this.logger.log(`callbackURL was missing — set to: ${reqSession.callbackURL}`)
         }
 
         // 🔍 Log current config and session key status
@@ -500,12 +505,12 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public initializePassport = (): void => {
-        this.router.use(passport.initialize())
+        this.router.use(passport.initialize() as any)
     }
 
     /* istanbul ignore next */
     public initializeSession = (): void => {
-        this.router.use(passport.session())
+        this.router.use(passport.session() as any)
     }
 
     /* istanbul ignore next */
@@ -522,7 +527,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.logger.log('initialising CSRF middleware')
 
             const csrfProtection = csrf({
-                value: this.getCSRFValue,
+                value: this.getCSRFValue as any,
             })
             // cookie options added via EXUI-986, fortify issues
             const cookieOptions: CookieOptions = {
@@ -530,10 +535,10 @@ export abstract class Strategy extends events.EventEmitter {
                 secure: true,
             }
             /* istanbul ignore next */
-            this.router.use(csrfProtection, (req, res, next) => {
+            this.router.use(csrfProtection as any, ((req: any, res: any, next: any) => {
                 res.cookie('XSRF-TOKEN', req.csrfToken(), cookieOptions)
                 next()
-            })
+            }) as any)
         }
     }
 
