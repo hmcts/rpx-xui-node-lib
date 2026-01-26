@@ -213,3 +213,126 @@ describe('Strategy.validateOptions', () => {
     expect(() => strategy.validateOptions(invalid)).toThrow()
   })
 });
+
+describe('Strategy.misc methods', () => {
+  let router: any
+  let strategy: TestStrategy
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    router = {
+      use: jest.fn(),
+      get: jest.fn(),
+    }
+    strategy = new TestStrategy(router as Router)
+  })
+
+  test('keepAliveHandler calls next()', () => {
+    const next = jest.fn() as NextFunction
+    strategy.keepAliveHandler({} as Request, {} as Response, next)
+    expect(next).toHaveBeenCalled()
+  })
+
+  test('initializeKeepAlive registers keepAliveHandler middleware', () => {
+    strategy.initializeKeepAlive()
+    expect(router.use).toHaveBeenCalledWith(strategy.keepAliveHandler)
+  })
+
+  test('authRouteHandler sends req.isAuthenticated()', () => {
+    const req = { isAuthenticated: () => true } as unknown as Request
+    const res = { send: jest.fn().mockReturnValue('sent') } as unknown as Response
+
+    const result = strategy.authRouteHandler(req, res)
+
+    expect(res.send).toHaveBeenCalledWith(true)
+    expect(result).toBe('sent')
+  })
+
+  test('destroySession resolves true and logs', async () => {
+    const req = {
+      session: {
+        destroy: (cb: (err?: any) => void) => cb(),
+      },
+    } as unknown as Request
+
+    await expect(strategy.destroySession(req)).resolves.toBe(true)
+    expect(loggerStub.log).toHaveBeenCalledWith('session destroyed')
+  })
+
+  test('getCSRFValue prefers body._csrf over others', () => {
+    const req = {
+      body: { _csrf: 'from-body' },
+      query: { _csrf: 'from-query' },
+      headers: { 'csrf-token': 'from-header' },
+      cookies: { 'XSRF-TOKEN': 'from-cookie' },
+    } as any
+
+    expect(strategy.getCSRFValue(req)).toBe('from-body')
+  })
+
+  test('getCSRFValue falls back to cookies', () => {
+    const req = {
+      body: {},
+      query: {},
+      headers: {},
+      cookies: { 'XSRF-TOKEN': 'from-cookie' },
+    } as any
+
+    expect(strategy.getCSRFValue(req)).toBe('from-cookie')
+  })
+
+  test('initialiseCSRF registers csrf middleware when useCSRF is true', () => {
+    ;(strategy as any).options = { ...(strategy as any).options, useCSRF: true }
+
+    strategy.initialiseCSRF()
+
+    expect(router.use).toHaveBeenCalled()
+    const args = router.use.mock.calls[0]
+    expect(args.length).toBe(2)
+    expect(typeof args[0]).toBe('function')
+    expect(typeof args[1]).toBe('function')
+  })
+
+  test('initialiseCSRF does nothing when useCSRF is false', () => {
+    ;(strategy as any).options = { ...(strategy as any).options, useCSRF: false }
+
+    strategy.initialiseCSRF()
+
+    expect(router.use).not.toHaveBeenCalled()
+  })
+
+  test('configure wires routes when useRoutes is true', () => {
+    const options = {
+      authorizationURL: 'https://idam.example.com/oauth2/authorize',
+      tokenURL: 'https://idam.example.com/oauth2/token',
+      clientID: 'client-id',
+      clientSecret: 'client-secret',
+      callbackURL: '/oauth2/callback',
+      logoutURL: 'https://idam.example.com',
+      scope: 'openid profile roles',
+      discoveryEndpoint: 'https://idam.example.com/.well-known/openid-configuration',
+      issuerURL: 'https://idam.example.com',
+      responseTypes: ['code'],
+      tokenEndpointAuthMethod: 'client_secret_basic',
+      sessionKey: 'idam',
+      ssoLogoutURL: 'https://idam.example.com/logout',
+      useRoutes: true,
+      useCSRF: false,
+      serviceOverride: false,
+    } as any
+
+    jest.spyOn(strategy, 'validateOptions').mockReturnValue(true)
+    jest.spyOn(strategy, 'serializeUser').mockImplementation(() => {})
+    jest.spyOn(strategy, 'deserializeUser').mockImplementation(() => {})
+    jest.spyOn(strategy, 'initialiseStrategy').mockResolvedValue(undefined)
+    jest.spyOn(strategy, 'initializePassport').mockImplementation(() => {})
+    jest.spyOn(strategy, 'initializeSession').mockImplementation(() => {})
+    jest.spyOn(strategy, 'initializeKeepAlive').mockImplementation(() => {})
+    jest.spyOn(strategy, 'initialiseCSRF').mockImplementation(() => {})
+
+    strategy.configure(options)
+
+    expect(router.get).toHaveBeenCalled()
+    expect(router.get.mock.calls.length).toBeGreaterThanOrEqual(5)
+  })
+})
