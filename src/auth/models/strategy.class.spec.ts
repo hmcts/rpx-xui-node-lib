@@ -113,7 +113,7 @@ describe('Strategy.saveStateInSession', () => {
   })
 
   test('does not save when options object is missing (covers optional-chaining branch)', async () => {
-    ;(strategy as any).options = undefined
+    (strategy as any).options = undefined
     const req = makeReq()
     const reqSession = req.session as any
 
