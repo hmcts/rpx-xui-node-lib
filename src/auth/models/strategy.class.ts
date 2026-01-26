@@ -1,6 +1,6 @@
 import * as events from 'events'
 import { CookieOptions, NextFunction, Request, RequestHandler, Response, Router } from 'express'
-import passport, { LogOutOptions } from 'passport'
+import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
@@ -118,6 +118,7 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
         this.logger.log('Base loginHandler Hit')
+
         const reqSession = req.session as MySessionData
         const { promise, state } = this.saveStateInSession(reqSession)
         /* istanbul ignore next */
@@ -132,7 +133,6 @@ export abstract class Strategy extends events.EventEmitter {
                 {
                     redirect_uri: reqSession?.callbackURL,
                     state,
-                    keepSessionInfo: false,
                 } as any,
                 (error: any, user: any, info: any) => {
                     /* istanbul ignore next */
@@ -160,7 +160,8 @@ export abstract class Strategy extends events.EventEmitter {
         }
     }
 
-       public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
+    /* istanbul ignore next */
+   public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
 
         // Always ensure callbackURL is set to a non-empty string
@@ -199,7 +200,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-    public logout = async (req: Request, res: Response, next?: NextFunction): Promise<void> => {
+    public logout = async (req: Request, res: Response): Promise<void> => {
         const reqSession = req.session as MySessionData
 
         try {
@@ -220,29 +221,31 @@ export abstract class Strategy extends events.EventEmitter {
             })
 
             //passport provides this method on request object
-            req.logout({ keepSessionInfo: false }, async (err) => {
-                if (err) {
-                    console.error(err)
-                    return next?.(err)
-                }
-                await this.destroySession(req)
-                /* istanbul ignore next */
-                if (req.query.noredirect) {
-                    res.status(200).send({ message: 'You have been logged out!' })
-                    return Promise.resolve()
-                }
-                const redirectUrl = URL.format({
-                    protocol: req.protocol,
-                    host: req.get('host'),
-                })
-                const params = new URLSearchParams({ post_logout_redirect_uri: redirectUrl })
-                const finalSSOLogoutUrl = `${this.options.ssoLogoutURL}?${params.toString()}`
-                const redirect = finalSSOLogoutUrl ? finalSSOLogoutUrl : AUTH.ROUTE.LOGIN
-                this.logger.log('redirecting to => ', redirect)
-                // 401 is when no accessToken
-                res.redirect(redirect as string)
+            req.logout((err) => {
+                console.error(err)
             })
+            await this.destroySession(req)
+            /* istanbul ignore next */
+            if (req.query.noredirect) {
+                res.status(200).send({ message: 'You have been logged out!' })
+                return Promise.resolve()
+            }
 
+            const redirectUrl = URL.format({
+                protocol: req.protocol,
+                host: req.get('host'),
+            })
+            const params = new URLSearchParams({ post_logout_redirect_uri: redirectUrl })
+
+            const finalSSOLogoutUrl = `${this.options.ssoLogoutURL}?${params.toString()}`
+
+            const redirect = finalSSOLogoutUrl ? finalSSOLogoutUrl : AUTH.ROUTE.LOGIN
+            
+            this.logger.log('redirecting to => ', redirect)
+            // 401 is when no accessToken
+            res.redirect(redirect as string)
+
+            /* istanbul ignore next */
         } catch (e) {
             this.logger.error('error => ', e)
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
@@ -283,9 +286,7 @@ export abstract class Strategy extends events.EventEmitter {
         this.deserializeUser()
         ;(async () => {
             await this.initialiseStrategy(this.options)
-        })().catch((error) => {
-            this.logger.error('initialiseStrategy error => ', error)
-        })
+        })()
 
         this.initializePassport()
         this.initializeSession()
@@ -341,8 +342,6 @@ export abstract class Strategy extends events.EventEmitter {
             this.strategyName,
             {
                 redirect_uri: reqSession?.callbackURL,
-                keepSessionInfo: false,
-                failureMessage: true,
             } as any,
             (error: any, user: any, info: any) => {
                 if (info) {
@@ -490,7 +489,7 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.error(
                     `User has no application access, as they do not have a role that matches ${this.options.allowRolesRegex}.`,
                 )
-                return this.logout(req, res, next)
+                return this.logout(req, res)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                 this.logger.log(
@@ -506,12 +505,12 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public initializePassport = (): void => {
-        this.router.use(passport.initialize() as any)
+        this.router.use(passport.initialize())
     }
 
     /* istanbul ignore next */
     public initializeSession = (): void => {
-        this.router.use(passport.session() as any)
+        this.router.use(passport.session())
     }
 
     /* istanbul ignore next */
@@ -528,7 +527,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.logger.log('initialising CSRF middleware')
 
             const csrfProtection = csrf({
-                value: this.getCSRFValue as any,
+                value: this.getCSRFValue,
             })
             // cookie options added via EXUI-986, fortify issues
             const cookieOptions: CookieOptions = {
@@ -536,10 +535,10 @@ export abstract class Strategy extends events.EventEmitter {
                 secure: true,
             }
             /* istanbul ignore next */
-            this.router.use(csrfProtection as any, ((req: any, res: any, next: any) => {
+            this.router.use(csrfProtection, (req, res, next) => {
                 res.cookie('XSRF-TOKEN', req.csrfToken(), cookieOptions)
                 next()
-            }) as any)
+            })
         }
     }
 
