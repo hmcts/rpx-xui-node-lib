@@ -82,7 +82,7 @@ test('sessionStore getClassStore error', () => {
 })
 
 test('sessionStore getClassStore', () => {
-    const storeMock = createMock<Store>()
+    const storeMock = createMock<RedisStore>()
     const mockSessionMetadata = createMock<SessionMetadata>()
     const mockRouter = createMock<Router>()
     const sessionStore = new RedisSessionStore(mockRouter)

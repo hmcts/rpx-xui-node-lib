@@ -14,7 +14,7 @@ export class RedisSessionStore extends SessionStore {
         super(SESSION.REDIS_STORE_NAME, router, logger)
     }
 
-    public getStore = (options: RedisSessionMetadata): session.Store => {
+    public getStore = (options: RedisSessionMetadata): connectRedis.RedisStore => {
         const tlsOptions = {
             prefix: options.redisStoreOptions.redisKeyPrefix,
         }
@@ -24,11 +24,11 @@ export class RedisSessionStore extends SessionStore {
         this.redisClientReadyListener(this.redisClient)
         this.redisClientErrorListener(this.redisClient)
 
-        const redisStore = connectRedis(session as any)
+        const redisStore = connectRedis(session)
         return new redisStore({
             client: this.redisClient,
             ttl: options.redisStoreOptions.redisTtl,
-        }) as unknown as session.Store
+        })
     }
 
     // TODO: This should be a pure function. Remove side effecting on redisClient,

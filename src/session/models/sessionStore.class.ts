@@ -28,7 +28,7 @@ export abstract class SessionStore extends events.EventEmitter {
     public configure = (options: SessionMetadata): RequestHandler => {
         const store = this.getClassStore(options)
         const sessionOptions = this.mapSessionOptions(options, store)
-        this.router.use(session(sessionOptions) as any)
+        this.router.use(session(sessionOptions))
         return this.router
     }
 
