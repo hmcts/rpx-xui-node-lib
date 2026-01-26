@@ -282,7 +282,7 @@ describe('Strategy.misc methods', () => {
   })
 
   test('initialiseCSRF registers csrf middleware when useCSRF is true', () => {
-    ;(strategy as any).options = { ...(strategy as any).options, useCSRF: true }
+    (strategy as any).options = { ...(strategy as any).options, useCSRF: true }
 
     strategy.initialiseCSRF()
 
@@ -294,7 +294,7 @@ describe('Strategy.misc methods', () => {
   })
 
   test('initialiseCSRF does nothing when useCSRF is false', () => {
-    ;(strategy as any).options = { ...(strategy as any).options, useCSRF: false }
+    (strategy as any).options = { ...(strategy as any).options, useCSRF: false }
 
     strategy.initialiseCSRF()
 
