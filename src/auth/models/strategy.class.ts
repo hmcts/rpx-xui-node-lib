@@ -4,10 +4,10 @@ import passport, { LogOutOptions } from 'passport'
 import { AUTH } from '../auth.constants'
 import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
-import Joi from 'joi'
+import Joi from '@hapi/joi'
 import * as URL from 'url'
 import { generators } from 'openid-client'
-import csrf from '@dr.pogodin/csurf'
+import csrf from 'csurf'
 import { MySessionData } from './sessionData.interface'
 import jwtDecode from 'jwt-decode'
 
@@ -199,7 +199,7 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-    public logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public logout = async (req: Request, res: Response, next?: NextFunction): Promise<void> => {
         const reqSession = req.session as MySessionData
 
         try {
@@ -223,7 +223,7 @@ export abstract class Strategy extends events.EventEmitter {
             req.logout({ keepSessionInfo: false }, async (err) => {
                 if (err) {
                     console.error(err)
-                    return next(err)
+                    return next?.(err)
                 }
                 await this.destroySession(req)
                 /* istanbul ignore next */
@@ -283,7 +283,9 @@ export abstract class Strategy extends events.EventEmitter {
         this.deserializeUser()
         ;(async () => {
             await this.initialiseStrategy(this.options)
-        })()
+        })().catch((error) => {
+            this.logger.error('initialiseStrategy error => ', error)
+        })
 
         this.initializePassport()
         this.initializeSession()
@@ -504,12 +506,12 @@ export abstract class Strategy extends events.EventEmitter {
 
     /* istanbul ignore next */
     public initializePassport = (): void => {
-        this.router.use(passport.initialize())
+        this.router.use(passport.initialize() as any)
     }
 
     /* istanbul ignore next */
     public initializeSession = (): void => {
-        this.router.use(passport.session())
+        this.router.use(passport.session() as any)
     }
 
     /* istanbul ignore next */
@@ -526,7 +528,7 @@ export abstract class Strategy extends events.EventEmitter {
             this.logger.log('initialising CSRF middleware')
 
             const csrfProtection = csrf({
-                value: this.getCSRFValue,
+                value: this.getCSRFValue as any,
             })
             // cookie options added via EXUI-986, fortify issues
             const cookieOptions: CookieOptions = {
@@ -534,10 +536,10 @@ export abstract class Strategy extends events.EventEmitter {
                 secure: true,
             }
             /* istanbul ignore next */
-            this.router.use(csrfProtection, (req, res, next) => {
+            this.router.use(csrfProtection as any, ((req: any, res: any, next: any) => {
                 res.cookie('XSRF-TOKEN', req.csrfToken(), cookieOptions)
                 next()
-            })
+            }) as any)
         }
     }
 

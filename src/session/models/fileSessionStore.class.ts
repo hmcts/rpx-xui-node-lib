@@ -13,10 +13,10 @@ export class FileSessionStore extends SessionStore {
 
     public getStore = (options: FileSessionMetadata): session.Store => {
         this.logger.info('using FileStore')
-        const fileStore = sessionFileStore(session)
+        const fileStore = sessionFileStore(session as any)
         return new fileStore({
             path: options.fileStoreOptions.filePath,
-        })
+        }) as unknown as session.Store
     }
 }
 
