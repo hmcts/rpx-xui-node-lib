@@ -18,6 +18,13 @@ class TestStrategy extends Strategy {
   }
 }
 
+// Variant to cover default logger parameter branch
+class TestStrategyDefaultLogger extends Strategy {
+  constructor(router: Router) {
+    super('test-strategy-default-logger', router)
+  }
+}
+
 describe('Strategy.saveStateInSession', () => {
   let router: Router
   let strategy: TestStrategy
@@ -56,8 +63,19 @@ describe('Strategy.saveStateInSession', () => {
 
     expect(reqSession.idam).toBeDefined()
     expect(reqSession.idam.state).toBe(state)
+    expect(loggerStub.log).toHaveBeenCalledWith(expect.stringContaining('state not found, generating new state'))
     expect(loggerStub.log).toHaveBeenCalledWith(expect.stringMatching(/saving state .* in session/))
     expect(loggerStub.log).toHaveBeenCalledWith(expect.stringMatching(/state .* saved in session/))
+  })
+
+  test('generates a new state when state argument is omitted', async () => {
+    const req = makeReq()
+    const reqSession = req.session as any
+
+    const { promise } = (strategy as any).saveStateInSession(reqSession)
+
+    await expect(promise).resolves.toBe(true)
+    expect(loggerStub.log).toHaveBeenCalledWith(expect.stringContaining('state not found, generating new state'))
   })
 
   test('uses provided state and saves it', async () => {
@@ -83,6 +101,61 @@ describe('Strategy.saveStateInSession', () => {
     await expect(promise).resolves.toBe(false)
     expect(reqSession.idam).toBeUndefined()
     expect(loggerStub.log).toHaveBeenCalledWith('sessionKey not available state not saved')
+  })
+
+  test('does not save when session object is missing and resolves false', async () => {
+    const reqSession = undefined as any
+
+    const { promise } = (strategy as any).saveStateInSession(reqSession, 'provided-state')
+
+    await expect(promise).resolves.toBe(false)
+    expect(loggerStub.log).toHaveBeenCalledWith('sessionKey not available state not saved')
+  })
+
+  test('does not save when options object is missing (covers optional-chaining branch)', async () => {
+    ;(strategy as any).options = undefined
+    const req = makeReq()
+    const reqSession = req.session as any
+
+    const { promise } = (strategy as any).saveStateInSession(reqSession, 'provided-state')
+
+    await expect(promise).resolves.toBe(false)
+    expect(loggerStub.log).toHaveBeenCalledWith('sessionKey not available state not saved')
+  })
+
+  test('handles options changing between accesses (covers optional-chaining branch inside assignment)', async () => {
+    const req = makeReq()
+    const reqSession = req.session as any
+
+    let optionsValue: any = { sessionKey: 'idam' }
+    let accessCount = 0
+
+    Object.defineProperty(strategy as any, 'options', {
+      configurable: true,
+      get() {
+        accessCount += 1
+        // 1st access: condition check (truthy)
+        // 2nd access: bracket key uses optional chaining (nullish branch)
+        // 3rd+ access: subsequent reads need a real object
+        if (accessCount === 2) return undefined
+        return optionsValue
+      },
+      set(v) {
+        optionsValue = v
+      },
+    })
+
+    const { promise } = (strategy as any).saveStateInSession(reqSession, 'provided-state')
+
+    await expect(promise).resolves.toBe(true)
+  })
+})
+
+describe('Strategy.constructor', () => {
+  test('uses default logger when not provided', () => {
+    const router = express.Router()
+    const s = new TestStrategyDefaultLogger(router)
+    expect((s as any).logger).toBeTruthy()
   })
 })
 
