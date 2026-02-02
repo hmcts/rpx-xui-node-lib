@@ -237,6 +237,21 @@ export abstract class Strategy extends events.EventEmitter {
                 res.redirect(redirect as string)
             })
 
+            const redirectUrl = URL.format({
+                protocol: req.protocol,
+                host: req.get('host'),
+            })
+            const params = new URLSearchParams({ post_logout_redirect_uri: redirectUrl })
+
+            const finalSSOLogoutUrl = `${this.options.ssoLogoutURL}?${params.toString()}`
+
+            const redirect = finalSSOLogoutUrl ? finalSSOLogoutUrl : AUTH.ROUTE.LOGIN
+            
+            this.logger.log('redirecting to => ', redirect)
+            // 401 is when no accessToken
+            res.redirect(redirect as string)
+
+            /* istanbul ignore next */
         } catch (e) {
             this.logger.error('error => ', e)
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
