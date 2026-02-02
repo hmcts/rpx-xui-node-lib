@@ -166,8 +166,6 @@ export abstract class Strategy extends events.EventEmitter {
 
         // Always ensure callbackURL is set (not just when missing)
         if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
-            req.app.set('trust proxy', true)
-
             // fallback to default if this.options.callbackURL is missing
             const pathname = this.options.callbackURL || req.originalUrl
 
@@ -232,13 +230,18 @@ export abstract class Strategy extends events.EventEmitter {
                     host: req.get('host'),
                 })
                 const params = new URLSearchParams({ post_logout_redirect_uri: redirectUrl })
+
                 const finalSSOLogoutUrl = `${this.options.ssoLogoutURL}?${params.toString()}`
+
                 const redirect = finalSSOLogoutUrl ? finalSSOLogoutUrl : AUTH.ROUTE.LOGIN
+
                 this.logger.log('redirecting to => ', redirect)
                 // 401 is when no accessToken
                 res.redirect(redirect as string)
-            })
 
+                /* istanbul ignore next */
+            })
+            
         } catch (e) {
             this.logger.error('error => ', e)
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
@@ -280,7 +283,8 @@ export abstract class Strategy extends events.EventEmitter {
         ;(async () => {
             await this.initialiseStrategy(this.options)
         })()
-
+        // ensure trust proxy is always enabled before any other middleware executes
+        this.initializeTrustProxy()
         this.initializePassport()
         this.initializeSession()
         this.initializeKeepAlive()
@@ -511,6 +515,17 @@ export abstract class Strategy extends events.EventEmitter {
     /* istanbul ignore next */
     public initializeKeepAlive = (): void => {
         this.router.use(this.keepAliveHandler)
+    }
+
+    /* istanbul ignore next */
+    public initializeTrustProxy = (): void => {
+        this.router.use((req, _res, next) => {
+            if (req.app.get('trust proxy') !== true) {
+                req.app.set('trust proxy', true)
+                this.logger.log('trust proxy enabled')
+            }
+            next()
+        })
     }
 
     /**
