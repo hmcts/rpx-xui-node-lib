@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.7-cleanup-logs",
+  "version": "2.30.7-cve-fix-qs",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -96,7 +96,7 @@
     "csurf": "^1.11.0",
     "debug": "^4.3.7",
     "deepmerge": "^4.2.2",
-    "express": "^4.20.0",
+    "express": "^5.2.1",
     "express-session": "^1.17.0",
     "jest-mock-axios": "^4.8.0",
     "jest-ts-auto-mock": "^2.1.0",
