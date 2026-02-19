@@ -269,11 +269,11 @@ export class OpenID extends AuthStrategy {
                     this.logger.log('passport authenticate')
 
                     if (error) {
-                        this.logger.error('loginHandler error: ', JSON.stringify(error))
+                        this.logger.error('loginHandler error: ', JSON.stringify(error, this.redactingLogReplacer))
                     }
                     /* istanbul ignore next */
                     if (info) {
-                        this.logger.info('loginHandler info: ', JSON.stringify(info))
+                        this.logger.info('loginHandler info: ', JSON.stringify(info, this.redactingLogReplacer))
                     }
                     /* istanbul ignore next */
                     if (user) {
