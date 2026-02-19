@@ -191,7 +191,7 @@ export class OpenID extends AuthStrategy {
             throw new Error('auto discovery failed')
         }
         const options = this.getOpenIDOptions(authOptions, this.issuer)
-        this.logger.log('initialiseStrategy options', options)
+        this.logger.log('initialiseStrategy options', JSON.stringify(options, this.redactingLogReplacer))
         this.client = this.getClientFromIssuer(this.issuer, options)
         if (!this.client) {
             throw new Error('client not initialised')

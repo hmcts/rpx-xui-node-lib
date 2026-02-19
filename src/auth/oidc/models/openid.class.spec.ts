@@ -165,6 +165,31 @@ test('OIDC OptionsMapper', () => {
     expect(openIdOptions.useRoutes).toEqual(options.useRoutes)
 })
 
+test('createNewStrategy should log redacted OpenID options', async () => {
+    const mockRouter = createMock<Router>()
+    const logger = {
+        log: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+    } as unknown as XuiLogger
+    const openId = new OpenID(mockRouter, logger)
+    const authOptions = { ...options, clientSecret: 'super-secret-client-secret' } as AuthOptions
+    const openIdOptions = openId.getOpenIDOptions(authOptions, { issuer: authOptions.issuerURL })
+
+    jest.spyOn(openId, 'discover').mockResolvedValue({} as Issuer<Client>)
+    jest.spyOn(openId, 'getOpenIDOptions').mockReturnValue(openIdOptions)
+    jest.spyOn(openId, 'getClientFromIssuer').mockReturnValue({} as Client)
+    jest.spyOn(openId, 'getNewStrategy').mockReturnValue({} as Strategy<any, Client>)
+
+    await openId.createNewStrategy(authOptions)
+
+    const logCalls = (logger.log as jest.Mock).mock.calls
+    const optionsLog = logCalls.find((call) => call[0] === 'initialiseStrategy options')
+    expect(optionsLog?.[1]).toContain('"client_secret":"[REDACTED]"')
+    expect(optionsLog?.[1]).not.toContain('super-secret-client-secret')
+})
+
 test('test validateOptions', () => {
     const options = {
         authorizationURL: '',

@@ -12,6 +12,9 @@ import { MySessionData } from './sessionData.interface'
 import jwtDecode from 'jwt-decode'
 
 export abstract class Strategy extends events.EventEmitter {
+    protected static readonly REDACTED_LOG_VALUE = '[REDACTED]'
+    private static readonly SENSITIVE_LOG_KEY_PATTERN = /(clientSecret|client_secret|password|token|authorization)/i
+
     public readonly strategyName: string
 
     protected readonly router: Router
@@ -80,11 +83,19 @@ export abstract class Strategy extends events.EventEmitter {
         }
         return true
     }
+
+    protected redactingLogReplacer = (key: string, value: any): any => {
+        if (key && Strategy.SENSITIVE_LOG_KEY_PATTERN.test(key)) {
+            return Strategy.REDACTED_LOG_VALUE
+        }
+        return value
+    }
+
     /* istanbul ignore next */
     public initialiseStrategy = async (options: any): Promise<void> => {
         this.options = options
-        this.logger.log('initialising strategy, options:')
-        this.logger.log(JSON.stringify(options))
+        this.logger.log('initialising strategy')
+        this.logger.log(JSON.stringify(options, this.redactingLogReplacer))
     }
 
     private saveStateInSession(reqSession: MySessionData, state?: string): { promise: Promise<boolean>, state: string } {
