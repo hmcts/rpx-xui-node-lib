@@ -188,6 +188,30 @@ describe('OAUTH2 Auth', () => {
         expect(next).toHaveBeenCalled()
     })
 
+    test('should reject callback when state is missing', async () => {
+        const authenticateSpy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
+        const emitSpy = jest.spyOn(oauth2, 'emit')
+        const mockRequest = {
+            ...mockRequestRequired,
+            url: 'http://localhost/callbackUrl',
+            body: {},
+            query: {},
+            session: {},
+        } as unknown as Request
+        const mockResponse = {
+            redirect: jest.fn(),
+            locals: { message: '' },
+        } as unknown as Response
+        const next = jest.fn()
+
+        await oauth2.callbackHandler(mockRequest, mockResponse, next)
+
+        expect(mockResponse.locals.message).toEqual('Invalid authorization request state.')
+        expect(emitSpy).toHaveBeenCalledWith(AUTH.EVENT.AUTHENTICATE_FAILURE, mockRequest, mockResponse, next)
+        expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+        expect(authenticateSpy).not.toHaveBeenCalled()
+    })
+
     test('should handle INVALID_STATE_ERROR in info', async () => {
         const info = { message: 'Invalid authorization request state.' }
         jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
@@ -246,7 +270,7 @@ describe('OAUTH2 Auth', () => {
             info: jest.fn(),
         } as unknown as XuiLogger
         const oAuth2 = new OAuth2(mockRouter, logger)
-        const mockProps = {url: 'http://localhost/callbackUrl'}
+        const mockProps = {url: 'http://localhost/callbackUrl', query: { state: 'whata' }}
         const mockRequest = createMockPassportRequest('user', mockProps)
         const mockResponse = createMock<Response>()
         const next = jest.fn()
@@ -274,6 +298,7 @@ describe('OAUTH2 Auth', () => {
         const oAuth2 = new OAuth2(mockRouter, logger)
         const mockRequest = createMock<Request>()
         mockRequest.url = 'http://someurl'
+        mockRequest.query = { state: 'whata' }
         const mockResponse = createMock<Response>()
         const next = jest.fn()
 
