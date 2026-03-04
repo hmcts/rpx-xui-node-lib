@@ -280,6 +280,50 @@ describe('OAUTH2 Auth', () => {
         expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
     })
 
+    test('callbackHandler should not overwrite session state from query state', async () => {
+        const info = { message: 'Invalid authorization request state.' }
+        const authenticateSpy = jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
+            if (callback) {
+                callback(null, null, info)
+            }
+            return jest.fn()
+        })
+
+        const mockRouter = createMock<Router>()
+        const logger = {
+            log: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+        } as unknown as XuiLogger
+        const oAuth2 = new OAuth2(mockRouter, logger);
+        (oAuth2 as any).options = { ...(oAuth2 as any).options, sessionKey: 'test' }
+
+        const saveSpy = jest.fn()
+        const mockRequest = {
+            ...mockRequestRequired,
+            url: 'http://localhost/callbackUrl',
+            body: {},
+            query: { state: 'query-state' },
+            session: {
+                callbackURL: 'http://localhost/callbackUrl',
+                save: saveSpy,
+                test: { state: 'original-state', nonce: 'nonce-value' },
+            },
+        } as unknown as Request
+        const mockResponse = {
+            redirect: jest.fn(),
+            locals: { message: '' },
+        } as unknown as Response
+        const next = jest.fn()
+
+        await oAuth2.callbackHandler(mockRequest, mockResponse, next)
+
+        expect(authenticateSpy).toHaveBeenCalled()
+        expect(saveSpy).not.toHaveBeenCalled()
+        expect((mockRequest.session as any).test.state).toEqual('original-state')
+        expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+    })
+
     test('should handle no user returned', async () => {
         const info = { message: 'Some other error' }
         jest.spyOn(passport, 'authenticate').mockImplementation((strategy, options, callback) => {
