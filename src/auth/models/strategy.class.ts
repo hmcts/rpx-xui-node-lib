@@ -311,8 +311,6 @@ export abstract class Strategy extends events.EventEmitter {
             res.redirect(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
             return
         }
-        const { promise } = this.saveStateInSession(reqSession, qstate)
-        await promise
         if (this.options.sessionKey) {
             const sessionKey = this.options.sessionKey
             this.logger.log(`sessionKey: ${sessionKey}`)
