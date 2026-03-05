@@ -615,7 +615,9 @@ xtest('keepAliveHandler session but not authenticated', async () => {
         session: session
     }
 
-    const mockRequest = createMockPassportRequest(null, mockRequestProps)
+    const mockRequest = createMockPassportRequest('user', mockRequestProps)
+    const isAuth = jest.fn()
+    isAuth.mockReturnValue(false)
 
     await oidc.keepAliveHandler(mockRequest, mockResponse, next)
     expect(next).toHaveBeenCalled()
