@@ -622,7 +622,7 @@ xtest('keepAliveHandler session but not authenticated', async () => {
     expect(next).toHaveBeenCalled()
 })
 
-xtest('keepAliveHandler session and isAuthenticated', async () => {
+xtest('keepAliveHandler session and isAuthenticated uses introspection for refresh', async () => {
     oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (req) => {
         expect(req.isRefresh).toBeFalsy()
     })
@@ -646,11 +646,12 @@ xtest('keepAliveHandler session and isAuthenticated', async () => {
     }
 
     const mockRequest = createMockPassportRequest('user', mockRequestProps)
-    const isAuth = jest.fn()
-    isAuth.mockReturnValue(true)
     const spyOnClient = jest.spyOn(oidc, 'getClient')
     const client = createMock<Client>()
     spyOnClient.mockReturnValue(client)
+
+    const spyOnIntrospect = jest.fn().mockResolvedValue({ active: true, exp: Math.floor(Date.now() / 1000) - 30 })
+    client.introspect = spyOnIntrospect
 
     const tokenSet = createMock<TokenSet>()
     const spyOnRefresh = jest.fn().mockReturnValue(tokenSet)
@@ -659,18 +660,20 @@ xtest('keepAliveHandler session and isAuthenticated', async () => {
     const convertedTokenSet = createMock<TokenSet>()
     spyConvertTokenSet.mockReturnValue(convertedTokenSet)
 
-    const spyOnIsTokenExpired = jest.spyOn(oidc, 'isTokenExpired')
-    spyOnIsTokenExpired.mockReturnValue(true)
+    const spyListenerCount = jest.spyOn(oidc, 'listenerCount').mockReturnValue(1)
 
     const spyAuthSuccEmit = jest.spyOn(oidc, 'emit').mockReturnValue(false)
 
     await oidc.keepAliveHandler(mockRequest, mockResponse, next)
-    expect(spyOnClient).toHaveBeenCalledTimes(2)
+    expect(spyOnIntrospect).toHaveBeenCalledWith('token-access')
+    expect(spyOnClient).toHaveBeenCalled()
     expect(spyOnRefresh).toHaveBeenCalled()
     expect(spyConvertTokenSet).toHaveBeenCalled()
     expect(mockRequest.session.passport.user.tokenset).toEqual(convertedTokenSet)
     expect(spyAuthSuccEmit).toHaveBeenCalledWith(AUTH.EVENT.AUTHENTICATE_SUCCESS, mockRequest, mockResponse, next)
 
+    spyListenerCount.mockRestore()
+    
     oidc.removeAllListeners()
 })
 
