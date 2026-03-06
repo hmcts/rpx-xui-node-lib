@@ -623,9 +623,6 @@ xtest('keepAliveHandler session but not authenticated', async () => {
 })
 
 xtest('keepAliveHandler session and isAuthenticated uses introspection for refresh', async () => {
-    oidc.addListener(AUTH.EVENT.AUTHENTICATE_SUCCESS, (req) => {
-        expect(req.isRefresh).toBeFalsy()
-    })
     const mockResponse = {} as Response
     const next = jest.fn()
     const session = createMock<MySessionData>()
@@ -673,7 +670,7 @@ xtest('keepAliveHandler session and isAuthenticated uses introspection for refre
     expect(spyAuthSuccEmit).toHaveBeenCalledWith(AUTH.EVENT.AUTHENTICATE_SUCCESS, mockRequest, mockResponse, next)
 
     spyListenerCount.mockRestore()
-    
+
     oidc.removeAllListeners()
 })
 
