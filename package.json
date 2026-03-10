@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.7-exui-4227-3",
+  "version": "2.30.7-exui-4227-final-minor-fix",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -112,7 +112,8 @@
     "minimatch": "3.0.5",
     "minimist": "1.2.6",
     "form-data": "^4.0.5",
-    "cookie": "^0.7.2"
+    "cookie": "^0.7.2",
+    "tar": "7.5.9"
   },
   "packageManager": "yarn@4.5.1"
 }
