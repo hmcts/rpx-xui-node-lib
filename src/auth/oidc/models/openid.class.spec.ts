@@ -93,7 +93,7 @@ test('OIDC loginHandler with session', async () => {
     jest.spyOn(openId, 'deserializeUser')
     jest.spyOn(openId, 'initializePassport')
     jest.spyOn(openId, 'initializeSession')
-    jest.spyOn(openId, 'initialiseStrategy').mockResolvedValue(undefined as unknown as void)
+    jest.spyOn(openId, 'initialiseStrategy').mockResolvedValue()
     jest.spyOn(openId, 'initialiseCSRF')
     options.useRoutes = true
     openId.configure(options)
