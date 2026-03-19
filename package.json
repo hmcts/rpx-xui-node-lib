@@ -105,7 +105,8 @@
   "resolutions": {
     "@babel/traverse": "7.23.2",
     "minimatch": "3.0.5",
-    "minimist": "1.2.6"
+    "minimist": "1.2.6",
+    "tar": "7.5.9"
   },
   "packageManager": "yarn@4.5.1"
 }
