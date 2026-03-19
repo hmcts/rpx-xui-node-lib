@@ -164,21 +164,18 @@ export abstract class Strategy extends events.EventEmitter {
    public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
 
-        // Always ensure callbackURL is set (not just when missing)
-        if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
-            req.app.set('trust proxy', true)
-
-            // fallback to default if this.options.callbackURL is missing
-            const pathname = this.options.callbackURL || req.originalUrl
-
-            reqSession.callbackURL = URL.format({
-                protocol: req.protocol,
-                host: req.get('host'),
-                pathname,
-            })
-
-            this.logger.log(`callbackURL was missing — set to: ${reqSession.callbackURL}`)
+        if (!this.options.callbackURL) {
+            next(new Error('Invalid callbackURL configuration'))
+            return
         }
+
+        req.app.set('trust proxy', true)
+        reqSession.callbackURL = URL.format({
+            protocol: req.protocol,
+            host: req.get('host'),
+            pathname: this.options.callbackURL,
+        })
+        this.logger.log(`setCallbackURL to: ${reqSession.callbackURL}`)
 
         // 🔍 Log current config and session key status
         this.logger.log(`setCallbackURL, options.callbackurl: ${this.options.callbackURL}`)
@@ -305,11 +302,15 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log('in callbackHandler for url ' + req.url)
         const reqSession = req.session as MySessionData
         const qstate = typeof req.query.state == 'string' ? req.query.state : undefined
-        const { promise, state } = this.saveStateInSession(reqSession, qstate)
-        if(!qstate) {
-            req.query.state = state
+        const INVALID_STATE_ERROR = 'Invalid authorization request state.'
+        if (!qstate) {
+            this.logger.log('Missing callback state in authorization response, rejecting request')
+            res.locals = res.locals || {}
+            res.locals.message = INVALID_STATE_ERROR
+            this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
+            res.redirect(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+            return
         }
-        await promise
         if (this.options.sessionKey) {
             const sessionKey = this.options.sessionKey
             this.logger.log(`sessionKey: ${sessionKey}`)
@@ -317,7 +318,6 @@ export abstract class Strategy extends events.EventEmitter {
         } else {
             this.logger.log('sessionKey not set')
         }
-        const INVALID_STATE_ERROR = 'Invalid authorization request state.'
         const LOGIN_BOOKMARK_ERROR = 'LoginBookmarkUsed :'
         const emitAuthenticationFailure = (logMessages: string[]): void => {
             this.logger.log(`inside emitAuthenticationFailure, message count ${logMessages.length}`)
