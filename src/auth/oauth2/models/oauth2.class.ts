@@ -23,7 +23,7 @@ export class OAuth2 extends Strategy {
             ...authOptions,
             ...{
                 logoutUrl: authOptions.logoutURL,
-                state: '1', // this is required to have oauth strategy chose the right sessionStore
+                state: true,
             },
         }
         delete options.logoutURL
