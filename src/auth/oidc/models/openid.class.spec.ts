@@ -11,7 +11,7 @@ import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 import { http, XuiLogger } from '../../../common'
 import { AuthOptions } from '../../models'
 import { MySessionData } from '../../models/sessionData.interface'
-import { createMockPassportRequest } from '../../../common/models/xuiNode.class.spec'
+import { createMockPassportRequest } from '../../../common/models/test/passportRequest.mock'
 
 const mockRequestRequired = {
     authorizationURL: '',

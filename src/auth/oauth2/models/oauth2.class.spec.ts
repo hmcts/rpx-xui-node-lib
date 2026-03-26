@@ -5,7 +5,7 @@ import { Request, Response, Router } from 'express'
 import { AuthOptions } from '../../models'
 import { XuiLogger } from '../../../common'
 import { AUTH } from '../../auth.constants'
-import { createMockPassportRequest } from '../../../common/models/xuiNode.class.spec';
+import { createMockPassportRequest } from '../../../common/models/test/passportRequest.mock';
 
 describe('OAUTH2 Auth', () => {
     const mockRequestRequired = {
