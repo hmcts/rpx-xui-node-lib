@@ -175,22 +175,30 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-   public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
+    public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
 
-        if (!this.options.callbackURL) {
-            next(new Error('Invalid callbackURL configuration'))
-            return
+        // Always ensure callbackURL is set to a non-empty string
+        const hasValidSessionCallback =
+            typeof reqSession.callbackURL === 'string' &&
+            reqSession.callbackURL.trim().length > 0
+
+        const hasValidOptionCallback =
+            typeof this.options.callbackURL === 'string' &&
+            this.options.callbackURL.trim().length > 0
+
+        if (!hasValidSessionCallback) {
+            req.app.set('trust proxy', true)
+
+            const pathname = hasValidOptionCallback ? this.options.callbackURL.trim() : req.originalUrl
+
+            reqSession.callbackURL = URL.format({
+                protocol: req.protocol,
+                host: req.get('host'),
+                pathname,
+            })
         }
-
-        req.app.set('trust proxy', true)
-        reqSession.callbackURL = URL.format({
-            protocol: req.protocol,
-            host: req.get('host'),
-            pathname: this.options.callbackURL,
-        })
-        this.logger.log(`setCallbackURL to: ${reqSession.callbackURL}`)
-
+        
         // 🔍 Log current config and session key status
         this.logger.log(`setCallbackURL, options.callbackurl: ${this.options.callbackURL}`)
 
