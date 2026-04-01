@@ -5,9 +5,11 @@ import { s2s, S2SAuth } from './s2s.class'
 import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
 
+const decodeMock = jest.fn(() => Buffer.from('1234567890'))
+
 jest.mock('otplib', () => ({
     ScureBase32Plugin: jest.fn().mockImplementation(() => ({
-        decode: jest.fn(() => Buffer.from('1234567890')),
+        decode: decodeMock,
     })),
     createGuardrails: jest.fn((config) => config),
     generate: jest.fn(),
@@ -55,6 +57,9 @@ describe('S2SAuth', () => {
         await flushPromises()
         mockAxios.mockResponse(postS2SResponse)
         const s2sToken = await promise
+        expect(otplib.ScureBase32Plugin).toHaveBeenCalledTimes(1)
+        expect(decodeMock).toHaveBeenCalledWith(s2sConfig.s2sSecret)
+        expect(otplib.createGuardrails).toHaveBeenCalledWith({ MIN_SECRET_BYTES: 10 })
         expect(otplib.generate).toHaveBeenCalledWith(
             expect.objectContaining({
                 guardrails: { MIN_SECRET_BYTES: 10 },
