@@ -93,7 +93,7 @@ test('OIDC loginHandler with session', async () => {
     jest.spyOn(openId, 'deserializeUser')
     jest.spyOn(openId, 'initializePassport')
     jest.spyOn(openId, 'initializeSession')
-    jest.spyOn(openId, 'initialiseStrategy')
+    jest.spyOn(openId, 'initialiseStrategy').mockResolvedValue()
     jest.spyOn(openId, 'initialiseCSRF')
     options.useRoutes = true
     openId.configure(options)
@@ -280,11 +280,11 @@ test('OIDC discoverIssuer', async () => {
     expect(spy).toHaveBeenCalled()
 })
 
-test('OIDC discover', () => {
+test('OIDC discover', async () => {
     const issuer = {}
     const spy = jest.spyOn(oidc, 'discoverIssuer').mockImplementation(() => Promise.resolve({ metadata: issuer }))
 
-    oidc.discover()
+    await oidc.discover()
     expect(spy).toHaveBeenCalled()
 })
 
@@ -542,7 +542,7 @@ xtest('configure with useRoutes', () => {
     const spyOnDeSer = jest.spyOn(openId, 'deserializeUser')
     const spyOnPass = jest.spyOn(openId, 'initializePassport')
     const spyOnSes = jest.spyOn(openId, 'initializeSession')
-    jest.spyOn(openId, 'initialiseStrategy')
+    jest.spyOn(openId, 'initialiseStrategy').mockResolvedValue()
     options.useRoutes = true
     openId.configure(options)
     expect(spyOnValidateOptions).toHaveBeenCalled()
@@ -566,7 +566,7 @@ xtest('configure without useRoutes', () => {
     const spyOnDeSer = jest.spyOn(openId, 'deserializeUser')
     const spyOnPass = jest.spyOn(openId, 'initializePassport')
     const spyOnSes = jest.spyOn(openId, 'initializeSession')
-    jest.spyOn(openId, 'initialiseStrategy')
+    jest.spyOn(openId, 'initialiseStrategy').mockResolvedValue()
 
     options.useRoutes = false
     openId.configure(options)
