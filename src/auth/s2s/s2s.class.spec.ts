@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import * as otplib from 'otplib'
 import mockAxios from 'jest-mock-axios'
-import { S2SAuth } from './s2s.class'
+import { s2s, S2SAuth } from './s2s.class'
 import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
 
@@ -40,6 +40,14 @@ describe('S2SAuth', () => {
 
     it('should be true that S2SAuth is defined', () => {
         expect(S2SAuth).toBeDefined()
+    })
+
+    it('should expose the expected S2S events', () => {
+        expect(s2sAuth.getEvents()).toEqual(Object.values(S2S.EVENT))
+    })
+
+    it('should export a singleton S2SAuth instance', () => {
+        expect(s2s).toBeInstanceOf(S2SAuth)
     })
 
     it('should generate an S2S token', async () => {
