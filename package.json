@@ -1,10 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-<<<<<<< exui-4227-cve-fix
-  "version": "2.30.7-exui-4227-final-minor-fix",
-=======
-  "version": "2.30.7-exui-3762-rel",
->>>>>>> pre-passport-branch
+  "version": "2.30.7-exui-4227-rel",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
