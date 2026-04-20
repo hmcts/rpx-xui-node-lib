@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.7-exui-4227-rel",
+  "version": "2.30.8-exui-4295-axios-update",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -90,7 +90,7 @@
     }
   },
   "dependencies": {
-    "axios": "^1.11.0",
+    "axios": "^1.15.0",
     "caller-path": "^3.0.0",
     "connect-redis": "^4.0.4",
     "csurf": "^1.11.0",
