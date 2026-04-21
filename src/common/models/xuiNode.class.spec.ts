@@ -3,41 +3,17 @@ import { Router, Request, Response } from 'express'
 import { XuiNodeOptions } from './xuiNodeOptions.interface'
 import { XuiNodeMiddlewareInterface } from './xuiNodeMiddleware.interface'
 import { createMock } from '@golevelup/ts-jest';
+import { createMockPassportRequest } from './test/passportRequest.mock'
 
-export interface PassportRequest extends Request {
-    user?: any;
-    isAuthenticated(): this is AuthenticatedRequest;
-    isUnauthenticated(): this is UnauthenticatedRequest;
-}
-
-interface AuthenticatedRequest extends Request {
-    user: any;
-}
-
-interface UnauthenticatedRequest extends Request {
-    user?: undefined;
-}
-
-export function createMockPassportRequest(
-    user?: any,
-    overrides: Partial<PassportRequest> = {}
-): PassportRequest {
-    const req = createMock<Request>() as unknown as PassportRequest;
-
-    req.user = user ?? undefined;
-
-    // Use function expressions, not arrow functions, to define type predicates
-    req.isAuthenticated = function (): this is AuthenticatedRequest {
-        return !!this.user;
-    };
-
-    req.isUnauthenticated = function (): this is UnauthenticatedRequest {
-        return !this.user;
-    };
-
-    Object.assign(req, overrides);
-    return req;
-}
+jest.mock('../../auth', () => ({
+    oidc: {},
+    OIDC: {},
+    oauth2: {},
+    XUIOAuth2Strategy: {},
+    OAUTH2: {},
+    s2s: {},
+    S2S: {},
+}))
 
 test('xuiNode isTruthy', () => {
     expect(xuiNode).toBeTruthy()

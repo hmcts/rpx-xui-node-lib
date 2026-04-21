@@ -1,9 +1,19 @@
 import { Request, Response } from 'express'
-import { authenticator } from 'otplib'
+import * as otplib from 'otplib'
 import mockAxios from 'jest-mock-axios'
-import { S2SAuth } from './s2s.class'
+import { s2s, S2SAuth } from './s2s.class'
 import { S2S } from './s2s.constants'
 import { S2SConfig } from './s2sConfig.interface'
+
+const decodeMock = jest.fn(() => Buffer.from('1234567890'))
+
+jest.mock('otplib', () => ({
+    ScureBase32Plugin: jest.fn().mockImplementation(() => ({
+        decode: decodeMock,
+    })),
+    createGuardrails: jest.fn((config) => config),
+    generate: jest.fn(),
+}))
 
 describe('S2SAuth', () => {
     let s2sAuth: S2SAuth
@@ -16,12 +26,13 @@ describe('S2SAuth', () => {
         data: 'abc123',
     }
     const oneTimePassword = 'password'
+    const flushPromises = async (): Promise<void> => await new Promise(setImmediate)
 
     beforeEach(() => {
+        jest.clearAllMocks()
         s2sAuth = new S2SAuth()
         s2sAuth.configure(s2sConfig, {})
-
-        jest.spyOn(authenticator, 'generate').mockReturnValue(oneTimePassword)
+        ;(otplib.generate as jest.MockedFunction<typeof otplib.generate>).mockResolvedValue(oneTimePassword)
 
         // Clear the S2S token cache of any existing token for the microservice
         s2sAuth.deleteCachedToken()
@@ -33,11 +44,29 @@ describe('S2SAuth', () => {
         expect(S2SAuth).toBeDefined()
     })
 
+    it('should expose the expected S2S events', () => {
+        expect(s2sAuth.getEvents()).toEqual(Object.values(S2S.EVENT))
+    })
+
+    it('should export a singleton S2SAuth instance', () => {
+        expect(s2s).toBeInstanceOf(S2SAuth)
+    })
+
     it('should generate an S2S token', async () => {
         const promise = s2sAuth.serviceTokenGenerator()
+        await flushPromises()
         mockAxios.mockResponse(postS2SResponse)
         const s2sToken = await promise
-        expect(authenticator.generate).toHaveBeenCalledWith(s2sConfig.s2sSecret)
+        expect(otplib.ScureBase32Plugin).toHaveBeenCalledTimes(1)
+        expect(decodeMock).toHaveBeenCalledWith(s2sConfig.s2sSecret)
+        expect(otplib.createGuardrails).toHaveBeenCalledWith({ MIN_SECRET_BYTES: 10 })
+        expect(otplib.generate).toHaveBeenCalledWith(
+            expect.objectContaining({
+                guardrails: { MIN_SECRET_BYTES: 10 },
+                secret: s2sConfig.s2sSecret,
+                strategy: 'totp',
+            })
+        )
         expect(mockAxios.post).toHaveBeenCalledWith(`${s2sConfig.s2sEndpointUrl}`, {
             microservice: s2sConfig.microservice,
             oneTimePassword,
@@ -46,39 +75,38 @@ describe('S2SAuth', () => {
     })
 
     it('should get a cached S2S token', async () => {
-        // First time around, the S2S token cache is empty so a new token is generated and cached
         let promise = s2sAuth.serviceTokenGenerator()
+        await flushPromises()
         mockAxios.mockResponse(postS2SResponse)
         let s2sToken = await promise
 
-        // Second time around, it should return the cached S2S token instead of generating a new one
         promise = s2sAuth.serviceTokenGenerator()
         s2sToken = await promise
-        expect(authenticator.generate).toHaveBeenCalledTimes(1)
+        expect(otplib.generate).toHaveBeenCalledTimes(1)
         expect(mockAxios.post).toHaveBeenCalledTimes(1)
         expect(s2sToken).toEqual('abc123')
     })
 
     it('should generate a new S2S token if the existing one has expired', async () => {
-        // First time around, the S2S token cache is empty so a new token is generated and cached
         const promise = s2sAuth.serviceTokenGenerator()
+        await flushPromises()
         mockAxios.mockResponse(postS2SResponse)
         await promise
 
-        // Get the S2S token from the cache and manually alter the expiration
         const cachedToken = s2sAuth.getToken()
         cachedToken.expiresAt = Math.floor(Date.now() / 1000)
 
-        // Second time around, it should generate a new S2S token (because the cached one has expired)
         const promise2 = s2sAuth.serviceTokenGenerator()
+        await flushPromises()
         mockAxios.mockResponse(postS2SResponse)
         await promise2
-        expect(authenticator.generate).toHaveBeenCalledTimes(2)
+        expect(otplib.generate).toHaveBeenCalledTimes(2)
         expect(mockAxios.post).toHaveBeenCalledTimes(2)
     })
 
     it('should delete the cached S2S token', async () => {
         const promise = s2sAuth.serviceTokenGenerator()
+        await flushPromises()
         mockAxios.mockResponse(postS2SResponse)
         await promise
         let cachedToken = s2sAuth.getToken()
@@ -96,7 +124,9 @@ describe('S2SAuth', () => {
         const next = (): string => {
             return 'Dummy next function'
         }
+
         const promise = s2sAuth.s2sHandler(req, res, next)
+        await flushPromises()
         mockAxios.mockResponse(postS2SResponse)
 
         const result = await promise
@@ -113,7 +143,6 @@ describe('S2SAuth', () => {
             return 'Dummy next function'
         }
 
-        // Add a listener to s2sAuth, which is an EventEmitter
         s2sAuth.on(S2S.EVENT.AUTHENTICATE_SUCCESS, function (token, emittedReq, emittedRes, emittedNext) {
             expect(token).toEqual('abc123')
             expect(emittedReq).toEqual(req)
@@ -122,12 +151,11 @@ describe('S2SAuth', () => {
         })
 
         const promise = s2sAuth.s2sHandler(req, res, next)
+        await flushPromises()
         mockAxios.mockResponse(postS2SResponse)
 
         const result = await promise
         expect(req.headers).toEqual({ ServiceAuthorization: 'Bearer abc123' })
-        // The handler should not return any result because next() should not be called, given that it should emit an
-        // event instead
         expect(result).toBeUndefined()
     })
 
@@ -139,10 +167,10 @@ describe('S2SAuth', () => {
         const next = jest.fn()
 
         const promise = s2sAuth.s2sHandler(req, res, next)
+        await flushPromises()
         mockAxios.mockError(new Error('Failed to request S2S token'))
 
         const result = await promise
-        // There should not be any S2S token in the request headers
         expect(req.headers).toEqual({})
         expect(next).toHaveBeenCalledWith(Error('Failed to request S2S token'))
         expect(result).toBeUndefined()
@@ -156,11 +184,10 @@ describe('S2SAuth', () => {
         const next = jest.fn()
 
         const promise = s2sAuth.s2sHandler(req, res, next)
-
+        await flushPromises()
         mockAxios.mockResponse({ data: null })
 
         const result = await promise
-        // There should not be any S2S token in the request headers
         expect(req.headers).toEqual({})
         expect(next).not.toHaveBeenCalled()
         expect(result).toBeUndefined()
