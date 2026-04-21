@@ -4,7 +4,7 @@ import passport from 'passport'
 import { AUTH } from '../auth.constants'
 import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
-import Joi from '@hapi/joi'
+import Joi from 'joi'
 import * as URL from 'url'
 import { generators } from 'openid-client'
 import csrf from 'csurf'
@@ -12,6 +12,9 @@ import { MySessionData } from './sessionData.interface'
 import jwtDecode from 'jwt-decode'
 
 export abstract class Strategy extends events.EventEmitter {
+    protected static readonly REDACTED_LOG_VALUE = '[REDACTED]'
+    private static readonly SENSITIVE_LOG_KEY_PATTERN = /(clientSecret|client_secret|password|token|authorization)/i
+
     public readonly strategyName: string
 
     protected readonly router: Router
@@ -80,11 +83,19 @@ export abstract class Strategy extends events.EventEmitter {
         }
         return true
     }
+
+    protected redactingLogReplacer = (key: string, value: any): any => {
+        if (key && Strategy.SENSITIVE_LOG_KEY_PATTERN.test(key)) {
+            return Strategy.REDACTED_LOG_VALUE
+        }
+        return value
+    }
+
     /* istanbul ignore next */
     public initialiseStrategy = async (options: any): Promise<void> => {
         this.options = options
         this.logger.log('initialising strategy, options:')
-        this.logger.log(JSON.stringify(options))
+        this.logger.log(JSON.stringify(options, this.redactingLogReplacer))
     }
 
     private saveStateInSession(reqSession: MySessionData, state?: string): { promise: Promise<boolean>, state: string } {
@@ -137,11 +148,14 @@ export abstract class Strategy extends events.EventEmitter {
                 (error: any, user: any, info: any) => {
                     /* istanbul ignore next */
                     if (error) {
-                        this.logger.error('passport authenticate error ', JSON.stringify(error))
+                        this.logger.error(
+                            'passport authenticate error ',
+                            JSON.stringify(error, this.redactingLogReplacer),
+                        )
                     }
                     /* istanbul ignore next */
                     if (info) {
-                        this.logger.info('passport authenticate info', JSON.stringify(info))
+                        this.logger.info('passport authenticate info', JSON.stringify(info, this.redactingLogReplacer))
                     }
                     /* istanbul ignore next */
                     if (!user) {
@@ -161,25 +175,30 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
-   public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
+    public setCallbackURL = (req: Request, _res: Response, next: NextFunction): void => {
         const reqSession = req.session as MySessionData
 
-        // Always ensure callbackURL is set (not just when missing)
-        if (!reqSession.callbackURL || typeof reqSession.callbackURL !== 'string') {
+        // Always ensure callbackURL is set to a non-empty string
+        const hasValidSessionCallback =
+            typeof reqSession.callbackURL === 'string' &&
+            reqSession.callbackURL.trim().length > 0
+
+        const hasValidOptionCallback =
+            typeof this.options.callbackURL === 'string' &&
+            this.options.callbackURL.trim().length > 0
+
+        if (!hasValidSessionCallback) {
             req.app.set('trust proxy', true)
 
-            // fallback to default if this.options.callbackURL is missing
-            const pathname = this.options.callbackURL || req.originalUrl
+            const pathname = hasValidOptionCallback ? this.options.callbackURL.trim() : req.originalUrl
 
             reqSession.callbackURL = URL.format({
                 protocol: req.protocol,
                 host: req.get('host'),
                 pathname,
             })
-
-            this.logger.log(`callbackURL was missing — set to: ${reqSession.callbackURL}`)
         }
-
+        
         // 🔍 Log current config and session key status
         this.logger.log(`setCallbackURL, options.callbackurl: ${this.options.callbackURL}`)
 
@@ -305,11 +324,15 @@ export abstract class Strategy extends events.EventEmitter {
         this.logger.log('in callbackHandler for url ' + req.url)
         const reqSession = req.session as MySessionData
         const qstate = typeof req.query.state == 'string' ? req.query.state : undefined
-        const { promise, state } = this.saveStateInSession(reqSession, qstate)
-        if(!qstate) {
-            req.query.state = state
+        const INVALID_STATE_ERROR = 'Invalid authorization request state.'
+        if (!qstate) {
+            this.logger.log('Missing callback state in authorization response, rejecting request')
+            res.locals = res.locals || {}
+            res.locals.message = INVALID_STATE_ERROR
+            this.emit(AUTH.EVENT.AUTHENTICATE_FAILURE, req, res, next)
+            res.redirect(AUTH.ROUTE.EXPIRED_LOGIN_LINK)
+            return
         }
-        await promise
         if (this.options.sessionKey) {
             const sessionKey = this.options.sessionKey
             this.logger.log(`sessionKey: ${sessionKey}`)
@@ -317,7 +340,6 @@ export abstract class Strategy extends events.EventEmitter {
         } else {
             this.logger.log('sessionKey not set')
         }
-        const INVALID_STATE_ERROR = 'Invalid authorization request state.'
         const LOGIN_BOOKMARK_ERROR = 'LoginBookmarkUsed :'
         const emitAuthenticationFailure = (logMessages: string[]): void => {
             this.logger.log(`inside emitAuthenticationFailure, message count ${logMessages.length}`)
