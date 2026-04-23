@@ -94,17 +94,23 @@ export class OpenID extends AuthStrategy {
         if (req.isAuthenticated() && this.getClient()) {
             const userDetails = reqsession.passport.user
             const currentAccessToken = userDetails.tokenset.accessToken
+            const client = this.getClient()
+            const canIntrospect = Boolean(client?.issuer?.metadata?.introspection_endpoint)
 
             if (currentAccessToken) {
                 try {
-                    const introspection = await this.getClient()?.introspect(currentAccessToken)
-                    const now = Math.floor(Date.now() / 1000)
-                    const tokenExpiredOrInvalid = !introspection?.active || !introspection?.exp || introspection.exp <= now
+                    let tokenExpiredOrInvalid = this.isTokenExpired(currentAccessToken)
+
+                    if (canIntrospect) {
+                        const now = Math.floor(Date.now() / 1000)
+                        const introspection = await client?.introspect(currentAccessToken)
+                        tokenExpiredOrInvalid = !introspection?.active || !introspection?.exp || introspection.exp <= now
+                    }
 
                     if (tokenExpiredOrInvalid) {
                         this.logger.log('token expired or inactive')
 
-                        const tokenSet: TokenSet | undefined = await this.getClient()?.refresh(
+                        const tokenSet: TokenSet | undefined = await client?.refresh(
                             reqsession.passport.user.tokenset.refreshToken,
                         )
 
