@@ -90,6 +90,7 @@
     }
   },
   "dependencies": {
+    "@dr.pogodin/csurf": "^1.14.0",
     "axios": "^1.16.0",
     "caller-path": "^3.0.0",
     "connect-redis": "^4.0.4",
