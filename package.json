@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.13",
+  "version": "2.30.13-EXUI-4299-body-parser",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -89,7 +89,7 @@
     "connect-redis": "^4.0.4",
     "debug": "^4.3.7",
     "deepmerge": "^4.2.2",
-    "express": "^4.20.0",
+    "express": "^5.2.1",
     "express-session": "^1.17.0",
     "joi": "^18.1.2",
     "jwt-decode": "^3.1.2",
