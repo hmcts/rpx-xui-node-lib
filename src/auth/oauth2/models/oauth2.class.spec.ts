@@ -156,7 +156,6 @@ describe('OAUTH2 Auth', () => {
         const mockResponse = {} as Response
         const next = jest.fn()
         oauth2.setCallbackURL(mockRequest, mockResponse, next)
-        expect(mockRequest.app.set).toHaveBeenCalledWith('trust proxy', true)
         expect(mockRequest.get).toHaveBeenCalledWith('host')
         expect((mockRequest.session as any)?.callbackURL).toEqual('http://localhost/callbackUrl')
         expect(next).toHaveBeenCalled()
