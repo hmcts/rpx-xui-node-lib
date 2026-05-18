@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import jwtDecode from 'jwt-decode'
-import { authenticator } from 'otplib'
+import { createGuardrails, generate, ScureBase32Plugin } from 'otplib'
 import { http, getLogger, XuiLogger } from '../../common'
 import { DecodedJWT } from './decodedJwt.interface'
 import { S2S } from './s2s.constants'
@@ -100,8 +100,9 @@ export class S2SAuth extends EventEmitter {
 
     private postS2SLease = async (): Promise<string> => {
         const { s2sSecret, microservice, s2sEndpointUrl } = this.s2sConfig
-        const oneTimePassword = authenticator.generate(s2sSecret)
-
+        const secretBytes = new ScureBase32Plugin().decode(s2sSecret)
+        const guardrails = createGuardrails({ MIN_SECRET_BYTES: secretBytes.length })
+        const oneTimePassword = await generate({ secret: s2sSecret, guardrails, strategy: 'totp' })
         this.logger.info('Requesting S2S token for microservice:', microservice)
 
         const request = await http.post(`${s2sEndpointUrl}`, {
