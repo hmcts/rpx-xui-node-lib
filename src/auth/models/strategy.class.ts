@@ -219,7 +219,7 @@ export abstract class Strategy extends events.EventEmitter {
 
         try {
             this.logger.log('logout start')
-            const { accessToken, refreshToken } = reqSession?.passport.user.tokenset || null
+            const { accessToken, refreshToken, idToken } = reqSession?.passport.user.tokenset || null
 
             const auth = this.getAuthorization(this.options.clientID, this.options.clientSecret)
 
@@ -250,9 +250,7 @@ export abstract class Strategy extends events.EventEmitter {
                     protocol: req.protocol,
                     host: req.get('host'),
                 })
-                const params = new URLSearchParams({ post_logout_redirect_uri: redirectUrl })
-
-                const finalSSOLogoutUrl = `${this.options.ssoLogoutURL}?${params.toString()}`
+                const finalSSOLogoutUrl = this.getSSOLogoutUrl(redirectUrl, idToken)
 
                 const redirect = finalSSOLogoutUrl ? finalSSOLogoutUrl : AUTH.ROUTE.LOGIN
 
@@ -268,6 +266,19 @@ export abstract class Strategy extends events.EventEmitter {
             res.status(401).redirect(AUTH.ROUTE.DEFAULT_REDIRECT)
         }
         this.logger.log('logout end')
+    }
+
+    public getSSOLogoutUrl = (redirectUrl: string, idToken?: string): string | undefined => {
+        if (!this.options.ssoLogoutURL || !idToken) {
+            return undefined
+        }
+
+        const params = new URLSearchParams({
+            id_token_hint: idToken,
+            post_logout_redirect_uri: redirectUrl,
+        })
+
+        return `${this.options.ssoLogoutURL}?${params.toString()}`
     }
 
     /* istanbul ignore next */
