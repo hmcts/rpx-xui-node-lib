@@ -1,38 +1,48 @@
 import { RedisSessionStore } from './redisSessionStore.class'
 import { createMock } from '@golevelup/ts-jest';
 import { RedisSessionMetadata, SessionMetadata } from './sessionMetadata.interface'
-import { default as redis } from 'redis'
+import * as redis from 'redis'
+import { RedisClientType } from 'redis'
 import { Router } from 'express'
 import session, { Store } from 'express-session'
 import { RedisStore } from 'connect-redis'
 
 describe('getStore()', () => {
-    it('should call redis.createClient() with the redisCloudUrl.', () => {
+    it('should create and connect the redis client with the redisCloudUrl.', () => {
         const MOCK_REDIS_CLOUD_URL = 'redis://i.am.a.redis.cloud.url'
         const MOCK_REDIS_KEY_PREFIX = 'mockRedisKeyPrefix'
+        const MOCK_REDIS_TTL = 123
 
         const redisSessionMetadata = createMock<RedisSessionMetadata>()
 
         redisSessionMetadata.redisStoreOptions.redisCloudUrl = MOCK_REDIS_CLOUD_URL
         redisSessionMetadata.redisStoreOptions.redisKeyPrefix = MOCK_REDIS_KEY_PREFIX
+        redisSessionMetadata.redisStoreOptions.redisTtl = MOCK_REDIS_TTL
 
-        const mockRedisStore = createMock<redis.RedisClient>()
-        const spyOnRedisCreateClient = jest.spyOn(redis, 'createClient').mockReturnValue(mockRedisStore)
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        const spyOnRedisCreateClient = jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
         const mockRouter = createMock<Router>()
         const redisSessionStore = new RedisSessionStore(mockRouter)
-        redisSessionStore.getStore(redisSessionMetadata)
+        const store = redisSessionStore.getStore(redisSessionMetadata)
 
-        expect(spyOnRedisCreateClient).toHaveBeenCalledWith(MOCK_REDIS_CLOUD_URL, { prefix: MOCK_REDIS_KEY_PREFIX })
+        expect(spyOnRedisCreateClient).toHaveBeenCalledWith({ url: MOCK_REDIS_CLOUD_URL })
+        expect(mockRedisStore.connect).toHaveBeenCalled()
+        expect(store.prefix).toEqual(MOCK_REDIS_KEY_PREFIX)
+        expect(store.ttl).toEqual(MOCK_REDIS_TTL)
     })
 
     describe('Redis client event listeners', () => {
-        let redisClient: redis.RedisClient
+        let redisClient: RedisClientType
         let spyOnRedisClientOnEvent: any
 
         beforeEach(() => {
             const REDIS_CLIENT_LISTENER = 'on'
 
-            redisClient = createMock<redis.RedisClient>()
+            redisClient = createMock<RedisClientType>()
 
             spyOnRedisClientOnEvent = jest.spyOn(redisClient, REDIS_CLIENT_LISTENER)
         })
