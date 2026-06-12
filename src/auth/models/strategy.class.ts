@@ -127,7 +127,7 @@ export abstract class Strategy extends events.EventEmitter {
      * @param next NextFunction
      */
     /* istanbul ignore next */
-    public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
+    public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler | void> => {
         this.logger.log('Base loginHandler Hit')
         const reqSession = req.session as MySessionData
         const { promise, state } = this.saveStateInSession(reqSession)
@@ -170,7 +170,6 @@ export abstract class Strategy extends events.EventEmitter {
         } catch (error) {
             this.logger.error('Exception in passport.authenticate', error, this.strategyName)
             next(error)
-            return Promise.reject(error)
         }
     }
 
