@@ -113,6 +113,73 @@ test('OIDC loginHandler with session', async () => {
     expect(spy).toHaveBeenCalled()
 })
 
+test('OIDC loginHandler passes single-string login_hint with generated state', async () => {
+    const mockRouter = createMock<Router>()
+    const logger = {
+        log: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+    } as unknown as XuiLogger
+    const openId = new OpenID(mockRouter, logger)
+    ;(openId as any).options = { sessionKey: 'test' }
+    const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
+    const mockRequest = {
+        ...mockRequestRequired,
+        body: {},
+        query: { login_hint: 'ejudiciary-aad' },
+        session: {
+            callbackURL: 'http://localhost/callback',
+            save: (callback: any): void => callback(),
+        },
+    } as unknown as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+
+    await openId.loginHandler(mockRequest, mockResponse, next)
+
+    expect(spy).toHaveBeenCalledWith(
+        openId.strategyName,
+        expect.objectContaining({
+            redirect_uri: 'http://localhost/callback',
+            login_hint: 'ejudiciary-aad',
+            state: expect.any(String),
+            nonce: expect.any(String),
+        }),
+        expect.any(Function),
+    )
+    expect((mockRequest.session as any).test.state).toEqual(expect.any(String))
+})
+
+test('OIDC loginHandler ignores non-string login_hint values', async () => {
+    const mockRouter = createMock<Router>()
+    const logger = {
+        log: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+    } as unknown as XuiLogger
+    const openId = new OpenID(mockRouter, logger)
+    ;(openId as any).options = { sessionKey: 'test' }
+    const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
+    const mockRequest = {
+        ...mockRequestRequired,
+        body: {},
+        query: { login_hint: ['ejudiciary-aad'] },
+        session: {
+            callbackURL: 'http://localhost/callback',
+            save: (callback: any): void => callback(),
+        },
+    } as unknown as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+
+    await openId.loginHandler(mockRequest, mockResponse, next)
+
+    const authenticateOptions = spy.mock.calls[spy.mock.calls.length - 1][1] as Record<string, unknown>
+    expect(authenticateOptions).not.toHaveProperty('login_hint')
+})
+
 test('OIDC jwTokenExpired', () => {
     let jwtData = { exp: new Date('Jun 04, 2020').getTime() / 1000 }
     let isTokenExpired = oidc.jwTokenExpired(jwtData)
