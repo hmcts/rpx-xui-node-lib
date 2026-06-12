@@ -899,7 +899,7 @@ __metadata:
     connect-redis: "npm:^9.0.0"
     cz-conventional-changelog: "npm:^3.3.0"
     debug: "npm:^4.3.7"
-    deepmerge: "npm:^4.2.2"
+    deepmerge: "npm:^4.3.1"
     eslint: "npm:^9.25.1"
     express: "npm:^5.2.1"
     express-session: "npm:^1.17.0"
@@ -4225,7 +4225,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deepmerge@npm:^4.2.2":
+"deepmerge@npm:^4.2.2, deepmerge@npm:^4.3.1":
   version: 4.3.1
   resolution: "deepmerge@npm:4.3.1"
   checksum: 10c0/e53481aaf1aa2c4082b5342be6b6d8ad9dfe387bc92ce197a66dea08bd4265904a087e75e464f14d1347cf2ac8afe1e4c16b266e0561cc5df29382d3c5f80044
