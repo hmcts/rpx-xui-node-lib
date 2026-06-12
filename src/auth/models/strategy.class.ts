@@ -120,6 +120,10 @@ export abstract class Strategy extends events.EventEmitter {
         return { promise: p, state: state}
     }
 
+    protected getLoginHint(req: Request): string | undefined {
+        return typeof req.query?.login_hint === 'string' ? req.query.login_hint : undefined
+    }
+
     /**
      * The login route handler will attempt to setup security state param and redirect user if not authenticated
      * @param req Request
@@ -137,12 +141,14 @@ export abstract class Strategy extends events.EventEmitter {
             await promise
             /* istanbul ignore next */
             this.logger.log('calling passport authenticate with state ' + state)
+            const loginHint = this.getLoginHint(req)
             /* istanbul ignore next */
             return passport.authenticate(
                 this.strategyName,
                 {
                     redirect_uri: reqSession?.callbackURL,
                     state,
+                    ...(loginHint ? { login_hint: loginHint } : {}),
                     keepSessionInfo: false,
                 } as any,
                 (error: any, user: any, info: any) => {
