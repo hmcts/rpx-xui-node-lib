@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
-import jwtDecode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 import { createGuardrails, generate, ScureBase32Plugin } from 'otplib'
 import { http, getLogger, XuiLogger } from '../../common'
 import { DecodedJWT } from './decodedJwt.interface'
