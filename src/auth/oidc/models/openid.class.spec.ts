@@ -341,6 +341,51 @@ test('OIDC verifyLogin happy Path with subscription', () => {
     oidc.removeAllListeners()
 })
 
+test('OIDC verifyLogin clears session and redirects to access denied when roles do not match', async () => {
+    const mockRequest = {
+        ...mockRequestRequired,
+        body: {},
+        session: {
+            destroy: jest.fn((callback) => callback()),
+        },
+    } as unknown as Request
+    mockRequest.logIn = (user: any, optionsOrDone: any, maybeDone?: (err?: any) => void) => {
+        if (typeof optionsOrDone === 'function') {
+            optionsOrDone()
+        } else if (maybeDone) {
+            maybeDone()
+        }
+    }
+    ;(mockRequest as any).logout = jest.fn((_options, callback) => callback())
+    const mockResponse = {} as Response
+    mockResponse.redirect = jest.fn()
+    const next = jest.fn()
+    const logoutSpy = jest.spyOn(oidc, 'logout')
+    const accessDeniedEventSpy = jest.fn()
+    const user = {
+        userinfo: {
+            roles: ['citizen'],
+        },
+    }
+    ;(oidc as any).options.allowRolesRegex = 'caseworker'
+    oidc.on(AUTH.EVENT.AUTHENTICATE_ACCESS_DENIED, accessDeniedEventSpy)
+
+    oidc.verifyLogin(mockRequest, user, next, mockResponse)
+    await new Promise<void>((resolve) => setImmediate(resolve))
+
+    expect(accessDeniedEventSpy).toHaveBeenCalledWith(mockRequest, mockResponse, next, {
+        allowRolesRegex: 'caseworker',
+        roles: ['citizen'],
+        userinfo: user.userinfo,
+    })
+    expect((mockRequest as any).logout).toHaveBeenCalledWith({ keepSessionInfo: false }, expect.any(Function))
+    expect(mockRequest.session?.destroy).toHaveBeenCalled()
+    expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.ACCESS_DENIED)
+    expect(logoutSpy).not.toHaveBeenCalled()
+    oidc.removeListener(AUTH.EVENT.AUTHENTICATE_ACCESS_DENIED, accessDeniedEventSpy)
+    ;(oidc as any).options.allowRolesRegex = '.'
+})
+
 test('OIDC discoverIssuer', async () => {
     const spy = jest.spyOn(Issuer, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<Client>))
     await oidc.discoverIssuer()

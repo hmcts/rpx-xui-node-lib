@@ -294,6 +294,22 @@ export abstract class Strategy extends events.EventEmitter {
     }
 
     /* istanbul ignore next */
+    public accessDenied = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        req.logout({ keepSessionInfo: false }, async (err) => {
+            if (err) {
+                console.error(err)
+                return next(err)
+            }
+            try {
+                await this.destroySession(req)
+                res.redirect(AUTH.ROUTE.ACCESS_DENIED)
+            } catch (error) {
+                next(error)
+            }
+        })
+    }
+
+    /* istanbul ignore next */
     public keepAliveHandler = (_req: Request, _res: Response, next: NextFunction): void => {
         next()
     }
@@ -512,12 +528,18 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.error('verifyLogin error', err)
                 return next(err)
             }
-            if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
+            const allowRolesRegex = this.options.allowRolesRegex
+            if (allowRolesRegex && !arrayPatternMatch(roles, allowRolesRegex)) {
                 this.logger.info(JSON.stringify(user.userInfo))
                 this.logger.error(
-                    `User has no application access, as they do not have a role that matches ${this.options.allowRolesRegex}.`,
+                    `User has no application access, as they do not have a role that matches ${allowRolesRegex}.`,
                 )
-                return this.logout(req, res, next)
+                this.emit(AUTH.EVENT.AUTHENTICATE_ACCESS_DENIED, req, res, next, {
+                    allowRolesRegex,
+                    roles,
+                    userinfo: user.userinfo,
+                })
+                return this.accessDenied(req, res, next)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                 this.logger.log(
