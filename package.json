@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.16-package-update",
+  "version": "2.30.17-package-update",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -83,15 +83,15 @@
     }
   },
   "dependencies": {
-    "@dr.pogodin/csurf": "^1.14.0",
+    "@dr.pogodin/csurf": "^1.16.9",
     "axios": "^1.17.0",
     "connect-redis": "^9.0.0",
-    "debug": "^4.3.7",
+    "debug": "^4.4.3",
     "deepmerge": "^4.3.1",
     "express": "^5.2.1",
     "express-session": "^1.17.0",
     "joi": "^18.1.2",
-    "jwt-decode": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "openid-client": "^5.7.1",
     "otplib": "^13.4.0",
     "passport": "^0.7.0",

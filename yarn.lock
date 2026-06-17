@@ -375,10 +375,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.29.2":
-  version: 7.29.2
-  resolution: "@babel/runtime@npm:7.29.2"
-  checksum: 10c0/30b80a0140d16467792e1bbeb06f655b0dab70407da38dfac7fedae9c859f9ae9d846ef14ad77bd3814c064295fe9b1bc551f1541ea14646ae9f22b71a8bc17a
+"@babel/runtime@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/runtime@npm:7.29.7"
+  checksum: 10c0/ca11572f7146b21e0bde6a9ed4bb6a89eafbee5f0944c7eb54d0d8a2dac962c33638a1d611e14faa71dfbb92b4b5f9236232208568a6b7d5c6f3f39ddb91771e
   languageName: node
   linkType: hard
 
@@ -712,18 +712,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dr.pogodin/csurf@npm:^1.14.0":
-  version: 1.16.9
-  resolution: "@dr.pogodin/csurf@npm:1.16.9"
+"@dr.pogodin/csurf@npm:^1.16.9":
+  version: 1.17.1
+  resolution: "@dr.pogodin/csurf@npm:1.17.1"
   dependencies:
-    "@babel/runtime": "npm:^7.29.2"
+    "@babel/runtime": "npm:^7.29.7"
     cookie: "npm:^1.1.1"
     cookie-signature: "npm:^1.2.2"
     http-errors: "npm:^2.0.1"
-    rndm: "npm:1.2.0"
-    tsscmp: "npm:1.0.6"
-    uid-safe: "npm:2.1.5"
-  checksum: 10c0/942558bd56701e79e27c10c5773cba23bd39fd6b87599e361bcb0622eda86629ad81546f44a3fc22aa42652fac44de36f97db4b4b0a907a31855143a2cff0bfd
+  checksum: 10c0/a2bb0a79961483c9e2e39193fe3bb8fa7784cd2128ded68ab8b67a9e10ea869e0a3156c52e4a0d5c16a4a11de823b313c2361f3f87cf0716c0e0c0bc6ce748e3
   languageName: node
   linkType: hard
 
@@ -879,7 +876,7 @@ __metadata:
   dependencies:
     "@commitlint/cli": "npm:^17.8.1"
     "@commitlint/config-conventional": "npm:^8.2.0"
-    "@dr.pogodin/csurf": "npm:^1.14.0"
+    "@dr.pogodin/csurf": "npm:^1.16.9"
     "@golevelup/ts-jest": "npm:^0.6.2"
     "@semantic-release/changelog": "npm:^6.0.3"
     "@semantic-release/git": "npm:^10.0.1"
@@ -898,7 +895,7 @@ __metadata:
     commitlint-config-cz: "npm:^0.13.1"
     connect-redis: "npm:^9.0.0"
     cz-conventional-changelog: "npm:^3.3.0"
-    debug: "npm:^4.3.7"
+    debug: "npm:^4.4.3"
     deepmerge: "npm:^4.3.1"
     eslint: "npm:^9.25.1"
     express: "npm:^5.2.1"
@@ -909,7 +906,7 @@ __metadata:
     jest-mock-axios: "npm:^4.8.0"
     jest-ts-auto-mock: "npm:^2.1.0"
     joi: "npm:^18.1.2"
-    jwt-decode: "npm:^3.1.2"
+    jwt-decode: "npm:^4.0.0"
     lint-staged: "npm:^10.2.2"
     openid-client: "npm:^5.7.1"
     otplib: "npm:^13.4.0"
@@ -4144,18 +4141,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^4.3.7":
-  version: 4.3.7
-  resolution: "debug@npm:4.3.7"
-  dependencies:
-    ms: "npm:^2.1.3"
-  peerDependenciesMeta:
-    supports-color:
-      optional: true
-  checksum: 10c0/1471db19c3b06d485a622d62f65947a19a23fbd0dd73f7fd3eafb697eec5360cde447fb075919987899b1a2096e85d35d4eb5a4de09a57600ac9cf7e6c8e768b
-  languageName: node
-  linkType: hard
-
 "debug@npm:^4.4.0, debug@npm:^4.4.3":
   version: 4.4.3
   resolution: "debug@npm:4.4.3"
@@ -7019,17 +7004,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jwt-decode@npm:*":
+"jwt-decode@npm:*, jwt-decode@npm:^4.0.0":
   version: 4.0.0
   resolution: "jwt-decode@npm:4.0.0"
   checksum: 10c0/de75bbf89220746c388cf6a7b71e56080437b77d2edb29bae1c2155048b02c6b8c59a3e5e8d6ccdfd54f0b8bda25226e491a4f1b55ac5f8da04cfbadec4e546c
-  languageName: node
-  linkType: hard
-
-"jwt-decode@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "jwt-decode@npm:3.1.2"
-  checksum: 10c0/a951547946b5e8b1d9df818152d6b1dbaf13eebb3a6e6daceedf888968f5d255959852c8188aae2c825dc9104a99d25cb6c23f25d76545d1aa0315b968b6912e
   languageName: node
   linkType: hard
 
@@ -9470,13 +9448,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rndm@npm:1.2.0":
-  version: 1.2.0
-  resolution: "rndm@npm:1.2.0"
-  checksum: 10c0/31788f9a07659b8b13e03c3d68bfa0cf7aab811edca10ba823841db4e830ca7d7eae8decc8cfcb334bc0e974c5022dcd6a1fb9ffd72dac8fa3efa45a4f8bdde5
-  languageName: node
-  linkType: hard
-
 "router@npm:^2.2.0":
   version: 2.2.0
   resolution: "router@npm:2.2.0"
@@ -10511,13 +10482,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsscmp@npm:1.0.6":
-  version: 1.0.6
-  resolution: "tsscmp@npm:1.0.6"
-  checksum: 10c0/2f79a9455e7e3e8071995f98cdf3487ccfc91b760bec21a9abb4d90519557eafaa37246e87c92fa8bf3fef8fd30cfd0cc3c4212bb929baa9fb62494bfa4d24b2
-  languageName: node
-  linkType: hard
-
 "type-check@npm:^0.4.0, type-check@npm:~0.4.0":
   version: 0.4.0
   resolution: "type-check@npm:0.4.0"
@@ -10666,7 +10630,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uid-safe@npm:2.1.5, uid-safe@npm:~2.1.5":
+"uid-safe@npm:~2.1.5":
   version: 2.1.5
   resolution: "uid-safe@npm:2.1.5"
   dependencies:
