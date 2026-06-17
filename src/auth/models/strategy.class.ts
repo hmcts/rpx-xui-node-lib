@@ -120,6 +120,10 @@ export abstract class Strategy extends events.EventEmitter {
         return { promise: p, state: state}
     }
 
+    protected getLoginHint(req: Request): string | undefined {
+        return typeof req.query?.login_hint === 'string' ? req.query.login_hint : undefined
+    }
+
     /**
      * The login route handler will attempt to setup security state param and redirect user if not authenticated
      * @param req Request
@@ -137,12 +141,14 @@ export abstract class Strategy extends events.EventEmitter {
             await promise
             /* istanbul ignore next */
             this.logger.log('calling passport authenticate with state ' + state)
+            const loginHint = this.getLoginHint(req)
             /* istanbul ignore next */
             return passport.authenticate(
                 this.strategyName,
                 {
                     redirect_uri: reqSession?.callbackURL,
                     state,
+                    ...(loginHint ? { login_hint: loginHint } : {}),
                     keepSessionInfo: false,
                 } as any,
                 (error: any, user: any, info: any) => {
@@ -284,6 +290,22 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.log('session destroyed')
                 resolve(true)
             })
+        })
+    }
+
+    /* istanbul ignore next */
+    public accessDenied = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        req.logout({ keepSessionInfo: false }, async (err) => {
+            if (err) {
+                console.error(err)
+                return next(err)
+            }
+            try {
+                await this.destroySession(req)
+                res.redirect(AUTH.ROUTE.ACCESS_DENIED)
+            } catch (error) {
+                next(error)
+            }
         })
     }
 
@@ -506,12 +528,18 @@ export abstract class Strategy extends events.EventEmitter {
                 this.logger.error('verifyLogin error', err)
                 return next(err)
             }
-            if (this.options.allowRolesRegex && !arrayPatternMatch(roles, this.options.allowRolesRegex)) {
+            const allowRolesRegex = this.options.allowRolesRegex
+            if (allowRolesRegex && !arrayPatternMatch(roles, allowRolesRegex)) {
                 this.logger.info(JSON.stringify(user.userInfo))
                 this.logger.error(
-                    `User has no application access, as they do not have a role that matches ${this.options.allowRolesRegex}.`,
+                    `User has no application access, as they do not have a role that matches ${allowRolesRegex}.`,
                 )
-                return this.logout(req, res, next)
+                this.emit(AUTH.EVENT.AUTHENTICATE_ACCESS_DENIED, req, res, next, {
+                    allowRolesRegex,
+                    roles,
+                    userinfo: user.userinfo,
+                })
+                return this.accessDenied(req, res, next)
             }
             if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
                 this.logger.log(

@@ -4,6 +4,7 @@ export const AUTH = {
         SERIALIZE_USER: 'auth.serializeUser',
         DESERIALIZE_USER: 'auth.deserializeUser',
         AUTHENTICATE_FAILURE: 'auth.authenticate.failure',
+        AUTHENTICATE_ACCESS_DENIED: 'auth.authenticate.accessDenied',
     },
     ROUTE: {
         DEFAULT_REDIRECT: '/',
@@ -13,5 +14,6 @@ export const AUTH = {
         OAUTH_CALLBACK: '/oauth2/callback',
         LOGOUT: '/auth/logout',
         EXPIRED_LOGIN_LINK: '/expired-login-link',
+        ACCESS_DENIED: '/access-denied',
     },
 }

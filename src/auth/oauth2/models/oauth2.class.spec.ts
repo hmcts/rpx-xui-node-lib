@@ -99,6 +99,100 @@ describe('OAUTH2 Auth', () => {
         expect(spy).toHaveBeenCalled()
     })
 
+    test('loginHandler passes single-string login_hint with generated state', async () => {
+        const mockRouter = createMock<Router>()
+        const options = createMock<AuthOptions>()
+        const logger = {
+            log: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+        } as unknown as XuiLogger
+        options.sessionKey = 'test'
+        options.discoveryEndpoint = 'http://localhost/someEndpoint'
+        options.authorizationURL = 'http://localhost/someAuthorizationURL'
+        options.tokenURL = 'http://localhost/someTokenURL'
+        options.clientID = 'clientID1234'
+        const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => () => true)
+        const oAuth2 = new OAuth2(mockRouter, logger)
+        jest.spyOn(oAuth2, 'validateOptions').mockReturnValue(true)
+        jest.spyOn(oAuth2, 'serializeUser')
+        jest.spyOn(oAuth2, 'deserializeUser')
+        jest.spyOn(oAuth2, 'initializePassport')
+        jest.spyOn(oAuth2, 'initializeSession')
+        jest.spyOn(oAuth2, 'initialiseStrategy')
+        jest.spyOn(oAuth2, 'initialiseCSRF')
+        options.useRoutes = true
+        oAuth2.configure(options)
+
+        const mockRequest = {
+            ...mockRequestRequired,
+            body: {},
+            query: { login_hint: 'ejudiciary-aad' },
+            session: {
+                callbackURL: 'http://localhost/callback',
+                save: (callback: any): void => callback(),
+            },
+        } as unknown as Request
+        const mockResponse = {} as Response
+        const next = jest.fn()
+
+        await oAuth2.loginHandler(mockRequest, mockResponse, next)
+
+        expect(spy).toHaveBeenCalledWith(
+            oAuth2.strategyName,
+            expect.objectContaining({
+                redirect_uri: 'http://localhost/callback',
+                login_hint: 'ejudiciary-aad',
+                state: expect.any(String),
+            }),
+            expect.any(Function),
+        )
+        expect((mockRequest.session as any).test.state).toEqual(expect.any(String))
+    })
+
+    test('loginHandler ignores non-string login_hint values', async () => {
+        const mockRouter = createMock<Router>()
+        const options = createMock<AuthOptions>()
+        const logger = {
+            log: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn(),
+        } as unknown as XuiLogger
+        options.sessionKey = 'test'
+        options.discoveryEndpoint = 'http://localhost/someEndpoint'
+        options.authorizationURL = 'http://localhost/someAuthorizationURL'
+        options.tokenURL = 'http://localhost/someTokenURL'
+        options.clientID = 'clientID1234'
+        const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => () => true)
+        const oAuth2 = new OAuth2(mockRouter, logger)
+        jest.spyOn(oAuth2, 'validateOptions').mockReturnValue(true)
+        jest.spyOn(oAuth2, 'serializeUser')
+        jest.spyOn(oAuth2, 'deserializeUser')
+        jest.spyOn(oAuth2, 'initializePassport')
+        jest.spyOn(oAuth2, 'initializeSession')
+        jest.spyOn(oAuth2, 'initialiseStrategy')
+        jest.spyOn(oAuth2, 'initialiseCSRF')
+        options.useRoutes = true
+        oAuth2.configure(options)
+
+        const mockRequest = {
+            ...mockRequestRequired,
+            body: {},
+            query: { login_hint: ['ejudiciary-aad'] },
+            session: {
+                callbackURL: 'http://localhost/callback',
+                save: (callback: any): void => callback(),
+            },
+        } as unknown as Request
+        const mockResponse = {} as Response
+        const next = jest.fn()
+
+        await oAuth2.loginHandler(mockRequest, mockResponse, next)
+
+        const authenticateOptions = spy.mock.calls[spy.mock.calls.length - 1][1] as Record<string, unknown>
+        expect(authenticateOptions).not.toHaveProperty('login_hint')
+    })
+
     test('loginHandler with session and no sessionKey', async () => {
         const mockRouter = createMock<Router>()
         const options = createMock<AuthOptions>()
