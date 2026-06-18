@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.16",
+  "version": "2.30.16-semantic-library-upgrades",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -48,8 +48,11 @@
     "@commitlint/config-conventional": "^8.2.0",
     "@golevelup/ts-jest": "^0.6.2",
     "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^8.1.0",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/npm": "^12.0.2",
+    "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/connect-redis": "^0.0.23",
     "@types/debug": "^4.1.5",
     "@types/express": "^5.0.0",
@@ -70,7 +73,7 @@
     "jest-mock-axios": "^4.8.0",
     "jest-ts-auto-mock": "^2.1.0",
     "lint-staged": "^10.2.2",
-    "semantic-release": "^19.0.2",
+    "semantic-release": "^24.2.9",
     "standard-version": "^9.5.0",
     "ts-auto-mock": "^3.7.4",
     "ts-jest": "^29.3.2",
@@ -105,7 +108,7 @@
     "@babel/traverse": "7.23.2",
     "minimatch": "3.0.5",
     "minimist": "1.2.6",
-    "tar": "7.5.9"
+    "tar": "7.5.16"
   },
   "packageManager": "yarn@4.5.1"
 }
