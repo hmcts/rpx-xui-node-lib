@@ -28,7 +28,7 @@ jobs:
                   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
             - name: Cancel job
               if: failure()
-              uses: andymckay/cancel-action@0.2
+              uses: andymckay/cancel-action@0.5
 
     build:
         runs-on: ubuntu-latest
