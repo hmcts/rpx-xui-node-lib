@@ -89,6 +89,7 @@ import { getUserSessionTimeout } from '@hmcts/rpx-xui-node-lib'
 3. Include the function call, and pass in the Users roles, and sessionTimeouts
 as set by your team. @see above for shape inputs.
 
+hello
 ```
 const sessionTimeout = getUserSessionTimeout(roles, sessionTimeouts)
 ```
