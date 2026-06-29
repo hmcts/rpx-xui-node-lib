@@ -87,6 +87,9 @@ export class S2SAuth extends EventEmitter {
         this.logger.info('Generating new S2S token')
 
         const token = await this.postS2SLease()
+        if (!token) {
+            return token
+        }
 
         const tokenData: DecodedJWT = jwtDecode(token)
 
