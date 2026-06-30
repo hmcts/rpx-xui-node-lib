@@ -101,7 +101,7 @@ export class S2SAuth extends EventEmitter {
         return token
     }
 
-    private postS2SLease = async (): Promise<string | undefined> => {
+    private readonly postS2SLease = async (): Promise<string | undefined> => {
         const { s2sSecret, microservice, s2sEndpointUrl } = this.s2sConfig
         const secretBytes = new ScureBase32Plugin().decode(s2sSecret)
         const guardrails = createGuardrails({ MIN_SECRET_BYTES: secretBytes.length })
