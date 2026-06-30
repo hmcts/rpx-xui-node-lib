@@ -83,12 +83,12 @@ export class S2SAuth extends EventEmitter {
         }
     }
 
-    private generateToken = async (): Promise<string> => {
+    private generateToken = async (): Promise<string | undefined> => {
         this.logger.info('Generating new S2S token')
 
         const token = await this.postS2SLease()
         if (!token) {
-            return token
+            return undefined
         }
 
         const tokenData: DecodedJWT = jwtDecode(token)
@@ -101,7 +101,7 @@ export class S2SAuth extends EventEmitter {
         return token
     }
 
-    private postS2SLease = async (): Promise<string> => {
+    private postS2SLease = async (): Promise<string | undefined> => {
         const { s2sSecret, microservice, s2sEndpointUrl } = this.s2sConfig
         const secretBytes = new ScureBase32Plugin().decode(s2sSecret)
         const guardrails = createGuardrails({ MIN_SECRET_BYTES: secretBytes.length })
@@ -116,7 +116,7 @@ export class S2SAuth extends EventEmitter {
         return request.data
     }
 
-    public serviceTokenGenerator = async (): Promise<string> => {
+    public serviceTokenGenerator = async (): Promise<string | undefined> => {
         if (this.validateCache()) {
             const tokenData = this.getToken()
             return tokenData.token
