@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.16",
+  "version": "2.30.17-package-update-01",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -50,7 +50,6 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.1.0",
-    "@types/connect-redis": "^0.0.23",
     "@types/debug": "^4.1.5",
     "@types/express": "^5.0.0",
     "@types/express-session": "1.17.10",
@@ -84,20 +83,20 @@
     }
   },
   "dependencies": {
-    "@dr.pogodin/csurf": "^1.14.0",
-    "axios": "^1.16.0",
-    "connect-redis": "^4.0.4",
-    "debug": "^4.3.7",
-    "deepmerge": "^4.2.2",
+    "@dr.pogodin/csurf": "^1.16.9",
+    "axios": "^1.17.0",
+    "connect-redis": "^9.0.0",
+    "debug": "^4.4.3",
+    "deepmerge": "^4.3.1",
     "express": "^5.2.1",
     "express-session": "^1.17.0",
     "joi": "^18.1.2",
-    "jwt-decode": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "openid-client": "^5.7.1",
     "otplib": "^13.4.0",
     "passport": "^0.7.0",
     "passport-oauth2": "^1.8.0",
-    "redis": "^3.0.2",
+    "redis": "^6.0.0",
     "session-file-store": "^1.5.0"
   },
   "resolutions": {

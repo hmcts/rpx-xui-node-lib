@@ -9,7 +9,7 @@ import * as URL from 'url'
 import { generators } from 'openid-client'
 import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
-import jwtDecode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 export abstract class Strategy extends events.EventEmitter {
     protected static readonly REDACTED_LOG_VALUE = '[REDACTED]'

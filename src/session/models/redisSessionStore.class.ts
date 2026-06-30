@@ -1,40 +1,46 @@
 import { SESSION } from '../session.constants'
 import { RedisSessionMetadata } from './sessionMetadata.interface'
-import session from 'express-session'
-import { default as connectRedis } from 'connect-redis'
-import * as redis from 'redis'
+import { RedisStore } from 'connect-redis'
+import { createClient, RedisClientType } from 'redis'
 import { SessionStore } from './sessionStore.class'
 import { Router } from 'express'
 import { getLogger, XuiLogger } from '../../common'
 
 export class RedisSessionStore extends SessionStore {
-    protected redisClient: redis.RedisClient | any
+    protected redisClient!: RedisClientType
 
     constructor(router = Router({ mergeParams: true }), logger: XuiLogger = getLogger('session:redis')) {
         super(SESSION.REDIS_STORE_NAME, router, logger)
     }
 
-    public getStore = (options: RedisSessionMetadata): connectRedis.RedisStore => {
-        const tlsOptions = {
-            prefix: options.redisStoreOptions.redisKeyPrefix,
-        }
+    public getStore = (options: RedisSessionMetadata): RedisStore => {
+        const ttl = options.redisStoreOptions.redisTtl === undefined
+            ? undefined
+            : Number(options.redisStoreOptions.redisTtl)
 
-        this.redisClient = redis.createClient(options.redisStoreOptions.redisCloudUrl, tlsOptions)
+        this.redisClient = createClient({
+            url: options.redisStoreOptions.redisCloudUrl,
+        })
 
         this.redisClientReadyListener(this.redisClient)
         this.redisClientErrorListener(this.redisClient)
 
-        const redisStore = connectRedis(session)
-        return new redisStore({
+        this.redisClient.connect().catch((error: Error) => {
+            this.logger.error(error)
+            this.emitEvent(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
+        })
+
+        return new RedisStore({
             client: this.redisClient,
-            ttl: options.redisStoreOptions.redisTtl,
+            prefix: options.redisStoreOptions.redisKeyPrefix,
+            ttl,
         })
     }
 
     // TODO: This should be a pure function. Remove side effecting on redisClient,
     // listenerCount, emit and logger, when you have Redis setup on a local machine,
     // ( to check that it still works )
-    public redisClientReadyListener = (redisClient: redis.RedisClient) => {
+    public redisClientReadyListener = (redisClient: RedisClientType) => {
         redisClient.on('ready', () => {
             this.emitEvent(SESSION.EVENT.REDIS_CLIENT_READY, redisClient)
             this.logger.info('redis client connected successfully')
@@ -42,7 +48,7 @@ export class RedisSessionStore extends SessionStore {
         })
     }
 
-    public redisClientErrorListener = (redisClient: redis.RedisClient) => {
+    public redisClientErrorListener = (redisClient: RedisClientType) => {
         redisClient.on('error', (error: any) => {
             this.logger.error(error)
             this.logger.info('redisClient is ', redisClient)

@@ -1,38 +1,101 @@
 import { RedisSessionStore } from './redisSessionStore.class'
 import { createMock } from '@golevelup/ts-jest';
 import { RedisSessionMetadata, SessionMetadata } from './sessionMetadata.interface'
-import { default as redis } from 'redis'
+import * as redis from 'redis'
+import { RedisClientType } from 'redis'
 import { Router } from 'express'
 import session, { Store } from 'express-session'
 import { RedisStore } from 'connect-redis'
+import { SESSION } from '../session.constants'
+import { XuiLogger } from '../../common'
 
 describe('getStore()', () => {
-    it('should call redis.createClient() with the redisCloudUrl.', () => {
+    const flushPromises = () => new Promise(process.nextTick)
+
+    it('should create and connect the redis client with the redisCloudUrl.', () => {
         const MOCK_REDIS_CLOUD_URL = 'redis://i.am.a.redis.cloud.url'
         const MOCK_REDIS_KEY_PREFIX = 'mockRedisKeyPrefix'
+        const MOCK_REDIS_TTL = 123
 
         const redisSessionMetadata = createMock<RedisSessionMetadata>()
 
         redisSessionMetadata.redisStoreOptions.redisCloudUrl = MOCK_REDIS_CLOUD_URL
         redisSessionMetadata.redisStoreOptions.redisKeyPrefix = MOCK_REDIS_KEY_PREFIX
+        redisSessionMetadata.redisStoreOptions.redisTtl = MOCK_REDIS_TTL
 
-        const mockRedisStore = createMock<redis.RedisClient>()
-        const spyOnRedisCreateClient = jest.spyOn(redis, 'createClient').mockReturnValue(mockRedisStore)
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        const spyOnRedisCreateClient = jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
         const mockRouter = createMock<Router>()
         const redisSessionStore = new RedisSessionStore(mockRouter)
-        redisSessionStore.getStore(redisSessionMetadata)
+        const store = redisSessionStore.getStore(redisSessionMetadata)
 
-        expect(spyOnRedisCreateClient).toHaveBeenCalledWith(MOCK_REDIS_CLOUD_URL, { prefix: MOCK_REDIS_KEY_PREFIX })
+        expect(spyOnRedisCreateClient).toHaveBeenCalledWith({ url: MOCK_REDIS_CLOUD_URL })
+        expect(mockRedisStore.connect).toHaveBeenCalled()
+        expect(store.prefix).toEqual(MOCK_REDIS_KEY_PREFIX)
+        expect(store.ttl).toEqual(MOCK_REDIS_TTL)
+    })
+
+    it('should leave ttl undefined when redisTtl is not configured.', () => {
+        const redisSessionMetadata = createMock<RedisSessionMetadata>()
+
+        redisSessionMetadata.redisStoreOptions = {
+            redisCloudUrl: 'redis://i.am.a.redis.cloud.url',
+            redisKeyPrefix: 'mockRedisKeyPrefix',
+            redisTtl: undefined as unknown as RedisSessionMetadata['redisStoreOptions']['redisTtl'],
+        }
+
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
+        const redisSessionStore = new RedisSessionStore(createMock<Router>())
+        const store = redisSessionStore.getStore(redisSessionMetadata)
+
+        expect(store.ttl).toEqual(86400)
+    })
+
+    it('should log and emit redis client errors when connect rejects.', async () => {
+        const redisSessionMetadata = createMock<RedisSessionMetadata>()
+        const error = new Error('Unable to connect to redis')
+
+        redisSessionMetadata.redisStoreOptions = {
+            redisCloudUrl: 'redis://i.am.a.redis.cloud.url',
+            redisKeyPrefix: 'mockRedisKeyPrefix',
+            redisTtl: 123,
+        }
+
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockRejectedValue(error),
+        })
+        jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
+
+        const logger = createMock<XuiLogger>()
+        const redisSessionStore = new RedisSessionStore(createMock<Router>(), logger)
+        const spyEmitEvent = jest.spyOn(redisSessionStore, 'emitEvent')
+
+        redisSessionStore.getStore(redisSessionMetadata)
+        await flushPromises()
+
+        expect(logger.error).toHaveBeenCalledWith(error)
+        expect(spyEmitEvent).toHaveBeenCalledWith(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
     })
 
     describe('Redis client event listeners', () => {
-        let redisClient: redis.RedisClient
+        let redisClient: RedisClientType
         let spyOnRedisClientOnEvent: any
 
         beforeEach(() => {
             const REDIS_CLIENT_LISTENER = 'on'
 
-            redisClient = createMock<redis.RedisClient>()
+            redisClient = createMock<RedisClientType>()
 
             spyOnRedisClientOnEvent = jest.spyOn(redisClient, REDIS_CLIENT_LISTENER)
         })
@@ -47,6 +110,21 @@ describe('getStore()', () => {
             expect(spyOnRedisClientOnEvent).toHaveBeenCalledWith(REDIS_CLIENT_READY_EVENT, expect.any(Function))
         })
 
+        it("should emit and log when redisClient receives the 'ready' event.", () => {
+            const mockRouter = createMock<Router>()
+            const logger = createMock<XuiLogger>()
+            const redisSessionStore = new RedisSessionStore(mockRouter, logger)
+            const spyEmitEvent = jest.spyOn(redisSessionStore, 'emitEvent')
+
+            redisSessionStore.redisClientReadyListener(redisClient)
+            const readyListener = spyOnRedisClientOnEvent.mock.calls[0][1]
+            readyListener()
+
+            expect(spyEmitEvent).toHaveBeenCalledWith(SESSION.EVENT.REDIS_CLIENT_READY, redisClient)
+            expect(logger.info).toHaveBeenCalledWith('redis client connected successfully')
+            expect(logger.info).toHaveBeenCalledWith('redisClient is ', redisClient)
+        })
+
         it("should listen for redisClient on 'error' event.", () => {
             const REDIS_CLIENT_ERROR_EVENT = 'error'
             const mockRouter = createMock<Router>()
@@ -54,6 +132,22 @@ describe('getStore()', () => {
             redisSessionStore.redisClientErrorListener(redisClient)
 
             expect(spyOnRedisClientOnEvent).toHaveBeenCalledWith(REDIS_CLIENT_ERROR_EVENT, expect.any(Function))
+        })
+
+        it("should log and emit when redisClient receives the 'error' event.", () => {
+            const error = new Error('Redis client failed')
+            const mockRouter = createMock<Router>()
+            const logger = createMock<XuiLogger>()
+            const redisSessionStore = new RedisSessionStore(mockRouter, logger)
+            const spyEmitEvent = jest.spyOn(redisSessionStore, 'emitEvent')
+
+            redisSessionStore.redisClientErrorListener(redisClient)
+            const errorListener = spyOnRedisClientOnEvent.mock.calls[0][1]
+            errorListener(error)
+
+            expect(logger.error).toHaveBeenCalledWith(error)
+            expect(logger.info).toHaveBeenCalledWith('redisClient is ', redisClient)
+            expect(spyEmitEvent).toHaveBeenCalledWith(SESSION.EVENT.REDIS_CLIENT_ERROR, error)
         })
     })
 })
