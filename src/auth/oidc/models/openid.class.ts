@@ -262,12 +262,14 @@ export class OpenID extends AuthStrategy {
             this.logger.log('waiting for session state to be saved')
             await promise
             this.logger.log('calling passport authenticate')
+            const loginHint = this.getLoginHint(req)
             return passport.authenticate(
                 this.strategyName,
                 {
                     redirect_uri: reqsession?.callbackURL,
                     nonce,
                     state,
+                    ...(loginHint ? { login_hint: loginHint } : {}),
                     keepSessionInfo: false,
                     failureMessage: true,
                 } as any,

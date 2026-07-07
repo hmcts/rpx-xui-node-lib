@@ -113,6 +113,73 @@ test('OIDC loginHandler with session', async () => {
     expect(spy).toHaveBeenCalled()
 })
 
+test('OIDC loginHandler passes single-string login_hint with generated state', async () => {
+    const mockRouter = createMock<Router>()
+    const logger = {
+        log: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+    } as unknown as XuiLogger
+    const openId = new OpenID(mockRouter, logger)
+    ;(openId as any).options = { sessionKey: 'test' }
+    const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
+    const mockRequest = {
+        ...mockRequestRequired,
+        body: {},
+        query: { login_hint: 'ejudiciary-aad' },
+        session: {
+            callbackURL: 'http://localhost/callback',
+            save: (callback: any): void => callback(),
+        },
+    } as unknown as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+
+    await openId.loginHandler(mockRequest, mockResponse, next)
+
+    expect(spy).toHaveBeenCalledWith(
+        openId.strategyName,
+        expect.objectContaining({
+            redirect_uri: 'http://localhost/callback',
+            login_hint: 'ejudiciary-aad',
+            state: expect.any(String),
+            nonce: expect.any(String),
+        }),
+        expect.any(Function),
+    )
+    expect((mockRequest.session as any).test.state).toEqual(expect.any(String))
+})
+
+test('OIDC loginHandler ignores non-string login_hint values', async () => {
+    const mockRouter = createMock<Router>()
+    const logger = {
+        log: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+    } as unknown as XuiLogger
+    const openId = new OpenID(mockRouter, logger)
+    ;(openId as any).options = { sessionKey: 'test' }
+    const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
+    const mockRequest = {
+        ...mockRequestRequired,
+        body: {},
+        query: { login_hint: ['ejudiciary-aad'] },
+        session: {
+            callbackURL: 'http://localhost/callback',
+            save: (callback: any): void => callback(),
+        },
+    } as unknown as Request
+    const mockResponse = {} as Response
+    const next = jest.fn()
+
+    await openId.loginHandler(mockRequest, mockResponse, next)
+
+    const authenticateOptions = spy.mock.calls[spy.mock.calls.length - 1][1] as Record<string, unknown>
+    expect(authenticateOptions).not.toHaveProperty('login_hint')
+})
+
 test('OIDC jwTokenExpired', () => {
     let jwtData = { exp: new Date('Jun 04, 2020').getTime() / 1000 }
     let isTokenExpired = oidc.jwTokenExpired(jwtData)
@@ -272,6 +339,51 @@ test('OIDC verifyLogin happy Path with subscription', () => {
     oidc.verifyLogin(mockRequest, user, next, mockResponse)
     expect(next).not.toHaveBeenCalledWith({})
     oidc.removeAllListeners()
+})
+
+test('OIDC verifyLogin clears session and redirects to access denied when roles do not match', async () => {
+    const mockRequest = {
+        ...mockRequestRequired,
+        body: {},
+        session: {
+            destroy: jest.fn((callback) => callback()),
+        },
+    } as unknown as Request
+    mockRequest.logIn = (user: any, optionsOrDone: any, maybeDone?: (err?: any) => void) => {
+        if (typeof optionsOrDone === 'function') {
+            optionsOrDone()
+        } else if (maybeDone) {
+            maybeDone()
+        }
+    }
+    ;(mockRequest as any).logout = jest.fn((_options, callback) => callback())
+    const mockResponse = {} as Response
+    mockResponse.redirect = jest.fn()
+    const next = jest.fn()
+    const logoutSpy = jest.spyOn(oidc, 'logout')
+    const accessDeniedEventSpy = jest.fn()
+    const user = {
+        userinfo: {
+            roles: ['citizen'],
+        },
+    }
+    ;(oidc as any).options.allowRolesRegex = 'caseworker'
+    oidc.on(AUTH.EVENT.AUTHENTICATE_ACCESS_DENIED, accessDeniedEventSpy)
+
+    oidc.verifyLogin(mockRequest, user, next, mockResponse)
+    await new Promise<void>((resolve) => setImmediate(resolve))
+
+    expect(accessDeniedEventSpy).toHaveBeenCalledWith(mockRequest, mockResponse, next, {
+        allowRolesRegex: 'caseworker',
+        roles: ['citizen'],
+        userinfo: user.userinfo,
+    })
+    expect((mockRequest as any).logout).toHaveBeenCalledWith({ keepSessionInfo: false }, expect.any(Function))
+    expect(mockRequest.session?.destroy).toHaveBeenCalled()
+    expect(mockResponse.redirect).toHaveBeenCalledWith(AUTH.ROUTE.ACCESS_DENIED)
+    expect(logoutSpy).not.toHaveBeenCalled()
+    oidc.removeListener(AUTH.EVENT.AUTHENTICATE_ACCESS_DENIED, accessDeniedEventSpy)
+    ;(oidc as any).options.allowRolesRegex = '.'
 })
 
 test('OIDC discoverIssuer', async () => {
