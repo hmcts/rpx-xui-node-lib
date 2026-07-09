@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.18-package-update-01",
+  "version": "2.30.20-package-update-01",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -84,7 +84,7 @@
   },
   "dependencies": {
     "@dr.pogodin/csurf": "^1.16.9",
-    "axios": "^1.17.0",
+    "axios": "^1.18.1",
     "connect-redis": "^9.0.0",
     "debug": "^4.4.3",
     "deepmerge": "^4.3.1",

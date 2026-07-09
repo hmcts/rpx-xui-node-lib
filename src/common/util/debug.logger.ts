@@ -22,8 +22,9 @@ export const getLogger = (namespace: string, delimiter = ':'): XuiLogger => {
         }
         logger = cache.get(newNamespace) as debug.Debugger
     })
-    // Make everything go to stdout so that AppInsights will pick it up in Traces
-    logger.log = console.info.bind(console)
+    // Resolve console.info at write time so instrumentation added after logger
+    // creation, such as Application Insights console patching, still sees logs.
+    logger.log = (...args: any[]) => console.info(...args)
     return {
         log: logger,
         warn: logger,
