@@ -85,7 +85,7 @@
   },
   "dependencies": {
     "@dr.pogodin/csurf": "^1.14.0",
-    "axios": "^1.16.0",
+    "axios": "^1.18.1",
     "connect-redis": "^4.0.4",
     "debug": "^4.3.7",
     "deepmerge": "^4.2.2",
