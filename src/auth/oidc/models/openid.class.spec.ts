@@ -4,7 +4,11 @@ import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
 import express, { NextFunction, Request, response, Response, Router } from 'express'
 import { AUTH } from '../../auth.constants'
-import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
+type Client = any
+type Issuer<T = any> = any
+type Strategy<T = any, U = any> = any
+type TokenSet = any
+type UserinfoResponse = any
 import { createMock } from '@golevelup/ts-jest';
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
@@ -387,14 +391,22 @@ test('OIDC verifyLogin clears session and redirects to access denied when roles 
 })
 
 test('OIDC discoverIssuer', async () => {
-    const spy = jest.spyOn(Issuer, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<Client>))
+    (oidc as any).options.discoveryEndpoint = 'http://localhost/issuer'
+    const discover = jest.fn().mockResolvedValue({})
+    const spy = jest.spyOn(oidc, 'loadOpenIdClient').mockResolvedValue({
+        discovery: discover,
+        ClientSecretBasic: jest.fn(),
+    } as any)
     await oidc.discoverIssuer()
     expect(spy).toHaveBeenCalled()
+    expect(discover).toHaveBeenCalled()
 })
 
 test('OIDC discover', async () => {
     const issuer = {}
-    const spy = jest.spyOn(oidc, 'discoverIssuer').mockImplementation(() => Promise.resolve({ metadata: issuer }))
+    const spy = jest.spyOn(oidc, 'discoverIssuer').mockResolvedValue({
+        serverMetadata: () => issuer,
+    } as any)
 
     await oidc.discover()
     expect(spy).toHaveBeenCalled()
@@ -509,13 +521,13 @@ xtest('test createNewStrategy', async () => {
         tokenEndpointAuthMethod: 'client_secret_basic',
         useRoutes: false,
     }
-    const spyDiscover = jest.spyOn(oidc, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<any>))
-    const spyGetClient = jest.spyOn(oidc, 'getClientFromIssuer').mockReturnValue({} as Client)
-    const spyOnStrategy = jest.spyOn(oidc, 'getNewStrategy').mockReturnValue({} as Strategy<any, Client>)
+    const spyDiscover = jest.spyOn(oidc, 'discover').mockResolvedValue({
+        serverMetadata: () => ({ issuer: options.issuerURL }),
+    } as any)
+    const spyOnStrategy = jest.spyOn(oidc, 'getNewStrategy').mockResolvedValue({} as Strategy<any, Client>)
     await oidc.createNewStrategy(options)
 
     expect(spyDiscover).toHaveBeenCalled()
-    expect(spyGetClient).toHaveBeenCalled()
     expect(spyOnStrategy).toHaveBeenCalled()
 })
 
@@ -525,7 +537,7 @@ xtest('verify() Should return a no access roles messages if the User has no role
 
     const doneFunction = jest.fn((_err, _user, _message) => {})
 
-    oidc.verify(tokenSet, userinfo, doneFunction)
+    oidc.verifyUserInfo(tokenSet, userinfo, doneFunction)
 
     expect(doneFunction).toHaveBeenCalledWith(null, false, { message: VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES })
 })
@@ -547,16 +559,9 @@ xtest('verify() Should return the user token set if a User has roles.', async ()
 
     const doneFunction = jest.fn((_err, _user, _message) => {})
 
-    oidc.verify(tokenSet, userinfo, doneFunction)
+    oidc.verifyUserInfo(tokenSet, userinfo, doneFunction)
 
     expect(doneFunction).toHaveBeenCalledWith(null, { tokenset: userTokenSet, userinfo })
-})
-
-xtest('Should return an object from getClientFromIssuer()', async () => {
-    const issuer = createMock<Issuer<Client>>()
-    const options = createMock<OpenIDMetadata>()
-
-    expect(oidc.getClientFromIssuer(issuer, options)).toBeDefined()
 })
 
 xtest('makeAuthorization() Should make an authorisation string', async () => {

@@ -1,4 +1,4 @@
-import { ClientMetadata } from 'openid-client'
+import type { ClientMetadata } from 'openid-client'
 
 export interface OpenIDMetadata extends ClientMetadata {
     discovery_endpoint: string

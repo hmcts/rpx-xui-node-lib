@@ -6,7 +6,7 @@ import { arrayPatternMatch, http, XuiLogger, getLogger } from '../../common'
 import { AuthOptions } from './authOptions.interface'
 import Joi from 'joi'
 import * as URL from 'url'
-import { generators } from 'openid-client'
+import { randomBytes } from 'crypto'
 import csrf from '@dr.pogodin/csurf'
 import { MySessionData } from './sessionData.interface'
 import jwtDecode from 'jwt-decode'
@@ -100,7 +100,7 @@ export abstract class Strategy extends events.EventEmitter {
 
     private saveStateInSession(reqSession: MySessionData, state?: string): { promise: Promise<boolean>, state: string } {
         if (!state) {
-            state = generators.state()
+            state = randomBytes(32).toString('base64url')
             this.logger.log(`state not found, generating new state ${state}`)
         }
         const p = new Promise<boolean>((resolve) => {
@@ -117,7 +117,7 @@ export abstract class Strategy extends events.EventEmitter {
                 resolve(false)
             }
         })
-        return { promise: p, state: state}
+        return { promise: p, state }
     }
 
     protected getLoginHint(req: Request): string | undefined {
