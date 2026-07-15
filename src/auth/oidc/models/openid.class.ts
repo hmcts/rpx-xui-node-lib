@@ -1,17 +1,15 @@
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
-import {
-    Client,
-    ClientAuthMethod,
-    Issuer,
-    ResponseType,
-    Strategy,
-    TokenSet,
-    UserinfoResponse,
-    generators,
-    custom,
-    HttpOptions,
+import type {
+    ClientAuth,
+    Configuration,
+    IntrospectionResponse,
+    TokenEndpointResponse,
+    TokenEndpointResponseHelpers,
+    UserInfoResponse,
 } from 'openid-client'
 import passport from 'passport'
+import type { Strategy as PassportStrategy } from 'passport'
+import { randomBytes } from 'node:crypto'
 import { OIDC } from '../oidc.constants'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { AUTH } from '../../auth.constants'
@@ -21,9 +19,23 @@ import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
 import { getLogger, XuiLogger } from '../../../common'
 import { MySessionData } from '../../models/sessionData.interface'
 
+export interface HttpOptions {
+    retry?: number
+    timeout?: number
+    [key: string]: unknown
+}
+
+export type TokenSet = TokenEndpointResponse & TokenEndpointResponseHelpers
+
+interface OpenIDPassportModule {
+    Strategy: new (options: any, verify: any) => PassportStrategy & {
+        authorizationRequestParams: (req: Request, options: any) => URLSearchParams | Record<string, string> | undefined
+    }
+}
+
 export class OpenID extends AuthStrategy {
-    protected issuer: Issuer<Client> | undefined
-    protected client: Client | undefined
+    protected client: Configuration | undefined
+    private httpOptions: HttpOptions
 
     constructor(
         router: Router = Router({ mergeParams: true }),
@@ -31,6 +43,7 @@ export class OpenID extends AuthStrategy {
         options: HttpOptions = {},
     ) {
         super(OIDC.STRATEGY_NAME, router, logger)
+        this.httpOptions = options
         this.setHttpOptionsDefaults(options)
     }
 
@@ -40,30 +53,17 @@ export class OpenID extends AuthStrategy {
      */
     /* istanbul ignore next */
     public setHttpOptionsDefaults = (options: HttpOptions): void => {
-        const defaults = {
-            retry: 3,
-            timeout: 15000,
-            hooks: {
-                beforeRequest: [
-                    (options: any) => {
-                        this.logger.log('--> %s %s', options.method.toUpperCase(), options.href)
-                    },
-                ],
-                afterResponse: [
-                    (response: any) => {
-                        this.logger.log(
-                            '<-- %i FROM %s %s',
-                            response.statusCode,
-                            response.request.gotOptions.method.toUpperCase(),
-                            response.request.gotOptions.href,
-                        )
-                        return response
-                    },
-                ],
-            },
-        }
-        const httpOptions = { ...defaults, ...options } as HttpOptions
-        custom.setHttpOptionsDefaults(httpOptions)
+        this.httpOptions = { retry: 3, timeout: 15000, ...options }
+    }
+
+    /** Preserve native ESM imports when this library is compiled to CommonJS. */
+    public loadOpenIdClient = (): Promise<typeof import('openid-client')> => {
+        return new Function('specifier', 'return import(specifier)')('openid-client')
+    }
+
+    /** Preserve native ESM imports when this library is compiled to CommonJS. */
+    public loadOpenIdPassport = (): Promise<OpenIDPassportModule> => {
+        return new Function('specifier', 'return import(specifier)')('openid-client/passport')
     }
 
     public getOpenIDOptions = (authOptions: AuthOptions, discoveryOptions: any): OpenIDMetadata => {
@@ -73,10 +73,10 @@ export class OpenID extends AuthStrategy {
             discovery_endpoint: authOptions.discoveryEndpoint,
             issuer_url: discoveryOptions.issuer,
             logout_url: authOptions.logoutURL,
-            response_types: authOptions.responseTypes as ResponseType[],
+            response_types: authOptions.responseTypes,
             scope: authOptions.scope,
             sessionKey: authOptions.sessionKey,
-            token_endpoint_auth_method: authOptions.tokenEndpointAuthMethod as ClientAuthMethod,
+            token_endpoint_auth_method: authOptions.tokenEndpointAuthMethod,
             useRoutes: authOptions.useRoutes,
         }
     }
@@ -84,64 +84,70 @@ export class OpenID extends AuthStrategy {
     // TODO: this.client should be passed in
     // This function is hard to mock, come back to once we've mocked out easier prod code.
     /* istanbul ignore next */
-    public keepAliveHandler = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        const reqsession = req.session as MySessionData
+    public keepAliveHandler = (req: Request, res: Response, next: NextFunction): void => {
+        void this.handleKeepAlive(req, res, next).catch((error) => next(error))
+    }
 
-        if (!reqsession?.passport?.user) {
+    private readonly handleKeepAlive = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const reqsession = req.session as MySessionData
+        const user = reqsession?.passport?.user
+
+        if (!user) {
             return next()
         }
 
-        if (req.isAuthenticated() && this.getClient()) {
-            const userDetails = reqsession.passport.user
-            const currentAccessToken = userDetails.tokenset.accessToken
-            const client = this.getClient()
-            const canIntrospect = Boolean(client?.issuer?.metadata?.introspection_endpoint)
-
-            if (currentAccessToken) {
-                try {
-                    let tokenExpiredOrInvalid = this.isTokenExpired(currentAccessToken)
-
-                    if (canIntrospect) {
-                        const now = Math.floor(Date.now() / 1000)
-                        const introspection = await client?.introspect(currentAccessToken)
-                        tokenExpiredOrInvalid = !introspection?.active || !introspection?.exp || introspection.exp <= now
-                    }
-
-                    if (tokenExpiredOrInvalid) {
-                        this.logger.log('token expired or inactive')
-
-                        const tokenSet: TokenSet | undefined = await client?.refresh(
-                            reqsession.passport.user.tokenset.refreshToken,
-                        )
-
-                        reqsession.passport.user.tokenset = this.convertTokenSet(tokenSet)
-
-                        if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
-                            this.logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
-                            return next()
-                        } else {
-                            req.isRefresh = true
-                            this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
-                            return
-                        }
-                    }
-                } catch (e) {
-                    this.logger.error('refresh error => ', e)
-                    next(e)
-                }
-            }
+        const client = this.getClient()
+        if (!req.isAuthenticated() || !client) {
+            return next()
         }
-        next()
+
+        const currentAccessToken = user.tokenset.accessToken
+        if (!currentAccessToken) {
+            return next()
+        }
+
+        try {
+            const canIntrospect = Boolean(client.serverMetadata().introspection_endpoint)
+            const tokenExpiredOrInvalid = await this.isAccessTokenExpiredOrInvalid(currentAccessToken, canIntrospect)
+            if (!tokenExpiredOrInvalid) {
+                return next()
+            }
+
+            this.logger.log('token expired or inactive')
+            const tokenSet = await this.refresh(user.tokenset.refreshToken)
+            user.tokenset = this.convertTokenSet(tokenSet)
+
+            if (!this.listenerCount(AUTH.EVENT.AUTHENTICATE_SUCCESS)) {
+                this.logger.log(`refresh: no listener count: ${AUTH.EVENT.AUTHENTICATE_SUCCESS}`)
+                return next()
+            }
+
+            req.isRefresh = true
+            this.emit(AUTH.EVENT.AUTHENTICATE_SUCCESS, req, res, next)
+        } catch (e) {
+            this.logger.error('refresh error => ', e)
+            throw e
+        }
     }
 
-    public discover = async (): Promise<Issuer<Client>> => {
+    private readonly isAccessTokenExpiredOrInvalid = async (
+        accessToken: string,
+        canIntrospect: boolean,
+    ): Promise<boolean> => {
+        if (!canIntrospect) {
+            return this.isTokenExpired(accessToken)
+        }
+
+        const now = Math.floor(Date.now() / 1000)
+        const introspection = await this.introspect(accessToken)
+        return !introspection?.active || !introspection.exp || introspection.exp <= now
+    }
+
+    public discover = async (): Promise<Configuration> => {
         this.logger.info(`discovering endpoint: ${this.options.discoveryEndpoint}`)
-        const issuer = await this.discoverIssuer()
-
-        const metadata = issuer.metadata
-        this.logger.log('discover metadata', metadata)
-
-        return this.newIssuer(metadata)
+        const client = await this.discoverIssuer()
+        this.logger.log('discover metadata', client.serverMetadata())
+        return client
     }
 
     public initialiseStrategy = async (authOptions: AuthOptions): Promise<void> => {
@@ -159,9 +165,21 @@ export class OpenID extends AuthStrategy {
         }
     }
 
-    public verify = (
+    public verify = async (
         tokenset: TokenSet,
-        userinfo: UserinfoResponse,
+        done: (err: any, user?: any, message?: any) => void,
+    ): Promise<void> => {
+        try {
+            const userinfo = await this.getUserInfo(tokenset)
+            this.verifyUserInfo(tokenset, userinfo, done)
+        } catch (error) {
+            done(error)
+        }
+    }
+
+    public verifyUserInfo = (
+        tokenset: TokenSet,
+        userinfo: UserInfoResponse,
         done: (err: any, user?: any, message?: any) => void,
     ): void => {
         if (!userinfo?.roles) {
@@ -177,16 +195,63 @@ export class OpenID extends AuthStrategy {
         return done(null, { tokenset: this.convertTokenSet(tokenset), userinfo })
     }
 
-    public discoverIssuer = async (): Promise<any> => {
-        return await Issuer.discover(`${this.options.discoveryEndpoint}`)
+    public getUserInfo = async (tokenset: TokenSet): Promise<UserInfoResponse> => {
+        if (!this.client || !tokenset.access_token) {
+            throw new Error('client or access token not initialised')
+        }
+        const subject = tokenset.claims()?.sub
+        if (!subject) {
+            throw new Error('ID token subject not available')
+        }
+        const openid = await this.loadOpenIdClient()
+        return openid.fetchUserInfo(this.client, tokenset.access_token, subject)
     }
 
-    public newIssuer = (metadata: any): Issuer<Client> => {
-        this.logger.log('newIssuer')
-        return new Issuer(metadata)
+    public discoverIssuer = async (): Promise<Configuration> => {
+        const openid = await this.loadOpenIdClient()
+        const authMethod = this.getClientAuth(openid)
+        const client = await openid.discovery(
+            new URL(this.options.discoveryEndpoint),
+            this.options.clientID,
+            {
+                client_secret: this.options.clientSecret,
+                response_types: this.options.responseTypes,
+                token_endpoint_auth_method: this.options.tokenEndpointAuthMethod,
+            },
+            authMethod,
+            { timeout: Math.ceil((this.httpOptions.timeout ?? 15000) / 1000) },
+        )
+        return client
     }
 
-    public useStrategy = (strategyName: string, strategy: Strategy<any, any>): void => {
+    private readonly getClientAuth = (openid: typeof import('openid-client')): ClientAuth | undefined => {
+        switch (this.options.tokenEndpointAuthMethod) {
+            case 'client_secret_basic':
+                return openid.ClientSecretBasic(this.options.clientSecret)
+            case 'client_secret_post':
+                return openid.ClientSecretPost(this.options.clientSecret)
+            case 'client_secret_jwt':
+                return openid.ClientSecretJwt(this.options.clientSecret)
+            case 'none':
+                return openid.None()
+            default:
+                return undefined
+        }
+    }
+
+    public introspect = async (accessToken: string): Promise<IntrospectionResponse> => {
+        if (!this.client) throw new Error('client not initialised')
+        const openid = await this.loadOpenIdClient()
+        return openid.tokenIntrospection(this.client, accessToken)
+    }
+
+    public refresh = async (refreshToken: string): Promise<TokenSet> => {
+        if (!this.client) throw new Error('client not initialised')
+        const openid = await this.loadOpenIdClient()
+        return openid.refreshTokenGrant(this.client, refreshToken)
+    }
+
+    public useStrategy = (strategyName: string, strategy: PassportStrategy): void => {
         passport.use(strategyName, strategy)
     }
 
@@ -194,39 +259,45 @@ export class OpenID extends AuthStrategy {
     // get the function to return and throw the error in the caller function.
     // Why? - this makes the function more pure, and allows it to be easily testable.
     /* istanbul ignore next */
-    public createNewStrategy = async (authOptions: AuthOptions): Promise<Strategy<any, any>> => {
-        this.issuer = await this.discover()
-        if (!this.issuer) {
+    public createNewStrategy = async (authOptions: AuthOptions): Promise<PassportStrategy> => {
+        this.client = await this.discover()
+        if (!this.client) {
             throw new Error('auto discovery failed')
         }
-        const options = this.getOpenIDOptions(authOptions, this.issuer)
+        const options = this.getOpenIDOptions(authOptions, this.client.serverMetadata())
         this.logger.log('initialiseStrategy options', options)
-        this.client = this.getClientFromIssuer(this.issuer, options)
-        if (!this.client) {
-            throw new Error('client not initialised')
-        }
         return this.getNewStrategy(options, this.client)
     }
     /* istanbul ignore next */
-    public getNewStrategy = (options: OpenIDMetadata, client: Client): Strategy<any, Client> => {
-        return new Strategy(
+    public getNewStrategy = async (options: OpenIDMetadata, client: Configuration): Promise<PassportStrategy> => {
+        const { Strategy } = await this.loadOpenIdPassport()
+        const strategy = new Strategy(
             {
-                client,
-                params: {
-                    prompt: OIDC.PROMPT,
-                    scope: options.scope,
-                },
+                config: client,
+                name: this.strategyName,
+                scope: options.scope,
                 sessionKey: options.sessionKey,
             },
             this.verify,
         )
+        const authorizationRequestParams = strategy.authorizationRequestParams.bind(strategy)
+        strategy.authorizationRequestParams = (req, authenticateOptions) => {
+            const params = new URLSearchParams(authorizationRequestParams(req, authenticateOptions))
+            const supplied = authenticateOptions as any
+            params.set('prompt', OIDC.PROMPT)
+            if (supplied.nonce) params.set('nonce', supplied.nonce)
+            if (supplied.state) params.set('state', supplied.state)
+            return params
+        }
+        const authenticate = strategy.authenticate
+        strategy.authenticate = function (req: Request, authenticateOptions: any): void {
+            const callbackURL = authenticateOptions?.redirect_uri
+            authenticate.call(this, req, callbackURL ? { ...authenticateOptions, callbackURL } : authenticateOptions)
+        }
+        return strategy
     }
 
-    public getClientFromIssuer = (issuer: Issuer<Client>, options: OpenIDMetadata): Client | undefined => {
-        return new issuer.Client(options)
-    }
-
-    public getClient = (): Client | undefined => {
+    public getClient = (): Configuration | undefined => {
         return this.client
     }
 
@@ -240,8 +311,8 @@ export class OpenID extends AuthStrategy {
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
         this.logger.log('OIDC loginHandler Hit')
 
-        const nonce = generators.nonce()
-        const state = generators.state()
+        const nonce = randomBytes(32).toString('base64url')
+        const state = randomBytes(32).toString('base64url')
         const reqsession = req.session as MySessionData
 
         const promise = new Promise((resolve) => {
