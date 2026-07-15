@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.21",
+  "version": "2.30.21-debug-bump",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -87,7 +87,7 @@
     "@dr.pogodin/csurf": "^1.17.1",
     "axios": "^1.18.1",
     "connect-redis": "^4.0.4",
-    "debug": "^4.3.7",
+    "debug": "4.4.3",
     "deepmerge": "^4.2.2",
     "express": "^5.2.1",
     "express-session": "^1.17.0",
