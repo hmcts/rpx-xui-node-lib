@@ -14,14 +14,10 @@ export class RedisSessionStore extends SessionStore {
     }
 
     public getStore = (options: RedisSessionMetadata): RedisStore => {
-        const ttl = options.redisStoreOptions.redisTtl === undefined
-            ? undefined
-            : Number(options.redisStoreOptions.redisTtl)
-        const redisCloudUrl = this.normalizeRedisUrl(options.redisStoreOptions.redisCloudUrl)
+        const ttl = this.parseTtl(options.redisStoreOptions.redisTtl)
+        const redisClientConfig = this.getRedisClientConfig(options.redisStoreOptions.redisCloudUrl)
 
-        this.redisClient = createClient({
-            url: redisCloudUrl,
-        })
+        this.redisClient = createClient(redisClientConfig)
 
         this.redisClientReadyListener(this.redisClient)
         this.redisClientErrorListener(this.redisClient)
@@ -80,6 +76,54 @@ export class RedisSessionStore extends SessionStore {
         } catch {
             // Preserve previous behavior if URL parsing fails.
             return redisCloudUrl
+        }
+    }
+
+    // RedisStore defaults to 86400s when ttl is undefined.
+    public parseTtl = (redisTtl: number | string | undefined): number | undefined => {
+        if (redisTtl === undefined || redisTtl === null || redisTtl === '') {
+            return undefined
+        }
+
+        const parsedTtl = Number(redisTtl)
+        return Number.isFinite(parsedTtl) && parsedTtl > 0 ? parsedTtl : undefined
+    }
+
+    // Supports both URL-style values and legacy Azure cache strings:
+    // host:port,password=...,ssl=true,abortConnect=false
+    public getRedisClientConfig = (redisCloudUrl: string) => {
+        const normalizedRedisUrl = this.normalizeRedisUrl(redisCloudUrl)
+        if (/^rediss?:\/\//i.test(normalizedRedisUrl)) {
+            return { url: normalizedRedisUrl }
+        }
+
+        const [hostPort, ...connectionParts] = redisCloudUrl.split(',').map((part) => part.trim())
+        const [host, portValue] = hostPort.split(':')
+        const port = Number(portValue)
+
+        if (!host || !Number.isFinite(port)) {
+            return { url: normalizedRedisUrl }
+        }
+
+        const parsedParts = connectionParts.reduce<Record<string, string>>((accumulator, part) => {
+            const [key, ...valueParts] = part.split('=')
+            if (!key || valueParts.length === 0) {
+                return accumulator
+            }
+
+            accumulator[key.trim().toLowerCase()] = valueParts.join('=').trim()
+            return accumulator
+        }, {})
+
+        const tlsEnabled = parsedParts.ssl?.toLowerCase() === 'true' || parsedParts.tls?.toLowerCase() === 'true'
+
+        return {
+            socket: {
+                host,
+                port,
+                ...(tlsEnabled ? { tls: true as const } : {}),
+            },
+            password: parsedParts.password,
         }
     }
 }

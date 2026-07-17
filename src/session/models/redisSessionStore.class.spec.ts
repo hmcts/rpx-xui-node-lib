@@ -88,6 +88,35 @@ describe('getStore()', () => {
         expect(spyOnRedisCreateClient).toHaveBeenCalledWith({ url: REDISS_URL })
     })
 
+    it('should parse legacy Azure redis connection strings.', () => {
+        const redisSessionMetadata = createMock<RedisSessionMetadata>()
+
+        redisSessionMetadata.redisStoreOptions = {
+            redisCloudUrl: 'xui-redis.redis.cache.windows.net:6380,password=secret,ssl=true,abortConnect=false',
+            redisKeyPrefix: 'mockRedisKeyPrefix',
+            redisTtl: 123,
+        }
+
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        const spyOnRedisCreateClient = jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
+
+        const redisSessionStore = new RedisSessionStore(createMock<Router>())
+        redisSessionStore.getStore(redisSessionMetadata)
+
+        expect(spyOnRedisCreateClient).toHaveBeenCalledWith({
+            socket: {
+                host: 'xui-redis.redis.cache.windows.net',
+                port: 6380,
+                tls: true,
+            },
+            password: 'secret',
+        })
+    })
+
     it('should leave ttl undefined when redisTtl is not configured.', () => {
         const redisSessionMetadata = createMock<RedisSessionMetadata>()
 
@@ -95,6 +124,27 @@ describe('getStore()', () => {
             redisCloudUrl: 'redis://i.am.a.redis.cloud.url',
             redisKeyPrefix: 'mockRedisKeyPrefix',
             redisTtl: undefined as unknown as RedisSessionMetadata['redisStoreOptions']['redisTtl'],
+        }
+
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
+        const redisSessionStore = new RedisSessionStore(createMock<Router>())
+        const store = redisSessionStore.getStore(redisSessionMetadata)
+
+        expect(store.ttl).toEqual(86400)
+    })
+
+    it('should leave ttl undefined when redisTtl is invalid.', () => {
+        const redisSessionMetadata = createMock<RedisSessionMetadata>()
+
+        redisSessionMetadata.redisStoreOptions = {
+            redisCloudUrl: 'redis://i.am.a.redis.cloud.url',
+            redisKeyPrefix: 'mockRedisKeyPrefix',
+            redisTtl: 'not-a-number',
         }
 
         const mockRedisStore = createMock<RedisClientType>({
