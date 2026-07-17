@@ -17,9 +17,10 @@ export class RedisSessionStore extends SessionStore {
         const ttl = options.redisStoreOptions.redisTtl === undefined
             ? undefined
             : Number(options.redisStoreOptions.redisTtl)
+        const redisCloudUrl = this.normalizeRedisUrl(options.redisStoreOptions.redisCloudUrl)
 
         this.redisClient = createClient({
-            url: options.redisStoreOptions.redisCloudUrl,
+            url: redisCloudUrl,
         })
 
         this.redisClientReadyListener(this.redisClient)
@@ -59,6 +60,26 @@ export class RedisSessionStore extends SessionStore {
     public emitEvent = (eventName: string, eventObject: any) => {
         if (this.listenerCount(SESSION.EVENT.REDIS_CLIENT_READY)) {
             this.emit(eventName, eventObject)
+        }
+    }
+
+    // Keep compatibility with legacy Azure-style URLs: redis://...?...&tls=true
+    // redis@6 expects TLS via rediss:// or socket.tls.
+    public normalizeRedisUrl = (redisCloudUrl: string): string => {
+        try {
+            const parsedRedisUrl = new URL(redisCloudUrl)
+            const tlsEnabledViaQuery = parsedRedisUrl.searchParams.get('tls')?.toLowerCase() === 'true'
+
+            if (tlsEnabledViaQuery && parsedRedisUrl.protocol === 'redis:') {
+                parsedRedisUrl.protocol = 'rediss:'
+                parsedRedisUrl.searchParams.delete('tls')
+                return parsedRedisUrl.toString()
+            }
+
+            return redisCloudUrl
+        } catch {
+            // Preserve previous behavior if URL parsing fails.
+            return redisCloudUrl
         }
     }
 }

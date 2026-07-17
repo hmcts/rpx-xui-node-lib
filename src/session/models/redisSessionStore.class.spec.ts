@@ -39,6 +39,55 @@ describe('getStore()', () => {
         expect(store.ttl).toEqual(MOCK_REDIS_TTL)
     })
 
+    it('should normalize legacy tls query URLs to rediss for redis v6.', () => {
+        const redisSessionMetadata = createMock<RedisSessionMetadata>()
+
+        redisSessionMetadata.redisStoreOptions = {
+            redisCloudUrl: 'redis://:secret@i.am.a.redis.cloud.url:6380?tls=true',
+            redisKeyPrefix: 'mockRedisKeyPrefix',
+            redisTtl: 123,
+        }
+
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        const spyOnRedisCreateClient = jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
+
+        const redisSessionStore = new RedisSessionStore(createMock<Router>())
+        redisSessionStore.getStore(redisSessionMetadata)
+
+        expect(spyOnRedisCreateClient).toHaveBeenCalledWith(
+            expect.objectContaining({
+                url: expect.stringMatching(/^rediss:\/\//),
+            }),
+        )
+    })
+
+    it('should keep rediss URLs unchanged.', () => {
+        const REDISS_URL = 'rediss://:secret@i.am.a.redis.cloud.url:6380'
+        const redisSessionMetadata = createMock<RedisSessionMetadata>()
+
+        redisSessionMetadata.redisStoreOptions = {
+            redisCloudUrl: REDISS_URL,
+            redisKeyPrefix: 'mockRedisKeyPrefix',
+            redisTtl: 123,
+        }
+
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        const spyOnRedisCreateClient = jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
+
+        const redisSessionStore = new RedisSessionStore(createMock<Router>())
+        redisSessionStore.getStore(redisSessionMetadata)
+
+        expect(spyOnRedisCreateClient).toHaveBeenCalledWith({ url: REDISS_URL })
+    })
+
     it('should leave ttl undefined when redisTtl is not configured.', () => {
         const redisSessionMetadata = createMock<RedisSessionMetadata>()
 
