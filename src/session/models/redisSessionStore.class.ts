@@ -64,15 +64,22 @@ export class RedisSessionStore extends SessionStore {
     public normalizeRedisUrl = (redisCloudUrl: string): string => {
         try {
             const parsedRedisUrl = new URL(redisCloudUrl)
+            const hasUsernameOnlyCredentials = parsedRedisUrl.username !== '' && parsedRedisUrl.password === ''
             const tlsEnabledViaQuery = parsedRedisUrl.searchParams.get('tls')?.toLowerCase() === 'true'
+
+            // Some environments provide redis://<access-key>@host:port (without ':').
+            // Redis v6 expects password auth, so rewrite to redis://:password@host:port.
+            if (hasUsernameOnlyCredentials) {
+                parsedRedisUrl.password = decodeURIComponent(parsedRedisUrl.username)
+                parsedRedisUrl.username = ''
+            }
 
             if (tlsEnabledViaQuery && parsedRedisUrl.protocol === 'redis:') {
                 parsedRedisUrl.protocol = 'rediss:'
                 parsedRedisUrl.searchParams.delete('tls')
-                return parsedRedisUrl.toString()
             }
 
-            return redisCloudUrl
+            return parsedRedisUrl.toString()
         } catch {
             // Preserve previous behavior if URL parsing fails.
             return redisCloudUrl
@@ -123,6 +130,7 @@ export class RedisSessionStore extends SessionStore {
                 port,
                 ...(tlsEnabled ? { tls: true as const } : {}),
             },
+            ...(parsedParts.password ? { username: parsedParts.user ?? parsedParts.username ?? 'default' } : {}),
             password: parsedParts.password,
         }
     }

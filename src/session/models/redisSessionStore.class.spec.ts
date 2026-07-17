@@ -65,6 +65,32 @@ describe('getStore()', () => {
         )
     })
 
+    it('should convert username-only URL credentials to password auth.', () => {
+        const redisSessionMetadata = createMock<RedisSessionMetadata>()
+
+        redisSessionMetadata.redisStoreOptions = {
+            redisCloudUrl: 'redis://access-key@i.am.a.redis.cloud.url:6380?tls=true',
+            redisKeyPrefix: 'mockRedisKeyPrefix',
+            redisTtl: 123,
+        }
+
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        const spyOnRedisCreateClient = jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
+
+        const redisSessionStore = new RedisSessionStore(createMock<Router>())
+        redisSessionStore.getStore(redisSessionMetadata)
+
+        expect(spyOnRedisCreateClient).toHaveBeenCalledWith(
+            expect.objectContaining({
+                url: expect.stringMatching(/^rediss:\/\/:access-key@i\.am\.a\.redis\.cloud\.url:6380\/?$/),
+            }),
+        )
+    })
+
     it('should keep rediss URLs unchanged.', () => {
         const REDISS_URL = 'rediss://:secret@i.am.a.redis.cloud.url:6380'
         const redisSessionMetadata = createMock<RedisSessionMetadata>()
@@ -113,6 +139,37 @@ describe('getStore()', () => {
                 port: 6380,
                 tls: true,
             },
+            username: 'default',
+            password: 'secret',
+        })
+    })
+
+    it('should use provided username from legacy Azure redis connection strings.', () => {
+        const redisSessionMetadata = createMock<RedisSessionMetadata>()
+
+        redisSessionMetadata.redisStoreOptions = {
+            redisCloudUrl: 'xui-redis.redis.cache.windows.net:6380,user=my-user,password=secret,ssl=true',
+            redisKeyPrefix: 'mockRedisKeyPrefix',
+            redisTtl: 123,
+        }
+
+        const mockRedisStore = createMock<RedisClientType>({
+            connect: jest.fn().mockResolvedValue(undefined),
+        })
+        const spyOnRedisCreateClient = jest
+            .spyOn(redis, 'createClient')
+            .mockReturnValue(mockRedisStore as unknown as ReturnType<typeof redis.createClient>)
+
+        const redisSessionStore = new RedisSessionStore(createMock<Router>())
+        redisSessionStore.getStore(redisSessionMetadata)
+
+        expect(spyOnRedisCreateClient).toHaveBeenCalledWith({
+            socket: {
+                host: 'xui-redis.redis.cache.windows.net',
+                port: 6380,
+                tls: true,
+            },
+            username: 'my-user',
             password: 'secret',
         })
     })
