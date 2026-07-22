@@ -105,6 +105,7 @@
   },
   "resolutions": {
     "@types/express": "5.0.6",
+    "@types/express-session": "1.17.10",
     "@babel/traverse": "7.23.2",
     "minimatch": "3.0.5",
     "minimist": "1.2.6",
