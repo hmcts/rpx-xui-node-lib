@@ -2,6 +2,7 @@ import { NextFunction, Request, RequestHandler, Response, Router } from 'express
 import type {
     ClientAuth,
     Configuration,
+    DiscoveryRequestOptions,
     IntrospectionResponse,
     TokenEndpointResponse,
     TokenEndpointResponseHelpers,
@@ -210,8 +211,15 @@ export class OpenID extends AuthStrategy {
     public discoverIssuer = async (): Promise<Configuration> => {
         const openid = await this.loadOpenIdClient()
         const authMethod = this.getClientAuth(openid)
+        const discoveryEndpoint = new URL(this.options.discoveryEndpoint)
+        const discoveryOptions: DiscoveryRequestOptions = {
+            timeout: Math.ceil((this.httpOptions.timeout ?? 15000) / 1000),
+        }
+        if (discoveryEndpoint.protocol === 'http:') {
+            discoveryOptions.execute = [openid.allowInsecureRequests]
+        }
         const client = await openid.discovery(
-            new URL(this.options.discoveryEndpoint),
+            discoveryEndpoint,
             this.options.clientID,
             {
                 client_secret: this.options.clientSecret,
@@ -219,7 +227,7 @@ export class OpenID extends AuthStrategy {
                 token_endpoint_auth_method: this.options.tokenEndpointAuthMethod,
             },
             authMethod,
-            { timeout: Math.ceil((this.httpOptions.timeout ?? 15000) / 1000) },
+            discoveryOptions,
         )
         return client
     }

@@ -390,16 +390,57 @@ test('OIDC verifyLogin clears session and redirects to access denied when roles 
     ;(oidc as any).options.allowRolesRegex = '.'
 })
 
-test('OIDC discoverIssuer', async () => {
-    (oidc as any).options.discoveryEndpoint = 'http://localhost/issuer'
+test('OIDC discoverIssuer allows insecure discovery for HTTP endpoints', async () => {
+    const openId = new OpenID()
+    ;(openId as any).options = { ...options, discoveryEndpoint: 'http://localhost/issuer' }
     const discover = jest.fn().mockResolvedValue({})
-    const spy = jest.spyOn(oidc, 'loadOpenIdClient').mockResolvedValue({
+    const allowInsecureRequests = jest.fn()
+    const authMethod = jest.fn()
+    const spy = jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
         discovery: discover,
-        ClientSecretBasic: jest.fn(),
+        ClientSecretBasic: jest.fn().mockReturnValue(authMethod),
+        allowInsecureRequests,
     } as any)
-    await oidc.discoverIssuer()
+
+    await openId.discoverIssuer()
+
     expect(spy).toHaveBeenCalled()
-    expect(discover).toHaveBeenCalled()
+    expect(discover).toHaveBeenCalledWith(
+        new URL('http://localhost/issuer'),
+        options.clientID,
+        {
+            client_secret: options.clientSecret,
+            response_types: options.responseTypes,
+            token_endpoint_auth_method: options.tokenEndpointAuthMethod,
+        },
+        authMethod,
+        { timeout: 15, execute: [allowInsecureRequests] },
+    )
+})
+
+test('OIDC discoverIssuer keeps HTTPS discovery strict', async () => {
+    const openId = new OpenID()
+    ;(openId as any).options = { ...options, discoveryEndpoint: 'https://idam.example/issuer' }
+    const discover = jest.fn().mockResolvedValue({})
+    const authMethod = jest.fn()
+    jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        discovery: discover,
+        ClientSecretBasic: jest.fn().mockReturnValue(authMethod),
+    } as any)
+
+    await openId.discoverIssuer()
+
+    expect(discover).toHaveBeenCalledWith(
+        new URL('https://idam.example/issuer'),
+        options.clientID,
+        {
+            client_secret: options.clientSecret,
+            response_types: options.responseTypes,
+            token_endpoint_auth_method: options.tokenEndpointAuthMethod,
+        },
+        authMethod,
+        { timeout: 15 },
+    )
 })
 
 test('OIDC discover', async () => {
