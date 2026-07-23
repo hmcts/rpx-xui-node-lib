@@ -712,7 +712,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dr.pogodin/csurf@npm:^1.16.9":
+"@dr.pogodin/csurf@npm:^1.17.1":
   version: 1.17.1
   resolution: "@dr.pogodin/csurf@npm:1.17.1"
   dependencies:
@@ -876,7 +876,7 @@ __metadata:
   dependencies:
     "@commitlint/cli": "npm:^17.8.1"
     "@commitlint/config-conventional": "npm:^8.2.0"
-    "@dr.pogodin/csurf": "npm:^1.16.9"
+    "@dr.pogodin/csurf": "npm:^1.17.1"
     "@golevelup/ts-jest": "npm:^0.6.2"
     "@semantic-release/changelog": "npm:^6.0.3"
     "@semantic-release/git": "npm:^10.0.1"
