@@ -1,9 +1,12 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.21",
+  "version": "2.30.21-5040",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=24.18.0"
+  },
   "scripts": {
     "test": "jest --env node",
     "test:watch": "jest --env node --watch",
