@@ -47,6 +47,17 @@ const options = {
     },
 }
 
+beforeEach(() => {
+    jest.spyOn(oidc, 'loadOpenIdClient').mockResolvedValue({
+        randomState: jest.fn().mockReturnValue('state'),
+        randomNonce: jest.fn().mockReturnValue('nonce'),
+    } as any)
+})
+
+afterEach(() => {
+    jest.restoreAllMocks()
+})
+
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
 })
@@ -91,7 +102,13 @@ test('OIDC loginHandler with session', async () => {
         error: jest.fn(),
         info: jest.fn(),
     } as unknown as XuiLogger
+
     const openId = new OpenID(mockRouter, logger)
+        jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        randomState: jest.fn().mockReturnValue('state'),
+        randomNonce: jest.fn().mockReturnValue('nonce'),
+    } as any)
+
     jest.spyOn(openId, 'validateOptions')
     jest.spyOn(openId, 'serializeUser')
     jest.spyOn(openId, 'deserializeUser')
@@ -125,7 +142,13 @@ test('OIDC loginHandler passes single-string login_hint with generated state', a
         info: jest.fn(),
         warn: jest.fn(),
     } as unknown as XuiLogger
+
     const openId = new OpenID(mockRouter, logger)
+        jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        randomState: jest.fn().mockReturnValue('state'),
+        randomNonce: jest.fn().mockReturnValue('nonce'),
+    } as any)
+
     ;(openId as any).options = { sessionKey: 'test' }
     const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
     const mockRequest = {
@@ -145,10 +168,10 @@ test('OIDC loginHandler passes single-string login_hint with generated state', a
     expect(spy).toHaveBeenCalledWith(
         openId.strategyName,
         expect.objectContaining({
-            redirect_uri: 'http://localhost/callback',
+            callbackURL: 'http://localhost/callback',
             login_hint: 'ejudiciary-aad',
-            state: expect.any(String),
-            nonce: expect.any(String),
+            state: 'state',
+            nonce: 'nonce',
         }),
         expect.any(Function),
     )
@@ -164,6 +187,12 @@ test('OIDC loginHandler ignores non-string login_hint values', async () => {
         warn: jest.fn(),
     } as unknown as XuiLogger
     const openId = new OpenID(mockRouter, logger)
+
+    jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        randomState: jest.fn().mockReturnValue('state'),
+        randomNonce: jest.fn().mockReturnValue('nonce'),
+    } as any)
+
     ;(openId as any).options = { sessionKey: 'test' }
     const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
     const mockRequest = {

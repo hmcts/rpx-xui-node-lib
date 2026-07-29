@@ -10,7 +10,6 @@ import type {
 } from 'openid-client'
 import passport from 'passport'
 import type { Strategy as PassportStrategy } from 'passport'
-import { randomBytes } from 'node:crypto'
 import { OIDC } from '../oidc.constants'
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { AUTH } from '../../auth.constants'
@@ -25,6 +24,30 @@ export interface HttpOptions {
     timeout?: number
     [key: string]: unknown
 }
+
+interface SessionTokenSet {
+    accessToken?: string
+    refreshToken?: string
+    idToken?: string
+}
+
+interface XUIUserInfo extends UserInfoResponse {
+    roles?: string[]
+    uid?: string
+    identity?: string
+    ssoProvider?: string
+}
+
+interface VerifiedUser {
+    tokenset: SessionTokenSet
+    userinfo: XUIUserInfo
+}
+
+type VerifyDone = (
+    err: Error | null,
+    user?: VerifiedUser | false,
+    message?: { message: string },
+) => void
 
 export type TokenSet = TokenEndpointResponse & TokenEndpointResponseHelpers
 
@@ -67,12 +90,12 @@ export class OpenID extends AuthStrategy {
         return new Function('specifier', 'return import(specifier)')('openid-client/passport')
     }
 
-    public getOpenIDOptions = (authOptions: AuthOptions, discoveryOptions: any): OpenIDMetadata => {
+    public getOpenIDOptions = (authOptions: AuthOptions,  { issuer }: { issuer: string }): OpenIDMetadata => {
         return {
             client_id: authOptions.clientID,
             client_secret: authOptions.clientSecret,
             discovery_endpoint: authOptions.discoveryEndpoint,
-            issuer_url: discoveryOptions.issuer,
+            issuer_url: issuer,
             logout_url: authOptions.logoutURL,
             response_types: authOptions.responseTypes,
             scope: authOptions.scope,
@@ -158,45 +181,56 @@ export class OpenID extends AuthStrategy {
         this.logger.log('initialiseStrategy end')
     }
 
-    public convertTokenSet = (tokenset: TokenSet | undefined): any => {
-        return {
-            accessToken: tokenset?.access_token,
-            refreshToken: tokenset?.refresh_token,
-            idToken: tokenset?.id_token,
-        }
-    }
+    public convertTokenSet = (
+        tokenset?: TokenSet,
+    ): SessionTokenSet => ({
+        accessToken: tokenset?.access_token,
+        refreshToken: tokenset?.refresh_token,
+        idToken: tokenset?.id_token,
+    })
 
     public verify = async (
         tokenset: TokenSet,
-        done: (err: any, user?: any, message?: any) => void,
+        done: VerifyDone,
     ): Promise<void> => {
         try {
             const userinfo = await this.getUserInfo(tokenset)
             this.verifyUserInfo(tokenset, userinfo, done)
         } catch (error) {
-            done(error)
+            done(error as Error | null)
         }
     }
 
     public verifyUserInfo = (
         tokenset: TokenSet,
-        userinfo: UserInfoResponse,
-        done: (err: any, user?: any, message?: any) => void,
+        userinfo: XUIUserInfo,
+        done: VerifyDone,
     ): void => {
         if (!userinfo?.roles) {
             this.logger.warn(VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES)
             return done(null, false, { message: VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES })
         }
-        const allowedKeys = ['ssoProvider', 'uid', 'identity', 'roles', 'iss']
-        const filteredUserinfo = Object.fromEntries(
-            Object.entries(userinfo).filter(([key]) => allowedKeys.includes(key))
-        )
-        this.logger.info('verify okay, user:', filteredUserinfo)
+
+        const {
+            roles,
+            uid,
+            identity,
+            iss,
+            ssoProvider,
+        } = userinfo
+
+        this.logger.info('verify okay', {
+            roles,
+            uid,
+            identity,
+            iss,
+            ssoProvider,
+        })
 
         return done(null, { tokenset: this.convertTokenSet(tokenset), userinfo })
     }
 
-    public getUserInfo = async (tokenset: TokenSet): Promise<UserInfoResponse> => {
+    public getUserInfo = async (tokenset: TokenSet): Promise<XUIUserInfo> => {
         if (!this.client || !tokenset.access_token) {
             throw new Error('client or access token not initialised')
         }
@@ -232,7 +266,7 @@ export class OpenID extends AuthStrategy {
         return client
     }
 
-    private readonly getClientAuth = (openid: typeof import('openid-client')): ClientAuth | undefined => {
+    private readonly getClientAuth = (openid: typeof import('openid-client')): ClientAuth => {
         switch (this.options.tokenEndpointAuthMethod) {
             case 'client_secret_basic':
                 return openid.ClientSecretBasic(this.options.clientSecret)
@@ -243,7 +277,9 @@ export class OpenID extends AuthStrategy {
             case 'none':
                 return openid.None()
             default:
-                return undefined
+                throw new Error(
+                `Unsupported token_endpoint_auth_method: ${this.options.tokenEndpointAuthMethod}`,
+            )
         }
     }
 
@@ -282,26 +318,30 @@ export class OpenID extends AuthStrategy {
         const strategy = new Strategy(
             {
                 config: client,
-                name: this.strategyName,
+                callbackURL: this.options.callbackURL,
                 scope: options.scope,
                 sessionKey: options.sessionKey,
+                name: this.strategyName,
             },
             this.verify,
         )
         const authorizationRequestParams = strategy.authorizationRequestParams.bind(strategy)
         strategy.authorizationRequestParams = (req, authenticateOptions) => {
-            const params = new URLSearchParams(authorizationRequestParams(req, authenticateOptions))
-            const supplied = authenticateOptions as any
+            const original = authorizationRequestParams(req, authenticateOptions)
+
+            const params = new URLSearchParams(
+                original instanceof URLSearchParams
+                    ? original
+                    : original ?? {},
+            )
+
+            const supplied = authenticateOptions ?? {}
             params.set('prompt', OIDC.PROMPT)
             if (supplied.nonce) params.set('nonce', supplied.nonce)
             if (supplied.state) params.set('state', supplied.state)
             return params
         }
-        const authenticate = strategy.authenticate
-        strategy.authenticate = function (req: Request, authenticateOptions: any): void {
-            const callbackURL = authenticateOptions?.redirect_uri
-            authenticate.call(this, req, callbackURL ? { ...authenticateOptions, callbackURL } : authenticateOptions)
-        }
+
         return strategy
     }
 
@@ -316,11 +356,14 @@ export class OpenID extends AuthStrategy {
      * @param next NextFunction
      */
     /* istanbul ignore next */
-    public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<RequestHandler> => {
+    public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<void | RequestHandler> => {
         this.logger.log('OIDC loginHandler Hit')
 
-        const nonce = randomBytes(32).toString('base64url')
         const state = randomBytes(32).toString('base64url')
+
+        const state = openid.randomState()
+        const nonce = openid.randomNonce()
+
         const reqsession = req.session as MySessionData
 
         const promise = new Promise((resolve) => {
@@ -345,7 +388,7 @@ export class OpenID extends AuthStrategy {
             return passport.authenticate(
                 this.strategyName,
                 {
-                    redirect_uri: reqsession?.callbackURL,
+                    callbackURL: reqsession?.callbackURL,
                     nonce,
                     state,
                     ...(loginHint ? { login_hint: loginHint } : {}),
@@ -375,7 +418,7 @@ export class OpenID extends AuthStrategy {
             )(req, res, next)
         } catch (error) {
             this.logger.error('this should not throw an error')
-            throw new Error(`this should not throw an ${error}`)
+            throw error
         }
     }
 }
