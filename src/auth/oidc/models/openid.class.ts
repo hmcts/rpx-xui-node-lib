@@ -359,7 +359,7 @@ export class OpenID extends AuthStrategy {
     public loginHandler = async (req: Request, res: Response, next: NextFunction): Promise<void | RequestHandler> => {
         this.logger.log('OIDC loginHandler Hit')
 
-        const state = randomBytes(32).toString('base64url')
+        const openid = await this.loadOpenIdClient()
 
         const state = openid.randomState()
         const nonce = openid.randomNonce()
