@@ -318,7 +318,6 @@ export class OpenID extends AuthStrategy {
         const strategy = new Strategy(
             {
                 config: client,
-                callbackURL: this.options.callbackURL,
                 scope: options.scope,
                 sessionKey: options.sessionKey,
                 name: this.strategyName,
