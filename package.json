@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.22",
+  "version": "2.30.23-minimatch",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -102,7 +102,7 @@
   "resolutions": {
     "@types/express": "5.0.6",
     "@babel/traverse": "7.23.2",
-    "minimatch": "3.0.5",
+    "minimatch": "10.2.6",
     "minimist": "1.2.6",
     "tar": "7.5.9"
   },
