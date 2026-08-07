@@ -185,7 +185,7 @@ test('OIDC jwTokenExpired', () => {
     let isTokenExpired = oidc.jwTokenExpired(jwtData)
     expect(isTokenExpired).toBeTruthy()
 
-    jwtData = { exp: Math.floor(Date.now() / 1000) + 60 }
+    jwtData = { exp: new Date().getTime() / 1000 }
     isTokenExpired = oidc.jwTokenExpired(jwtData)
     expect(isTokenExpired).toBeFalsy()
 })
