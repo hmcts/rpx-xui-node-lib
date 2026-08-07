@@ -9,6 +9,8 @@ const config = {
         '^.+\\.(t|j)sx?$': ['ts-jest', { compiler: 'typescript' }],
     },
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
+    testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+    modulePathIgnorePatterns: ['<rootDir>/dist/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     restoreMocks: true,
     globals: {},
