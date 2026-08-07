@@ -102,7 +102,7 @@
   "resolutions": {
     "@types/express": "5.0.6",
     "@babel/traverse": "7.23.2",
-    "minimatch": "10.2.6",
+    "minimatch": "8.0.7",
     "minimist": "1.2.6",
     "tar": "7.5.9"
   },

@@ -10,9 +10,6 @@ const config = {
     },
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
     modulePathIgnorePatterns: ['<rootDir>/dist/'],
-    moduleNameMapper: {
-        '^jest-mock-axios$': '<rootDir>/node_modules/jest-mock-axios/dist/index.js',
-    },
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     restoreMocks: true,
     globals: {},
