@@ -4,7 +4,11 @@ import { oidc, OpenID } from './openid.class'
 import passport from 'passport'
 import express, { NextFunction, Request, response, Response, Router } from 'express'
 import { AUTH } from '../../auth.constants'
-import { Client, Issuer, Strategy, TokenSet, UserinfoResponse } from 'openid-client'
+type Client = any
+type Issuer<T = any> = any
+type Strategy<T = any, U = any> = any
+type TokenSet = any
+type UserinfoResponse = any
 import { createMock } from '@golevelup/ts-jest';
 import { OpenIDMetadata } from './OpenIDMetadata.interface'
 import { VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES } from '../../messaging.constants'
@@ -42,6 +46,17 @@ const options = {
         scope: 'scope1 scope2',
     },
 }
+
+beforeEach(() => {
+    jest.spyOn(oidc, 'loadOpenIdClient').mockResolvedValue({
+        randomState: jest.fn().mockReturnValue('state'),
+        randomNonce: jest.fn().mockReturnValue('nonce'),
+    } as any)
+})
+
+afterEach(() => {
+    jest.restoreAllMocks()
+})
 
 test('OIDC Auth', () => {
     expect(oidc).toBeDefined()
@@ -87,7 +102,13 @@ test('OIDC loginHandler with session', async () => {
         error: jest.fn(),
         info: jest.fn(),
     } as unknown as XuiLogger
+
     const openId = new OpenID(mockRouter, logger)
+        jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        randomState: jest.fn().mockReturnValue('state'),
+        randomNonce: jest.fn().mockReturnValue('nonce'),
+    } as any)
+
     jest.spyOn(openId, 'validateOptions')
     jest.spyOn(openId, 'serializeUser')
     jest.spyOn(openId, 'deserializeUser')
@@ -121,7 +142,13 @@ test('OIDC loginHandler passes single-string login_hint with generated state', a
         info: jest.fn(),
         warn: jest.fn(),
     } as unknown as XuiLogger
+
     const openId = new OpenID(mockRouter, logger)
+        jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        randomState: jest.fn().mockReturnValue('state'),
+        randomNonce: jest.fn().mockReturnValue('nonce'),
+    } as any)
+
     ;(openId as any).options = { sessionKey: 'test' }
     const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
     const mockRequest = {
@@ -141,10 +168,10 @@ test('OIDC loginHandler passes single-string login_hint with generated state', a
     expect(spy).toHaveBeenCalledWith(
         openId.strategyName,
         expect.objectContaining({
-            redirect_uri: 'http://localhost/callback',
+            callbackURL: 'http://localhost/callback',
             login_hint: 'ejudiciary-aad',
-            state: expect.any(String),
-            nonce: expect.any(String),
+            state: 'state',
+            nonce: 'nonce',
         }),
         expect.any(Function),
     )
@@ -160,6 +187,12 @@ test('OIDC loginHandler ignores non-string login_hint values', async () => {
         warn: jest.fn(),
     } as unknown as XuiLogger
     const openId = new OpenID(mockRouter, logger)
+
+    jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        randomState: jest.fn().mockReturnValue('state'),
+        randomNonce: jest.fn().mockReturnValue('nonce'),
+    } as any)
+
     ;(openId as any).options = { sessionKey: 'test' }
     const spy = jest.spyOn(passport, 'authenticate').mockImplementation(() => jest.fn())
     const mockRequest = {
@@ -386,15 +419,64 @@ test('OIDC verifyLogin clears session and redirects to access denied when roles 
     ;(oidc as any).options.allowRolesRegex = '.'
 })
 
-test('OIDC discoverIssuer', async () => {
-    const spy = jest.spyOn(Issuer, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<Client>))
-    await oidc.discoverIssuer()
+test('OIDC discoverIssuer allows insecure discovery for HTTP endpoints', async () => {
+    const openId = new OpenID()
+    ;(openId as any).options = { ...options, discoveryEndpoint: 'http://localhost/issuer' }
+    const discover = jest.fn().mockResolvedValue({})
+    const allowInsecureRequests = jest.fn()
+    const authMethod = jest.fn()
+    const spy = jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        discovery: discover,
+        ClientSecretBasic: jest.fn().mockReturnValue(authMethod),
+        allowInsecureRequests,
+    } as any)
+
+    await openId.discoverIssuer()
+
     expect(spy).toHaveBeenCalled()
+    expect(discover).toHaveBeenCalledWith(
+        new URL('http://localhost/issuer'),
+        options.clientID,
+        {
+            client_secret: options.clientSecret,
+            response_types: options.responseTypes,
+            token_endpoint_auth_method: options.tokenEndpointAuthMethod,
+        },
+        authMethod,
+        { timeout: 15, execute: [allowInsecureRequests] },
+    )
+})
+
+test('OIDC discoverIssuer keeps HTTPS discovery strict', async () => {
+    const openId = new OpenID()
+    ;(openId as any).options = { ...options, discoveryEndpoint: 'https://idam.example/issuer' }
+    const discover = jest.fn().mockResolvedValue({})
+    const authMethod = jest.fn()
+    jest.spyOn(openId, 'loadOpenIdClient').mockResolvedValue({
+        discovery: discover,
+        ClientSecretBasic: jest.fn().mockReturnValue(authMethod),
+    } as any)
+
+    await openId.discoverIssuer()
+
+    expect(discover).toHaveBeenCalledWith(
+        new URL('https://idam.example/issuer'),
+        options.clientID,
+        {
+            client_secret: options.clientSecret,
+            response_types: options.responseTypes,
+            token_endpoint_auth_method: options.tokenEndpointAuthMethod,
+        },
+        authMethod,
+        { timeout: 15 },
+    )
 })
 
 test('OIDC discover', async () => {
     const issuer = {}
-    const spy = jest.spyOn(oidc, 'discoverIssuer').mockImplementation(() => Promise.resolve({ metadata: issuer }))
+    const spy = jest.spyOn(oidc, 'discoverIssuer').mockResolvedValue({
+        serverMetadata: () => issuer,
+    } as any)
 
     await oidc.discover()
     expect(spy).toHaveBeenCalled()
@@ -509,13 +591,13 @@ xtest('test createNewStrategy', async () => {
         tokenEndpointAuthMethod: 'client_secret_basic',
         useRoutes: false,
     }
-    const spyDiscover = jest.spyOn(oidc, 'discover').mockImplementation(() => Promise.resolve({} as Issuer<any>))
-    const spyGetClient = jest.spyOn(oidc, 'getClientFromIssuer').mockReturnValue({} as Client)
-    const spyOnStrategy = jest.spyOn(oidc, 'getNewStrategy').mockReturnValue({} as Strategy<any, Client>)
+    const spyDiscover = jest.spyOn(oidc, 'discover').mockResolvedValue({
+        serverMetadata: () => ({ issuer: options.issuerURL }),
+    } as any)
+    const spyOnStrategy = jest.spyOn(oidc, 'getNewStrategy').mockResolvedValue({} as Strategy<any, Client>)
     await oidc.createNewStrategy(options)
 
     expect(spyDiscover).toHaveBeenCalled()
-    expect(spyGetClient).toHaveBeenCalled()
     expect(spyOnStrategy).toHaveBeenCalled()
 })
 
@@ -525,7 +607,7 @@ xtest('verify() Should return a no access roles messages if the User has no role
 
     const doneFunction = jest.fn((_err, _user, _message) => {})
 
-    oidc.verify(tokenSet, userinfo, doneFunction)
+    oidc.verifyUserInfo(tokenSet, userinfo, doneFunction)
 
     expect(doneFunction).toHaveBeenCalledWith(null, false, { message: VERIFY_ERROR_MESSAGE_NO_ACCESS_ROLES })
 })
@@ -547,16 +629,9 @@ xtest('verify() Should return the user token set if a User has roles.', async ()
 
     const doneFunction = jest.fn((_err, _user, _message) => {})
 
-    oidc.verify(tokenSet, userinfo, doneFunction)
+    oidc.verifyUserInfo(tokenSet, userinfo, doneFunction)
 
     expect(doneFunction).toHaveBeenCalledWith(null, { tokenset: userTokenSet, userinfo })
-})
-
-xtest('Should return an object from getClientFromIssuer()', async () => {
-    const issuer = createMock<Issuer<Client>>()
-    const options = createMock<OpenIDMetadata>()
-
-    expect(oidc.getClientFromIssuer(issuer, options)).toBeDefined()
 })
 
 xtest('makeAuthorization() Should make an authorisation string', async () => {
