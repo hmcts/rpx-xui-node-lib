@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
-import jwtDecode from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 import { createGuardrails, generate, ScureBase32Plugin } from 'otplib'
 import { http, getLogger, XuiLogger } from '../../common'
 import { DecodedJWT } from './decodedJwt.interface'
@@ -83,10 +83,13 @@ export class S2SAuth extends EventEmitter {
         }
     }
 
-    private generateToken = async (): Promise<string> => {
+    private generateToken = async (): Promise<string | undefined> => {
         this.logger.info('Generating new S2S token')
 
         const token = await this.postS2SLease()
+        if (!token) {
+            return undefined
+        }
 
         const tokenData: DecodedJWT = jwtDecode(token)
 
@@ -98,7 +101,7 @@ export class S2SAuth extends EventEmitter {
         return token
     }
 
-    private postS2SLease = async (): Promise<string> => {
+    private readonly postS2SLease = async (): Promise<string | undefined> => {
         const { s2sSecret, microservice, s2sEndpointUrl } = this.s2sConfig
         const secretBytes = new ScureBase32Plugin().decode(s2sSecret)
         const guardrails = createGuardrails({ MIN_SECRET_BYTES: secretBytes.length })
@@ -113,7 +116,7 @@ export class S2SAuth extends EventEmitter {
         return request.data
     }
 
-    public serviceTokenGenerator = async (): Promise<string> => {
+    public serviceTokenGenerator = async (): Promise<string | undefined> => {
         if (this.validateCache()) {
             const tokenData = this.getToken()
             return tokenData.token
