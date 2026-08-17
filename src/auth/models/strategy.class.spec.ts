@@ -59,3 +59,29 @@ test('redactingLogReplacer should redact nested sensitive keys and retain non-se
     expect(serialized).toContain('"serviceAuthorization":"[REDACTED]"')
     expect(serialized).toContain('"tokenURL":"[REDACTED]"')
 })
+
+test('getSSOLogoutUrl should include required end session parameters using the id token', async () => {
+    const logger = getMockLogger()
+    const strategy = new TestStrategy(logger)
+    await strategy.initialiseStrategy({
+        ssoLogoutURL: 'http://idam.test/o/endSession',
+    })
+
+    const ssoLogoutUrl = strategy.getSSOLogoutUrl('http://service.test', 'id-token-value') as string
+    const parsedUrl = new URL(ssoLogoutUrl)
+
+    expect(`${parsedUrl.origin}${parsedUrl.pathname}`).toEqual('http://idam.test/o/endSession')
+    expect(parsedUrl.searchParams.get('post_logout_redirect_uri')).toEqual('http://service.test')
+    expect(parsedUrl.searchParams.get('id_token_hint')).toEqual('id-token-value')
+    expect(parsedUrl.searchParams.get('id_token_hint')).not.toEqual('access-token-value')
+})
+
+test('getSSOLogoutUrl should not build an end session URL without an id token', async () => {
+    const logger = getMockLogger()
+    const strategy = new TestStrategy(logger)
+    await strategy.initialiseStrategy({
+        ssoLogoutURL: 'http://idam.test/o/endSession',
+    })
+
+    expect(strategy.getSSOLogoutUrl('http://service.test')).toBeUndefined()
+})
