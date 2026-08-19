@@ -209,7 +209,7 @@ test('OIDC OptionsMapper', () => {
         clientID: 'clientId',
         clientSecret: 'Clientsecret',
         discoveryEndpoint: 'someEndpoint',
-        issuerURL: 'issuer_url',
+        issuerURL: 'configured_issuer_url',
         logoutURL: 'logouturl',
         callbackURL: 'http://localhost/callback',
         responseTypes: ['none'],
@@ -218,7 +218,7 @@ test('OIDC OptionsMapper', () => {
         tokenEndpointAuthMethod: 'client_secret_basic',
         useRoutes: false,
     }
-    const openIdOptions = oidc.getOpenIDOptions(options, { issuer: options.issuerURL })
+    const openIdOptions = oidc.getOpenIDOptions(options, { issuer: 'discovered_issuer_url' })
 
     expect(openIdOptions.client_id).toEqual(options.clientID)
     expect(openIdOptions.client_secret).toEqual(options.clientSecret)
@@ -230,6 +230,28 @@ test('OIDC OptionsMapper', () => {
     expect(openIdOptions.sessionKey).toEqual(options.sessionKey)
     expect(openIdOptions.token_endpoint_auth_method).toEqual(options.tokenEndpointAuthMethod)
     expect(openIdOptions.useRoutes).toEqual(options.useRoutes)
+})
+
+test('OIDC OptionsMapper falls back to the discovered issuer', () => {
+    const options = {
+        authorizationURL: '',
+        tokenURL: '',
+        clientID: 'clientId',
+        clientSecret: 'Clientsecret',
+        discoveryEndpoint: 'someEndpoint',
+        issuerURL: '',
+        logoutURL: 'logouturl',
+        callbackURL: 'http://localhost/callback',
+        responseTypes: ['none'],
+        scope: 'some scope',
+        sessionKey: 'key',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        useRoutes: false,
+    }
+
+    const openIdOptions = oidc.getOpenIDOptions(options, { issuer: 'discovered_issuer_url' })
+
+    expect(openIdOptions.issuer_url).toEqual('discovered_issuer_url')
 })
 
 test('test validateOptions', () => {
