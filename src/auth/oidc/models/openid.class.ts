@@ -71,7 +71,7 @@ export class OpenID extends AuthStrategy {
             client_id: authOptions.clientID,
             client_secret: authOptions.clientSecret,
             discovery_endpoint: authOptions.discoveryEndpoint,
-            issuer_url: authOptions.issuerURL || discoveryOptions.issuer,
+            issuer_url: discoveryOptions.issuer,
             logout_url: authOptions.logoutURL,
             response_types: authOptions.responseTypes as ResponseType[],
             scope: authOptions.scope,
