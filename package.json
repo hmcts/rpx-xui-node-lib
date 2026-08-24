@@ -1,6 +1,6 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.21-minimist-bump",
+  "version": "2.30.27",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
@@ -92,7 +92,7 @@
     "debug": "^4.4.3",
     "deepmerge": "^4.3.1",
     "express": "^5.2.1",
-    "express-session": "^1.17.0",
+    "express-session": "^1.19.0",
     "joi": "^18.1.2",
     "jwt-decode": "^4.0.0",
     "openid-client": "^5.7.1",
