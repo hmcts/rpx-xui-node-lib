@@ -819,10 +819,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@golevelup/ts-jest@npm:^0.6.2":
-  version: 0.6.2
-  resolution: "@golevelup/ts-jest@npm:0.6.2"
-  checksum: 10c0/91fd477a1bd44913178929a9aecf8f5540208cf78a939b74f52c6804069ba1098b6e134d415b02226fb4be0f621ec16a1bcf1904821f254c009accce8c70ef27
+"@golevelup/ts-jest@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "@golevelup/ts-jest@npm:0.7.0"
+  checksum: 10c0/98f8663bca40c42c02cd875259b4a37671f5e931a20c44c64f86f2a9cb98431a0b3e96b14a6b2b07ce6f8407cd40015c127714d95fa6acda7e99f22de1a22199
   languageName: node
   linkType: hard
 
@@ -879,7 +879,7 @@ __metadata:
     "@commitlint/cli": "npm:^17.8.1"
     "@commitlint/config-conventional": "npm:^8.2.0"
     "@dr.pogodin/csurf": "npm:^1.17.1"
-    "@golevelup/ts-jest": "npm:^0.6.2"
+    "@golevelup/ts-jest": "npm:^0.7.0"
     "@semantic-release/changelog": "npm:^6.0.3"
     "@semantic-release/commit-analyzer": "npm:^13.0.1"
     "@semantic-release/git": "npm:^10.0.1"

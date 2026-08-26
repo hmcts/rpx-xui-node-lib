@@ -46,7 +46,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^8.2.0",
-    "@golevelup/ts-jest": "^0.6.2",
+    "@golevelup/ts-jest": "^0.7.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
