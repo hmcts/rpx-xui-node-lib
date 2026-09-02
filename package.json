@@ -4,6 +4,9 @@
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=24.18.0"
+  },
   "scripts": {
     "test": "jest --env node",
     "test:watch": "jest --env node --watch",
@@ -48,8 +51,11 @@
     "@commitlint/config-conventional": "^8.2.0",
     "@golevelup/ts-jest": "^0.6.2",
     "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^8.1.0",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/npm": "^12.0.2",
+    "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/debug": "^4.1.5",
     "@types/express": "^5.0.0",
     "@types/express-session": "1.17.10",
@@ -69,7 +75,7 @@
     "jest-mock-axios": "^4.8.0",
     "jest-ts-auto-mock": "^2.1.0",
     "lint-staged": "^10.2.2",
-    "semantic-release": "^19.0.2",
+    "semantic-release": "^24.2.9",
     "standard-version": "^9.5.0",
     "ts-auto-mock": "^3.7.4",
     "ts-jest": "^29.3.2",
@@ -89,7 +95,7 @@
     "debug": "^4.4.3",
     "deepmerge": "^4.3.1",
     "express": "^5.2.1",
-    "express-session": "^1.17.0",
+    "express-session": "^1.19.0",
     "joi": "^18.1.2",
     "jwt-decode": "^4.0.0",
     "openid-client": "^5.7.1",
@@ -101,10 +107,12 @@
   },
   "resolutions": {
     "@types/express": "5.0.6",
+    "@types/express-session": "1.17.10",
     "@babel/traverse": "7.23.2",
     "minimatch": "8.0.7",
-    "minimist": "1.2.6",
-    "tar": "7.5.9"
+    "minimist": "1.2.8",
+    "tar": "7.5.16",
+    "body-parser": "^2.3.0"
   },
   "packageManager": "yarn@4.5.1"
 }
