@@ -907,6 +907,7 @@ __metadata:
     "@types/passport-oauth2": "npm:^1.4.9"
     "@types/session-file-store": "npm:^1.2.6"
     axios: "npm:^1.18.1"
+    commit-and-tag-version: "npm:^9.5.0"
     commitizen: "npm:^4.0.3"
     commitlint-config-cz: "npm:^0.13.1"
     connect-redis: "npm:^9.0.0"
@@ -931,7 +932,6 @@ __metadata:
     redis: "npm:^6.1.0"
     semantic-release: "npm:^24.2.9"
     session-file-store: "npm:^1.5.0"
-    standard-version: "npm:^9.5.0"
     ts-auto-mock: "npm:^3.7.4"
     ts-jest: "npm:^29.3.2"
     ts-patch: "npm:^3.3.0"
@@ -3626,6 +3626,30 @@ __metadata:
   version: 6.2.1
   resolution: "commander@npm:6.2.1"
   checksum: 10c0/85748abd9d18c8bc88febed58b98f66b7c591d9b5017cad459565761d7b29ca13b7783ea2ee5ce84bf235897333706c4ce29adf1ce15c8252780e7000e2ce9ea
+  languageName: node
+  linkType: hard
+
+"commit-and-tag-version@npm:^9.5.0":
+  version: 9.6.0
+  resolution: "commit-and-tag-version@npm:9.6.0"
+  dependencies:
+    chalk: "npm:^2.4.2"
+    conventional-changelog: "npm:3.1.25"
+    conventional-changelog-config-spec: "npm:2.1.0"
+    conventional-changelog-conventionalcommits: "npm:4.6.3"
+    conventional-recommended-bump: "npm:6.1.0"
+    detect-indent: "npm:^6.0.0"
+    detect-newline: "npm:^3.1.0"
+    dotgitignore: "npm:^2.1.0"
+    figures: "npm:^3.1.0"
+    find-up: "npm:^5.0.0"
+    git-semver-tags: "npm:^4.0.0"
+    semver: "npm:^7.1.1"
+    stringify-package: "npm:^1.0.1"
+    yargs: "npm:^16.0.0"
+  bin:
+    commit-and-tag-version: bin/cli.js
+  checksum: 10c0/aafb8160ca5f5baec46a517a00cb4cd2be803e4f04190ece7d6b0116f93066b6f5e051f390f019a41654aeea6b514c2172baf69fe48cb50107e79e7110d1c903
   languageName: node
   linkType: hard
 
@@ -10180,30 +10204,6 @@ __metadata:
   dependencies:
     escape-string-regexp: "npm:^2.0.0"
   checksum: 10c0/651c9f87667e077584bbe848acaecc6049bc71979f1e9a46c7b920cad4431c388df0f51b8ad7cfd6eed3db97a2878d0fc8b3122979439ea8bac29c61c95eec8a
-  languageName: node
-  linkType: hard
-
-"standard-version@npm:^9.5.0":
-  version: 9.5.0
-  resolution: "standard-version@npm:9.5.0"
-  dependencies:
-    chalk: "npm:^2.4.2"
-    conventional-changelog: "npm:3.1.25"
-    conventional-changelog-config-spec: "npm:2.1.0"
-    conventional-changelog-conventionalcommits: "npm:4.6.3"
-    conventional-recommended-bump: "npm:6.1.0"
-    detect-indent: "npm:^6.0.0"
-    detect-newline: "npm:^3.1.0"
-    dotgitignore: "npm:^2.1.0"
-    figures: "npm:^3.1.0"
-    find-up: "npm:^5.0.0"
-    git-semver-tags: "npm:^4.0.0"
-    semver: "npm:^7.1.1"
-    stringify-package: "npm:^1.0.1"
-    yargs: "npm:^16.0.0"
-  bin:
-    standard-version: bin/cli.js
-  checksum: 10c0/22aab8f4768b3d1126dae8cc74131119de140e760e7cb67b7278ae192d700fe51ffc153691de1dd1c6e1589f9828d052981684e7b9b6b9b8a30e5681e624dbc5
   languageName: node
   linkType: hard
 
