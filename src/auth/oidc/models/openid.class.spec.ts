@@ -250,7 +250,7 @@ test('test validateOptions', () => {
     }
     expect(() => {
         oidc.validateOptions(options)
-    }).toThrowError('authorizationURL')
+    }).toThrow('authorizationURL')
 
     //positive case
     options.authorizationURL = 'something'
@@ -852,7 +852,7 @@ xtest('getUrlFromOptions without routeCredential', () => {
     const logger = createMock<typeof console>()
     const openId = new OpenID(mockRouter, logger)
 
-    expect(() => openId.getUrlFromOptions({} as AuthOptions)).toThrowError('missing routeCredential in options')
+    expect(() => openId.getUrlFromOptions({} as AuthOptions)).toThrow('missing routeCredential in options')
 })
 
 xtest('getRequestBody without routeCredential', () => {
@@ -860,7 +860,7 @@ xtest('getRequestBody without routeCredential', () => {
     const logger = createMock<typeof console>()
     const openId = new OpenID(mockRouter, logger)
 
-    expect(() => openId.getRequestBody({} as AuthOptions)).toThrowError('options.routeCredential missing values')
+    expect(() => openId.getRequestBody({} as AuthOptions)).toThrow('options.routeCredential missing values')
 })
 
 xtest('generateToken', async () => {

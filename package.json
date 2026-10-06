@@ -1,9 +1,12 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.24-4583",
+  "version": "2.30.32",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=24.18.0"
+  },
   "scripts": {
     "test": "jest --env node",
     "test:watch": "jest --env node --watch",
@@ -56,7 +59,7 @@
     "@types/debug": "^4.1.5",
     "@types/express": "^5.0.0",
     "@types/express-session": "1.17.10",
-    "@types/jest": "29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/jwt-decode": "^3.1.0",
     "@types/node": "^18.19.76",
     "@types/passport": "^1.0.2",
@@ -65,20 +68,20 @@
     "commitizen": "^4.0.3",
     "commitlint-config-cz": "^0.13.1",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^9.25.1",
+    "eslint": "^9.39.2",
     "helmet": "^7.0.0",
     "husky": "^8.0.0",
-    "jest": "^29.7.0",
+    "jest": "^30.5.1",
     "jest-mock-axios": "^4.8.0",
     "jest-ts-auto-mock": "^2.1.0",
     "lint-staged": "^10.2.2",
     "semantic-release": "^24.2.9",
     "standard-version": "^9.5.0",
     "ts-auto-mock": "^3.7.4",
-    "ts-jest": "^29.3.2",
+    "ts-jest": "^29.4.12",
     "ts-patch": "^3.3.0",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.31.1"
+    "typescript-eslint": "^8.66.0"
   },
   "config": {
     "commitizen": {
@@ -92,8 +95,8 @@
     "debug": "^4.4.3",
     "deepmerge": "^4.3.1",
     "express": "^5.2.1",
-    "express-session": "^1.17.0",
-    "joi": "^18.1.2",
+    "express-session": "^1.19.0",
+    "joi": "^18.2.8",
     "jwt-decode": "^4.0.0",
     "openid-client": "^5.7.1",
     "otplib": "^13.4.0",
@@ -106,10 +109,10 @@
     "@types/express": "5.0.6",
     "@types/express-session": "1.17.10",
     "@babel/traverse": "7.23.2",
-    "minimatch": "3.0.5",
-    "minimist": "1.2.6",
-    "tar": "7.5.16",
-    "body-parser": "^2.3.0"
+    "minimatch": "8.0.7",
+    "minimist": "1.2.8",
+    "body-parser": "^2.3.0",
+    "node-gyp": "13.0.2"
   },
   "packageManager": "yarn@4.5.1"
 }
