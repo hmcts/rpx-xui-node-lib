@@ -1,4 +1,9 @@
-import { Router } from 'express'
+import express, { Router } from 'express'
+import session from 'express-session'
+import { Passport } from 'passport'
+import { Server } from 'http'
+import { AddressInfo } from 'net'
+import { AUTH } from '../auth.constants'
 import { XuiLogger } from '../../common'
 import { Strategy } from './strategy.class'
 
@@ -84,4 +89,80 @@ test('getSSOLogoutUrl should not build an end session URL without an id token', 
     })
 
     expect(strategy.getSSOLogoutUrl('http://service.test')).toBeUndefined()
+})
+
+describe('login session fixation protection', () => {
+    let server: Server
+    let baseUrl: string
+    let store: session.MemoryStore
+
+    beforeEach(async () => {
+        const app = express()
+        const passport = new Passport()
+        const strategy = new TestStrategy(getMockLogger())
+        const user = { userinfo: { uid: 'test-user', roles: ['caseworker'] } }
+        store = new session.MemoryStore()
+
+        passport.serializeUser((authenticatedUser, done) => done(null, authenticatedUser))
+        passport.deserializeUser((authenticatedUser: Express.User, done) => done(null, authenticatedUser))
+        app.use(session({ secret: 'session-fixation-regression-test', resave: false, saveUninitialized: false, store }))
+        app.use(passport.initialize())
+        app.use(passport.session())
+        app.get('/anonymous', (req, res) => {
+            Object.assign(req.session, { anonymousMarker: 'untrusted-session-data' })
+            res.json({ sessionID: req.sessionID })
+        })
+        strategy.on(AUTH.EVENT.AUTHENTICATE_SUCCESS, (req, res) => {
+            res.json({ sessionID: req.sessionID, anonymousMarker: req.session.anonymousMarker })
+        })
+        app.get('/login', (req, res, next) => strategy.verifyLogin(req, user, next, res))
+        app.get('/private', (req, res) => {
+            res.sendStatus(req.isAuthenticated() ? 200 : 401)
+        })
+
+        await new Promise<void>((resolve, reject) => {
+            server = app.listen(0, '127.0.0.1', (error?: Error) => error ? reject(error) : resolve())
+        })
+        baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
+    })
+
+    afterEach(async () => {
+        await new Promise<void>((resolve, reject) => {
+            server.close((error) => error ? reject(error) : resolve())
+            server.closeAllConnections()
+        })
+    })
+
+    test.each([false, true])('rotates the session and rejects the old cookie on login (reauthentication: %s)', async (reauthenticate) => {
+        const anonymousResponse = await fetch(`${baseUrl}/anonymous`)
+        let previousSession = await anonymousResponse.json() as { sessionID: string }
+        let previousCookie = anonymousResponse.headers.get('set-cookie')!.split(';')[0]
+
+        if (reauthenticate) {
+            const firstLogin = await fetch(`${baseUrl}/login`, { headers: { cookie: previousCookie } })
+            expect(firstLogin.status).toBe(200)
+            previousSession = await firstLogin.json() as { sessionID: string }
+            previousCookie = firstLogin.headers.get('set-cookie')!.split(';')[0]
+            const authenticatedResponse = await fetch(`${baseUrl}/private`, { headers: { cookie: previousCookie } })
+            expect(authenticatedResponse.status).toBe(200)
+        }
+
+        const loginResponse = await fetch(`${baseUrl}/login`, { headers: { cookie: previousCookie } })
+        expect(loginResponse.status).toBe(200)
+        const authenticatedSession = await loginResponse.json() as { sessionID: string, anonymousMarker?: string }
+        const authenticatedCookie = loginResponse.headers.get('set-cookie')!.split(';')[0]
+
+        expect(authenticatedSession.sessionID).not.toBe(previousSession.sessionID)
+        expect(authenticatedCookie).not.toBe(previousCookie)
+        expect(authenticatedSession.anonymousMarker).toBeUndefined()
+        const previousStoredSession = await new Promise<session.SessionData | null | undefined>((resolve, reject) => {
+            store.get(previousSession.sessionID, (error, storedSession) => error ? reject(error) : resolve(storedSession))
+        })
+        expect(previousStoredSession).toBeFalsy()
+
+        const replayResponse = await fetch(`${baseUrl}/private`, { headers: { cookie: previousCookie } })
+        expect(replayResponse.status).toBe(401)
+        const authenticatedResponse = await fetch(`${baseUrl}/private`, { headers: { cookie: authenticatedCookie } })
+        expect(authenticatedResponse.status).toBe(200)
+    })
 })
