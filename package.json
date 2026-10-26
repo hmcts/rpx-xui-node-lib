@@ -1,11 +1,11 @@
 {
   "name": "@hmcts/rpx-xui-node-lib",
-  "version": "2.30.34-joi-update",
+  "version": "2.30.35-joi-update",
   "description": "Common nodejs library components for XUI",
   "main": "dist/index",
   "types": "dist/index.d.ts",
   "engines": {
-    "node": ">=24.18.0"
+    "node": ">=24.22.1"
   },
   "scripts": {
     "test": "jest --env node",
