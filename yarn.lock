@@ -1144,7 +1144,7 @@ __metadata:
     jest: "npm:^30.5.1"
     jest-mock-axios: "npm:^4.8.0"
     jest-ts-auto-mock: "npm:^2.1.0"
-    joi: "npm:^18.2.8"
+    joi: "npm:^18.3.0"
     jwt-decode: "npm:^4.0.0"
     lint-staged: "npm:^10.2.2"
     openid-client: "npm:^5.7.1"
@@ -4164,10 +4164,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bn.js@npm:^4.0.0":
-  version: 4.12.0
-  resolution: "bn.js@npm:4.12.0"
-  checksum: 10c0/9736aaa317421b6b3ed038ff3d4491935a01419ac2d83ddcfebc5717385295fcfcf0c57311d90fe49926d0abbd7a9dbefdd8861e6129939177f7e67ebc645b21
+"bn.js@npm:^4.12.3":
+  version: 4.12.5
+  resolution: "bn.js@npm:4.12.5"
+  checksum: 10c0/e15e35d0e082fa43c5dd03b552041faf23bc870fbe5de0e41ab5d2d987875f43ffb1f8f57021494e9d71784223c59ddbba1819948b2c2648477a61ab7455aa42
   languageName: node
   linkType: hard
 
@@ -8570,9 +8570,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"joi@npm:^18.2.8":
-  version: 18.2.8
-  resolution: "joi@npm:18.2.8"
+"joi@npm:^18.3.0":
+  version: 18.3.0
+  resolution: "joi@npm:18.3.0"
   dependencies:
     "@hapi/address": "npm:^5.1.1"
     "@hapi/formula": "npm:^3.0.2"
@@ -8581,7 +8581,7 @@ __metadata:
     "@hapi/tlds": "npm:^1.1.1"
     "@hapi/topo": "npm:^6.0.2"
     "@standard-schema/spec": "npm:^1.1.0"
-  checksum: 10c0/45e6626aa02be8633618f6ec0c2785d9178886e74c18e93007d8e311246f31a9b15e49904f87c1c05c9e2a43c6ab071fc081db7fbb0ab949403026d4f9f0bf0c
+  checksum: 10c0/13b4ab345a79562fa57e483208c1fcb71fbb56bd52ccd97c295db80a5d40e03ec130364080375afe2035f33b3b9f79a9b1b0bb508b90b8f2517eb3e52c9bb27b
   languageName: node
   linkType: hard
 
