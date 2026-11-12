@@ -15,7 +15,7 @@ package.json. The published package contains the compiled dist/ directory.
 Prerequisites
 -------------
 
-- Node.js 24.18.0 or a later version accepted by package.json.
+- Node.js 24.22.2 or a later version accepted by package.json.
 - Yarn 4.5.1.
 - Git Bash or WSL on Windows for shell commands that use Unix-style syntax.
 
