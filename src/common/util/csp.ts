@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import crypto from 'node:crypto';
-import merge from 'deepmerge';
+import { deepmerge } from 'deepmerge-ts';
 
 export function csp({
   extraScript = (process.env.CSP_SCRIPT_EXTRA ?? '').split(',').filter(Boolean),
@@ -39,7 +39,7 @@ export function csp({
     };
 
     // deep‑merge so we don’t lose anything from SECURITY_POLICY
-    const finalCsp = merge(defaultCsp, newCsp);
+    const finalCsp = deepmerge(defaultCsp, newCsp);
 
     helmet.contentSecurityPolicy(finalCsp)(req, res, next);
   };
