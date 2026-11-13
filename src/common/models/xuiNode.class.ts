@@ -43,7 +43,7 @@ export class XuiNode extends EventEmitter {
             this.logger.log('request is unauthenticated')
             res.statusCode = 401
             res.statusMessage = 'Unauthorized'
-            res.status(401).send({ message: 'Unauthorized' })
+            return res.status(401).send({ message: 'Unauthorized' })
         } else {
             this.logger.log('user is authenticated ' + req?.user?.toString())
         }
@@ -51,8 +51,13 @@ export class XuiNode extends EventEmitter {
     }
 
     public configure = (options: XuiNodeOptions): RequestHandler => {
-        this.middlewares.forEach(async (middleware) => await this.applyMiddleware(middleware, options))
-        return this.router
+        const setup = this.middlewares.reduce(
+            (ready, middleware) => ready.then(() => this.applyMiddleware(middleware, options)),
+            Promise.resolve(),
+        )
+        return (req, res, next) => {
+            void setup.then(() => this.router(req, res, next)).catch(next)
+        }
     }
 
     /**

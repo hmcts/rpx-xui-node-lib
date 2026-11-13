@@ -19,16 +19,61 @@ test('xuiNode isTruthy', () => {
     expect(xuiNode).toBeTruthy()
 })
 
-test('xuiNode configure', () => {
-    const mockRouter = {} as Router
+test('xuiNode configure waits for middleware setup in order before handling requests', async () => {
+    const mockRouter = jest.fn() as unknown as Router
     const logger = createMock<typeof console>()
-    const middlewares: Array<string> = ['session1', 'auth1']
+    const middlewares: Array<string> = ['session', 'auth']
     const xuinode = new XuiNode(mockRouter, middlewares, logger)
     const options = { authorizationURL: 'http://localhost/someauthurl' } as XuiNodeOptions
+    const configured: string[] = []
+    let releaseSession: () => void = () => {}
+    let releaseAuth: () => void = () => {}
+    const sessionReady = new Promise<void>((resolve) => { releaseSession = resolve })
+    const authReady = new Promise<void>((resolve) => { releaseAuth = resolve })
     const spy = jest.spyOn(xuinode, 'applyMiddleware')
-    xuinode.configure(options)
-    expect(spy).toHaveBeenCalledWith('session1', options)
-    expect(spy).toHaveBeenCalledWith('auth1', options)
+        .mockImplementation(async (middleware, middlewareOptions) => {
+            configured.push(middleware)
+            if (middleware === 'session') await sessionReady
+            if (middleware === 'auth') await authReady
+            expect(middlewareOptions).toBe(options)
+        })
+    const handler = xuinode.configure(options)
+    const req = createMockPassportRequest(null)
+    const resp = createMock<Response>()
+    const next = jest.fn()
+    handler(req, resp, next)
+
+    await new Promise<void>((resolve) => setImmediate(resolve))
+    expect(configured).toEqual(['session'])
+    expect(mockRouter).not.toHaveBeenCalled()
+
+    releaseSession()
+    await new Promise<void>((resolve) => setImmediate(resolve))
+    expect(configured).toEqual(['session', 'auth'])
+    expect(mockRouter).not.toHaveBeenCalled()
+
+    releaseAuth()
+    await new Promise<void>((resolve) => setImmediate(resolve))
+    expect(mockRouter).toHaveBeenCalledWith(req, resp, next)
+    expect(spy).toHaveBeenCalledTimes(2)
+})
+
+test('xuiNode configure forwards setup failure without entering a partially configured router', async () => {
+    const mockRouter = jest.fn() as unknown as Router
+    const logger = createMock<typeof console>()
+    const xuinode = new XuiNode(mockRouter, ['session', 'auth'], logger)
+    const error = new Error('session setup failed')
+    jest.spyOn(xuinode, 'applyMiddleware').mockRejectedValue(error)
+    const handler = xuinode.configure({ session: {} } as XuiNodeOptions)
+    const req = createMockPassportRequest(null)
+    const resp = createMock<Response>()
+    const next = jest.fn()
+
+    handler(req, resp, next)
+    await new Promise<void>((resolve) => setImmediate(resolve))
+
+    expect(mockRouter).not.toHaveBeenCalled()
+    expect(next).toHaveBeenCalledWith(error)
 })
 
 test('applyMiddlewareLayer() should call importMiddleware with the baseDir and middleware', () => {
@@ -89,6 +134,7 @@ test('defaultAuthenticate, fake authenticated', () => {
     const next = jest.fn()
     xuinode.authenticate(req, resp, next)
     expect(resp.statusCode).toEqual(0)
+    expect(next).toHaveBeenCalledTimes(1)
 })
 
 test('defaultAuthenticate, unauthenticated', () => {
@@ -105,4 +151,5 @@ test('defaultAuthenticate, unauthenticated', () => {
 
     xuinode.authenticate(req, resp, next)
     expect(resp.statusCode).toEqual(401)
+    expect(next).not.toHaveBeenCalled()
 })
