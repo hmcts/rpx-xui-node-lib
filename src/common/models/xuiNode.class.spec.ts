@@ -46,11 +46,13 @@ test('xuiNode configure waits for middleware setup in order before handling requ
     await new Promise<void>((resolve) => setImmediate(resolve))
     expect(configured).toEqual(['session'])
     expect(mockRouter).not.toHaveBeenCalled()
+    expect(next).not.toHaveBeenCalled()
 
     releaseSession()
     await new Promise<void>((resolve) => setImmediate(resolve))
     expect(configured).toEqual(['session', 'auth'])
     expect(mockRouter).not.toHaveBeenCalled()
+    expect(next).not.toHaveBeenCalled()
 
     releaseAuth()
     await new Promise<void>((resolve) => setImmediate(resolve))
@@ -58,7 +60,7 @@ test('xuiNode configure waits for middleware setup in order before handling requ
     expect(spy).toHaveBeenCalledTimes(2)
 })
 
-test('xuiNode configure forwards setup failure without entering a partially configured router', async () => {
+test('xuiNode configure forwards an earlier setup failure without entering the router', async () => {
     const mockRouter = jest.fn() as unknown as Router
     const logger = createMock<typeof console>()
     const xuinode = new XuiNode(mockRouter, ['session', 'auth'], logger)
@@ -68,11 +70,12 @@ test('xuiNode configure forwards setup failure without entering a partially conf
     const req = createMockPassportRequest(null)
     const resp = createMock<Response>()
     const next = jest.fn()
-
+    await new Promise<void>((resolve) => setImmediate(resolve))
     handler(req, resp, next)
     await new Promise<void>((resolve) => setImmediate(resolve))
 
     expect(mockRouter).not.toHaveBeenCalled()
+    expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenCalledWith(error)
 })
 

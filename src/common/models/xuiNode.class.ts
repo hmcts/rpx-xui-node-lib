@@ -55,8 +55,15 @@ export class XuiNode extends EventEmitter {
             (ready, middleware) => ready.then(() => this.applyMiddleware(middleware, options)),
             Promise.resolve(),
         )
+        const readiness = setup.then(
+            () => ({ failed: false as const }),
+            (error: unknown) => ({ failed: true as const, error }),
+        )
         return (req, res, next) => {
-            void setup.then(() => this.router(req, res, next)).catch(next)
+            void readiness.then((result) => {
+                if (result.failed) return next(result.error ?? new Error('XUI middleware setup failed'))
+                return this.router(req, res, next)
+            }).catch(next)
         }
     }
 
