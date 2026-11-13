@@ -79,6 +79,20 @@ test('xuiNode configure forwards an earlier setup failure without entering the r
     expect(next).toHaveBeenCalledWith(error)
 })
 
+test('xuiNode configure forwards router errors through Express', async () => {
+    const error = new Error('router failed')
+    const mockRouter = jest.fn(() => { throw error }) as unknown as Router
+    const xuinode = new XuiNode(mockRouter, [], createMock<typeof console>())
+    const handler = xuinode.configure({} as XuiNodeOptions)
+    const next = jest.fn()
+
+    handler(createMockPassportRequest(null), createMock<Response>(), next)
+    await new Promise<void>((resolve) => setImmediate(resolve))
+
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledWith(error)
+})
+
 test('applyMiddlewareLayer() should call importMiddleware with the baseDir and middleware', () => {
     const xuiNodeOptions = { session1: 'someValue' }
     const middleware = 'session1'
