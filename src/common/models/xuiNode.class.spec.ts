@@ -149,10 +149,13 @@ test('defaultAuthenticate, unauthenticated', () => {
     xuinode.configure(options)
     const req = createMockPassportRequest(null)
     const resp = createMock<Response>()
+    jest.spyOn(resp, 'status').mockReturnValue(resp)
     resp.statusCode = 0
     const next = jest.fn()
 
     xuinode.authenticate(req, resp, next)
     expect(resp.statusCode).toEqual(401)
+    expect(resp.status).toHaveBeenCalledWith(401)
+    expect(resp.send).toHaveBeenCalledWith({ message: 'Unauthorized' })
     expect(next).not.toHaveBeenCalled()
 })
