@@ -19,7 +19,7 @@ export function csp({
       directives: {
         // dashed form is fine too, but keep the SAME spelling everywhere
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", `'nonce-${nonce}'`, ...extraScript],
+        scriptSrc: ["'self'", "'strict-dynamic'", `'nonce-${nonce}'`, ...extraScript],
         styleSrc: ["'self'", `'nonce-${nonce}'`, ...extraStyle],
 
         connectSrc: ["'self'", "blob:", "data:", ...extraConnect],
