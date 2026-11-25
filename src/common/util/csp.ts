@@ -14,17 +14,13 @@ export function csp({
   return (req: Request, res: Response, next: NextFunction) => {
     const nonce = crypto.randomBytes(16).toString('base64');
     res.locals.cspNonce = nonce;
-
     const newCsp = {
       useDefaults: true,
       directives: {
         // dashed form is fine too, but keep the SAME spelling everywhere
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", `'nonce-${nonce}'`, ...extraScript],
+        scriptSrc: ["'self'", "'strict-dynamic'", `'nonce-${nonce}'`, ...extraScript],
         styleSrc: ["'self'", `'nonce-${nonce}'`, ...extraStyle],
-
-        // inline style attributes still allowed - should be phased out in future
-        styleSrcAttr: ["'unsafe-inline'"],
 
         connectSrc: ["'self'", "blob:", "data:", ...extraConnect],
         imgSrc: ["'self'", "data:", ...extraImg],
