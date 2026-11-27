@@ -36,12 +36,6 @@ export const SECURITY_POLICY = {
             'https://fonts.gstatic.com',
         ],
         mediaSrc: ["'self'"],
-        scriptSrc: [
-            "'self'",
-            'https://*.google-analytics.com',
-            'https://*.googletagmanager.com',
-            'az416426.vo.msecnd.net',
-        ],
         styleSrc: [
             "'self'",
             'https://fonts.googleapis.com',
